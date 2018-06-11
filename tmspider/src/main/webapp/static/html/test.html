@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>测试页面 - TMSpider</title>
+    <link rel="stylesheet" type="text/css" href="/css/common.css"/>
+    <script type="text/javascript" src="/js/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $("#submit").click(function () {
+                var data = $("#annImportForm").serializeArray();
+                var str = "即将导入第" + data[2].value + "期公告中" + data[4].value + "到" + data[5].value
+                    + "期间的初审的数据，是否继续？";
+                if (confirm(str)) {
+                    $.ajax({
+                        type: "POST",
+                        url: "/ann/importFirstTrialAnns",
+                        data: data,
+                        success: function (result) {
+                            alert(result.status);
+                        }
+
+                    });
+                }
+            });
+            $("#optExcelButton").click(function () {
+                if (confirm("即将开始处理，是否确认？")) {
+                    $.ajax({
+                        type: "GET",
+                        url: "/ann/optExcel",
+                        async: false,
+                        success: function (data) {
+                            prompt("OK");
+                            var status = data.status;
+                            alert(status);
+                        }
+                    });
+                }
+            });
+        })
+    </script>
+</head>
+<body>
+<h4>【初审公告导入】</h4>
+<form id="annImportForm">
+    <input name="page" type="number" value="1" style="display: none"/>
+    <input name="rows" type="number" value="1" style="display: none"/>
+
+    公告期号：<input name="annNum" type="number"/><br>
+    公告类型：<select name="annType">
+    <option label="商标初审公告" value="TMZCSQ" selected/>
+</select><br>
+    开始日期：<input name="appDateBegin" type="date" value="2017-09-01"/>
+    结束日期：<input name="appDateEnd" type="date" value="2017-09-30"/><br>
+    <input type="reset" value="重置表单"/> <input id="submit" type="button" value="查询导入"/>
+</form>
+<hr>
+<h4>【表格处理】</h4>
+<label>请在做完第一步初审公告导入之后，再进行表格处理。</label><br>
+<button id="optExcelButton">开始处理</button>
+</body>
+</html>

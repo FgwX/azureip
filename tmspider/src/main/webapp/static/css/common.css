@@ -1,0 +1,34 @@
+@keyframes leftIn {
+    from {left: 0px;}
+    to {left: 100px;}
+}
+
+@-moz-keyframes myfirst /* Firefox */
+{
+    from {
+        background: red;
+    }
+    to {
+        background: yellow;
+    }
+}
+
+@-webkit-keyframes leftIn /* Safari 和 Chrome */
+{
+    from {left: 0px;}
+    to {left: 100px;}
+}
+
+@-o-keyframes myfirst /* Opera */
+{
+    from {
+        background: red;
+    }
+    to {
+        background: yellow;
+    }
+}
+
+.input {
+    animation: leftIn 10s;
+}

@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.azureip.tmspider.mapper.AnnouncementMapper">
+    <resultMap id="BaseResultMap" type="com.azureip.tmspider.model.Announcement">
+        <id column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="page_no" jdbcType="INTEGER" property="pageNo"/>
+        <result column="ann_type_code" jdbcType="VARCHAR" property="annTypeCode"/>
+        <result column="ann_type" jdbcType="VARCHAR" property="annType"/>
+        <result column="ann_num" jdbcType="VARCHAR" property="annNum"/>
+        <result column="ann_date" jdbcType="TIMESTAMP" property="annDate"/>
+        <result column="reg_name" jdbcType="VARCHAR" property="regName"/>
+        <result column="reg_num" jdbcType="VARCHAR" property="regNum"/>
+        <result column="tm_name" jdbcType="VARCHAR" property="tmName"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id, page_no, ann_type_code, ann_type, ann_num, ann_date, reg_name, reg_num, tm_name
+    </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from announcement
+        where id = #{id,jdbcType=VARCHAR}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+        delete from announcement
+        where id = #{id,jdbcType=VARCHAR}
+    </delete>
+    <insert id="insert" parameterType="com.azureip.tmspider.model.Announcement">
+        insert into announcement (id, page_no, ann_type_code,
+          ann_type, ann_num, ann_date,
+          reg_name, reg_num, tm_name
+          )
+        values (#{id,jdbcType=VARCHAR}, #{pageNo,jdbcType=INTEGER}, #{annTypeCode,jdbcType=VARCHAR},
+          #{annType,jdbcType=VARCHAR}, #{annNum,jdbcType=VARCHAR}, #{annDate,jdbcType=TIMESTAMP},
+          #{regName,jdbcType=VARCHAR}, #{regNum,jdbcType=VARCHAR}, #{tmName,jdbcType=VARCHAR}
+          )
+    </insert>
+    <insert id="insertSelective" parameterType="com.azureip.tmspider.model.Announcement">
+        insert into announcement
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="pageNo != null">
+                page_no,
+            </if>
+            <if test="annTypeCode != null">
+                ann_type_code,
+            </if>
+            <if test="annType != null">
+                ann_type,
+            </if>
+            <if test="annNum != null">
+                ann_num,
+            </if>
+            <if test="annDate != null">
+                ann_date,
+            </if>
+            <if test="regName != null">
+                reg_name,
+            </if>
+            <if test="regNum != null">
+                reg_num,
+            </if>
+            <if test="tmName != null">
+                tm_name,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=VARCHAR},
+            </if>
+            <if test="pageNo != null">
+                #{pageNo,jdbcType=INTEGER},
+            </if>
+            <if test="annTypeCode != null">
+                #{annTypeCode,jdbcType=VARCHAR},
+            </if>
+            <if test="annType != null">
+                #{annType,jdbcType=VARCHAR},
+            </if>
+            <if test="annNum != null">
+                #{annNum,jdbcType=VARCHAR},
+            </if>
+            <if test="annDate != null">
+                #{annDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="regName != null">
+                #{regName,jdbcType=VARCHAR},
+            </if>
+            <if test="regNum != null">
+                #{regNum,jdbcType=VARCHAR},
+            </if>
+            <if test="tmName != null">
+                #{tmName,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.azureip.tmspider.model.Announcement">
+        update announcement
+        <set>
+            <if test="pageNo != null">
+                page_no = #{pageNo,jdbcType=INTEGER},
+            </if>
+            <if test="annTypeCode != null">
+                ann_type_code = #{annTypeCode,jdbcType=VARCHAR},
+            </if>
+            <if test="annType != null">
+                ann_type = #{annType,jdbcType=VARCHAR},
+            </if>
+            <if test="annNum != null">
+                ann_num = #{annNum,jdbcType=VARCHAR},
+            </if>
+            <if test="annDate != null">
+                ann_date = #{annDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="regName != null">
+                reg_name = #{regName,jdbcType=VARCHAR},
+            </if>
+            <if test="regNum != null">
+                reg_num = #{regNum,jdbcType=VARCHAR},
+            </if>
+            <if test="tmName != null">
+                tm_name = #{tmName,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=VARCHAR}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.azureip.tmspider.model.Announcement">
+        update announcement
+        set page_no = #{pageNo,jdbcType=INTEGER},
+          ann_type_code = #{annTypeCode,jdbcType=VARCHAR},
+          ann_type = #{annType,jdbcType=VARCHAR},
+          ann_num = #{annNum,jdbcType=VARCHAR},
+          ann_date = #{annDate,jdbcType=TIMESTAMP},
+          reg_name = #{regName,jdbcType=VARCHAR},
+          reg_num = #{regNum,jdbcType=VARCHAR},
+          tm_name = #{tmName,jdbcType=VARCHAR}
+        where id = #{id,jdbcType=VARCHAR}
+    </update>
+    <select id="getByRegNum" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM announcement
+        WHERE reg_num = #{regNum}
+    </select>
+</mapper>
