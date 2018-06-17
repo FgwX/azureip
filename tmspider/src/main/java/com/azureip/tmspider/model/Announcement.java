@@ -3,123 +3,119 @@ package com.azureip.tmspider.model;
 import java.util.Date;
 
 public class Announcement {
-    public Announcement() {
-    }
 
-    public Announcement(String id, Integer pageNo, String annTypeCode, String annType, String annNum, Date annDate, String regName, String regNum, String tmName) {
+    public Announcement(String id, Integer page_no, String ann_type_code, String ann_type, String ann_num, Date ann_date, String reg_name, String reg_num, String tm_name) {
         this.id = id;
-        this.pageNo = pageNo;
-        this.annTypeCode = annTypeCode;
-        this.annType = annType;
-        this.annNum = annNum;
-        this.annDate = annDate;
-        this.regName = regName;
-        this.regNum = regNum;
-        this.tmName = tmName;
+        this.page_no = page_no;
+        this.ann_type_code = ann_type_code;
+        this.ann_type = ann_type;
+        this.ann_num = ann_num;
+        this.ann_date = ann_date;
+        this.reg_name = reg_name;
+        this.reg_num = reg_num;
+        this.tm_name = tm_name;
     }
 
+    // 主键ID
     private String id;
+    // 页码
+    private Integer page_no;
+    // 公告类型代码
+    private String ann_type_code;
+    // 公告类型
+    private String ann_type;
+    // 公告期号
+    private String ann_num;
+    // 公告日期
+    private Date ann_date;
+    // 申请人
+    private String reg_name;
+    // 注册号
+    private String reg_num;
+    // 商标名称
+    private String tm_name;
 
-    private Integer pageNo;
+    public void setId(String id) {
+        this.id = id;
+    }
 
-    private String annTypeCode;
+    public void setPage_no(Integer page_no) {
+        this.page_no = page_no;
+    }
 
-    private String annType;
+    public void setAnn_type_code(String ann_type_code) {
+        this.ann_type_code = ann_type_code;
+    }
 
-    private String annNum;
+    public void setAnn_type(String ann_type) {
+        this.ann_type = ann_type;
+    }
 
-    private Date annDate;
+    public void setAnn_num(String ann_num) {
+        this.ann_num = ann_num;
+    }
 
-    private String regName;
+    public void setAnn_date(Date ann_date) {
+        this.ann_date = ann_date;
+    }
 
-    private String regNum;
+    public void setReg_name(String reg_name) {
+        this.reg_name = reg_name;
+    }
 
-    private String tmName;
+    public void setReg_num(String reg_num) {
+        this.reg_num = reg_num;
+    }
+
+    public void setTm_name(String tm_name) {
+        this.tm_name = tm_name;
+    }
 
     public String getId() {
+
         return id;
     }
 
-    public void setId(String id) {
-        this.id = id == null ? null : id.trim();
+    public Integer getPage_no() {
+        return page_no;
     }
 
-    public Integer getPageNo() {
-        return pageNo;
+    public String getAnn_type_code() {
+        return ann_type_code;
     }
 
-    public void setPageNo(Integer pageNo) {
-        this.pageNo = pageNo;
+    public String getAnn_type() {
+        return ann_type;
     }
 
-    public String getAnnTypeCode() {
-        return annTypeCode;
+    public String getAnn_num() {
+        return ann_num;
     }
 
-    public void setAnnTypeCode(String annTypeCode) {
-        this.annTypeCode = annTypeCode == null ? null : annTypeCode.trim();
+    public Date getAnn_date() {
+        return ann_date;
     }
 
-    public String getAnnType() {
-        return annType;
+    public String getReg_name() {
+        return reg_name;
     }
 
-    public void setAnnType(String annType) {
-        this.annType = annType == null ? null : annType.trim();
+    public String getReg_num() {
+        return reg_num;
     }
 
-    public String getAnnNum() {
-        return annNum;
-    }
-
-    public void setAnnNum(String annNum) {
-        this.annNum = annNum == null ? null : annNum.trim();
-    }
-
-    public Date getAnnDate() {
-        return annDate;
-    }
-
-    public void setAnnDate(Date annDate) {
-        this.annDate = annDate;
-    }
-
-    public String getRegName() {
-        return regName;
-    }
-
-    public void setRegName(String regName) {
-        this.regName = regName == null ? null : regName.trim();
-    }
-
-    public String getRegNum() {
-        return regNum;
-    }
-
-    public void setRegNum(String regNum) {
-        this.regNum = regNum == null ? null : regNum.trim();
-    }
-
-    public String getTmName() {
-        return tmName;
-    }
-
-    public void setTmName(String tmName) {
-        this.tmName = tmName == null ? null : tmName.trim();
+    public String getTm_name() {
+        return tm_name;
     }
 
     @Override
     public String toString() {
         return "Announcement{" +
-                "id='" + id + '\'' +
-                ", pageNo=" + pageNo +
-                ", annTypeCode='" + annTypeCode + '\'' +
-                ", annType='" + annType + '\'' +
-                ", annNum='" + annNum + '\'' +
-                ", annDate=" + annDate +
-                ", regName='" + regName + '\'' +
-                ", regNum='" + regNum + '\'' +
-                ", tmName='" + tmName + '\'' +
+                "ann_num='" + ann_num + '\'' +
+                ", ann_date=" + ann_date +
+                ", reg_name='" + reg_name + '\'' +
+                ", reg_num='" + reg_num + '\'' +
+                ", tm_name='" + tm_name + '\'' +
                 '}';
     }
 }

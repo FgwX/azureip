@@ -1,11 +1,13 @@
 package com.azureip.tmspider.pojo;
 
+import com.azureip.tmspider.model.Announcement;
+
 import java.io.Serializable;
 import java.util.List;
 
-public class AnnoucementListPojo implements Serializable {
+public class AnnListPojo implements Serializable {
 
-    public AnnoucementListPojo(int total, List<AnnoucementPojo> rows) {
+    public AnnListPojo(int total, List<Announcement> rows) {
         this.total = total;
         this.rows = rows;
     }
@@ -13,13 +15,13 @@ public class AnnoucementListPojo implements Serializable {
     // 公告总数
     private int total;
     // 公告列表
-    private List<AnnoucementPojo> rows;
+    private List<Announcement> rows;
 
     public int getTotal() {
         return total;
     }
 
-    public List<AnnoucementPojo> getRows() {
+    public List<Announcement> getRows() {
         return rows;
     }
 
@@ -27,7 +29,7 @@ public class AnnoucementListPojo implements Serializable {
         this.total = total;
     }
 
-    public void setRows(List<AnnoucementPojo> rows) {
+    public void setRows(List<Announcement> rows) {
         this.rows = rows;
     }
 }

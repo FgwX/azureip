@@ -1,30 +1,17 @@
 package com.azureip.tmspider.controller;
 
-import com.azureip.tmspider.model.Announcement;
 import com.azureip.tmspider.pojo.AnnQueryPojo;
-import com.azureip.tmspider.pojo.AnnoucementListPojo;
-import com.azureip.tmspider.pojo.AnnoucementPojo;
 import com.azureip.tmspider.pojo.GlobalResponse;
 import com.azureip.tmspider.service.AnnService;
-import com.google.gson.Gson;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -36,8 +23,6 @@ public class AnnController {
 
     /**
      * 查询公告总数
-     *
-     * @return
      */
     @PostMapping("queryAnnCount")
     @ResponseBody
@@ -57,9 +42,6 @@ public class AnnController {
 
     /**
      * 查询导入公告数据
-     *
-     * @param pojo
-     * @return
      */
     @PostMapping("importAnns")
     @ResponseBody
@@ -78,10 +60,7 @@ public class AnnController {
     }
 
     /**
-     * 处理EXCEL表格，标记出已有初审公告的行。
-     *
-     * @return
-     * @throws IOException
+     * 处理EXCEL表格，标记出已有初审公告的行
      */
     @GetMapping("optExcel")
     @ResponseBody

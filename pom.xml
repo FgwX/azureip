@@ -9,7 +9,7 @@
     <modules>
         <module>website</module>
         <module>tmspider</module>
-        <module>site</module>
+        <module>site-green-ani</module>
     </modules>
     <packaging>pom</packaging>
 

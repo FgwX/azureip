@@ -1,10 +1,13 @@
 package com.azureip.tmspider.mapper;
 
 import com.azureip.tmspider.model.Announcement;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Repository
 public interface AnnouncementMapper {
+
     int deleteByPrimaryKey(String id);
 
     int insert(Announcement record);
@@ -18,9 +21,13 @@ public interface AnnouncementMapper {
     int updateByPrimaryKey(Announcement record);
 
     /**
-     * 根据注册号查询公告
-     * @param regNum
-     * @return
+     * 插入公告集合
      */
-    List<Announcement> getByRegNum (String regNum);
+    int insertList(List<Announcement> list);
+
+    /**
+     * 根据注册号查询公告
+     */
+    List<Announcement> getByRegNum(String regNum);
+
 }
