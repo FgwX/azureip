@@ -14,13 +14,13 @@
         <result column="tm_name" jdbcType="VARCHAR" property="tm_name"/>
     </resultMap>
 
-    <sql id="Base_Column_List">
+    <sql id="BaseColumnList">
         id, page_no, ann_type_code, ann_type, ann_num, ann_date, reg_name, reg_num, tm_name
     </sql>
 
     <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
         select
-        <include refid="Base_Column_List"/>
+        <include refid="BaseColumnList"/>
         from announcement
         where id = #{id,jdbcType=VARCHAR}
     </select>
@@ -139,16 +139,16 @@
         insert into announcement (id,page_no,ann_type_code,ann_type,ann_num,ann_date,reg_name,reg_num,tm_name)
         values
         <foreach collection="list" index="i" item="ann" separator=",">
-            (#{ann.id},#{ann.pageNo},#{ann.annTypeCode},#{ann.annType},#{ann.annNum},#{ann.annDate},#{ann.regName},#{ann.regNum},#{ann.tmName})
+            (#{ann.id},#{ann.page_no},#{ann.ann_type_code},#{ann.ann_type},#{ann.ann_num},#{ann.ann_date},#{ann.reg_name},#{ann.reg_num},#{ann.tm_name})
         </foreach>
     </insert>
 
     <!--通过注册号查询公告-->
     <select id="getByRegNum" parameterType="java.lang.String" resultMap="BaseResultMap">
-        SELECT
-        <include refid="Base_Column_List" />
-        FROM announcement
-        WHERE reg_num = #{regNum}
+        select
+        <include refid="BaseColumnList" />
+        from announcement
+        where reg_num = #{reg_num}
     </select>
 
 </mapper>
