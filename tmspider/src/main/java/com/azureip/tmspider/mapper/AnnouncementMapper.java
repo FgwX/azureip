@@ -28,6 +28,6 @@ public interface AnnouncementMapper {
     /**
      * 根据注册号查询公告
      */
-    List<Announcement> getByRegNum(String regNum);
+    List<Announcement> getByRegNum(String reg_num);
 
 }

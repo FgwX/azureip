@@ -4,6 +4,9 @@ import java.util.Date;
 
 public class Announcement {
 
+    public Announcement() {
+    }
+
     public Announcement(String id, Integer page_no, String ann_type_code, String ann_type, String ann_num, Date ann_date, String reg_name, String reg_num, String tm_name) {
         this.id = id;
         this.page_no = page_no;
