@@ -151,4 +151,11 @@
         where reg_num = #{reg_num}
     </select>
 
+    <!--通过注册号查询公告数量-->
+    <select id="getCountByRegNum" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select count(1)
+        from announcement
+        where reg_num = #{reg_num}
+    </select>
+
 </mapper>

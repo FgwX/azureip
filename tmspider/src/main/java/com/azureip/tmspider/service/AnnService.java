@@ -16,6 +16,8 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,12 +27,19 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
 
 @Service
 public class AnnService {
 
     @Autowired
     private AnnouncementMapper mapper;
+
+//    @Autowired
+//    private ThreadPoolTaskExecutor executor;
+
     private static Gson gson = new Gson();
     // RequestHeader: User-Agent
     private static final String AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36";
@@ -159,14 +168,17 @@ public class AnnService {
                 XSSFRow row = sheet.getRow(j);
                 try {
                     String regNum = row.getCell(2).getStringCellValue();
-                    List<Announcement> annList = getByRegNum(regNum);
-                    if (annList.size() > 0) {
+                    //long queryStart = System.currentTimeMillis();
+                    int annCount = getCountByRegNum(regNum);
+                    //long queryEnd = System.currentTimeMillis();
+                    //System.out.println("查询第" + j + "行耗时" + (queryEnd - queryStart) + "毫秒");
+                    if (annCount > 0) {
                         if (newLine) {
                             System.out.println();
                         }
                         row.createCell(7).setCellValue("初审公告");
                         count += 1;
-                        System.out.println("正在处理第【" + j + "】行，注册号[" + regNum + "]，查询到" + annList.size() + "条初审公告");
+                        System.out.println("正在处理第【" + j + "】行，注册号[" + regNum + "]，查询到" + annCount + "条初审公告");
                         newLine = false;
                     } else {
                         if (!newLine) {
@@ -198,6 +210,73 @@ public class AnnService {
     }
 
     /**
+     * 多张程处理EXCEL表格
+     */
+    @Transactional
+    public List<String> optExcelWithMultiThred(File srcDir, File tarDir) throws IOException {
+        File[] files = srcDir.listFiles();
+        List<String> fileNames = new ArrayList<>();
+        for (int i = 0; i < files.length; i++) {
+            String fileName = files[i].getName();
+            System.out.println("==========> 正在处理第" + (i + 1) + "个文档，共" + files.length + "个：【" + fileName + "】<==========");
+            FileInputStream in = new FileInputStream(files[i]);
+            XSSFWorkbook workbook = new XSSFWorkbook(in);
+            in.close();
+            // 首行为标题行; 第C列为注册号，H列为公告状态
+            XSSFSheet sheet = workbook.getSheetAt(0);
+            int count = 0;
+            System.out.println("待处理的数据共有【" + sheet.getLastRowNum() + "】条，开始处理……");
+            boolean newLine = true;
+            int dotCount = 0;
+            List<Future<Integer>> futures = new ArrayList<>();
+            List<XSSFRow> rows0 = new ArrayList<>();
+            List<XSSFRow> rows1 = new ArrayList<>();
+            List<XSSFRow> rows2 = new ArrayList<>();
+            List<XSSFRow> rows3 = new ArrayList<>();
+            for (int j = 1; j < sheet.getLastRowNum(); j++) {
+                XSSFRow row = sheet.getRow(j);
+                switch (j%4){
+                    case 0:
+                        rows0.add(row);
+                        break;
+                    case 1:
+                        rows1.add(row);
+                        break;
+                    case 2:
+                        rows2.add(row);
+                        break;
+                    case 3:
+                        rows3.add(row);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            futures.add(operation(rows0));
+            // 输出目标文件
+            FileOutputStream out = new FileOutputStream(tarDir + File.separator + fileName);
+            workbook.write(out);
+            out.close();
+            fileNames.add(fileName);
+            if (newLine) {
+                System.out.println();
+            }
+            System.out.println("==========> 【" + fileName + "】处理完成，共处理数据" + count + "条  <==========");
+        }
+        return fileNames;
+    }
+
+    private Future<Integer> operation(List<XSSFRow> rows0) {
+        Callable<Integer> thread = new Callable<Integer>() {
+            @Override
+            public Integer call() throws Exception {
+                return null;
+            }
+        };
+        return null;
+    }
+
+    /**
      * 保存公告
      */
     @Transactional
@@ -218,6 +297,13 @@ public class AnnService {
      */
     public List<Announcement> getByRegNum(String regNum) {
         return mapper.getByRegNum(regNum);
+    }
+
+    /**
+     * 根据注册号查询公告数量
+     */
+    public Integer getCountByRegNum (String regNum){
+        return mapper.getCountByRegNum(regNum);
     }
 
 }

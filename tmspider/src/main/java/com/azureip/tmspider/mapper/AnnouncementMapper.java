@@ -30,4 +30,8 @@ public interface AnnouncementMapper {
      */
     List<Announcement> getByRegNum(String reg_num);
 
+    /**
+     * 根据注册号查询公告数量
+     */
+    Integer getCountByRegNum(String reg_num);
 }

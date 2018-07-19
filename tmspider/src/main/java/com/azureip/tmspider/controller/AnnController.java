@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -79,11 +80,5 @@ public class AnnController {
             response.setMessage(e.getMessage());
         }
         return response;
-    }
-
-    public static void main(String[] args) {
-        AnnQueryPojo pojo = new AnnQueryPojo();
-        int total = pojo.getTotal();
-        System.out.println("Total: " + total);
     }
 }
