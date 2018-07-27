@@ -26,7 +26,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -43,6 +45,15 @@ public class AnnService {
     private static Gson gson = new Gson();
     // RequestHeader: User-Agent
     private static final String AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36";
+
+    /**
+     * 查询本地公告数据库中最新一期数据量
+     */
+    public Map<String,String> queryLocalLatest(){
+        Map<String,String> result = new HashMap<>();
+        mapper.queryLocalLatest();
+        return result;
+    }
 
     /**
      * 多条件查询公告总数
@@ -122,23 +133,6 @@ public class AnnService {
             long insertEnd = System.currentTimeMillis();
             System.out.println("插入" + result + "条数据耗时：" + (insertEnd - insertStart) + "毫秒");
             successCount += result;
-            /*List<Announcement> batchList = new ArrayList<>();
-            for (Announcement ann : annList.getRows()) {
-                batchList.add(ann);
-                if (batchList.size() >= 10000) {
-                    long insertStart = System.currentTimeMillis();
-                    int result = batchSave(batchList);
-                    long insertEnd = System.currentTimeMillis();
-                    System.out.println("插入" + result + "条数据耗时：" + (insertEnd - insertStart) + "毫秒");
-                    successCount += result;
-                    batchList.clear();
-                }
-            }
-            if (!batchList.isEmpty()) {
-                int result = batchSave(batchList);
-                successCount += result;
-                batchList.clear();
-            }*/
         }
         client.close();
         System.out.println("插入成功！共计: " + successCount + "条公告。");
@@ -158,7 +152,7 @@ public class AnnService {
             FileInputStream in = new FileInputStream(files[i]);
             XSSFWorkbook workbook = new XSSFWorkbook(in);
             in.close();
-            // 首行为标题行; 第C列为注册号，H列为公告状态
+            // 首行为标题行; 第B列为注册号，G列为公告状态
             XSSFSheet sheet = workbook.getSheetAt(0);
             int count = 0;
             System.out.println("待处理的数据共有【" + sheet.getLastRowNum() + "】条，开始处理……");
@@ -167,7 +161,7 @@ public class AnnService {
             for (int j = 1; j < sheet.getLastRowNum(); j++) {
                 XSSFRow row = sheet.getRow(j);
                 try {
-                    String regNum = row.getCell(2).getStringCellValue();
+                    String regNum = row.getCell(1).getStringCellValue();
                     //long queryStart = System.currentTimeMillis();
                     int annCount = getCountByRegNum(regNum);
                     //long queryEnd = System.currentTimeMillis();
@@ -176,7 +170,7 @@ public class AnnService {
                         if (newLine) {
                             System.out.println();
                         }
-                        row.createCell(7).setCellValue("初审公告");
+                        row.createCell(6).setCellValue("初审公告");
                         count += 1;
                         System.out.println("正在处理第【" + j + "】行，注册号[" + regNum + "]，查询到" + annCount + "条初审公告");
                         newLine = false;

@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("ann")
@@ -21,6 +22,16 @@ public class AnnController {
 
     @Autowired
     private AnnService annService;
+
+    /**
+     * 查询本地公告数据库中最新一期数据量
+     */
+    @GetMapping("queryLocalLatest")
+    @ResponseBody
+    public GlobalResponse<Map<String,String>> queryLocalLatest(){
+
+        return null;
+    }
 
     /**
      * 查询公告总数

@@ -21,6 +21,11 @@ public interface AnnouncementMapper {
     int updateByPrimaryKey(Announcement record);
 
     /**
+     * 查询本地公告数据库中最新一期数据量
+     */
+    void queryLocalLatest();
+
+    /**
      * 插入公告集合
      */
     int insertList(List<Announcement> list);
@@ -34,4 +39,5 @@ public interface AnnouncementMapper {
      * 根据注册号查询公告数量
      */
     Integer getCountByRegNum(String reg_num);
+
 }
