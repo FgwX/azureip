@@ -75,6 +75,7 @@ public class AnnService {
         countPost.setHeader("User-Agent", AGENT);
         countPost.setConfig(config);
         CloseableHttpResponse countResp = client.execute(countPost);
+        int statusCode = countResp.getStatusLine().getStatusCode();
         AnnListPojo countPojo = gson.fromJson(EntityUtils.toString(countResp.getEntity()), AnnListPojo.class);
         client.close();
         return countPojo.getTotal();
