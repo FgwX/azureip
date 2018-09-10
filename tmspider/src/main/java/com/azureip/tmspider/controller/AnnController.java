@@ -61,8 +61,13 @@ public class AnnController {
         GlobalResponse<Integer> response = new GlobalResponse<Integer>();
         try {
             int successCount = annService.importAnns(pojo);
-            response.setStatus(GlobalResponse.SUCCESS);
-            response.setResult(successCount);
+            if (successCount > 0){
+                response.setStatus(GlobalResponse.SUCCESS);
+                response.setResult(successCount);
+            } else {
+                response.setStatus(GlobalResponse.ERROR);
+                response.setMessage("数据导入失败！");
+            }
         } catch (Exception e) {
             e.printStackTrace();
             response.setStatus(GlobalResponse.ERROR);

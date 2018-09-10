@@ -130,7 +130,13 @@ public class AnnService {
             System.out.println("查询耗时：" + (listQueryEnd - listQureyStart) + "毫秒");
             AnnListPojo annList = gson.fromJson(EntityUtils.toString(resp.getEntity()), AnnListPojo.class);
             long insertStart = System.currentTimeMillis();
-            int result = batchSave(annList.getRows());
+            int result = 0;
+            try {
+                result = batchSave(annList.getRows());
+            } catch (Exception e) {
+                System.err.println("数据库异常：" + e.getMessage());
+                return 0;
+            }
             long insertEnd = System.currentTimeMillis();
             System.out.println("插入" + result + "条数据耗时：" + (insertEnd - insertStart) + "毫秒");
             successCount += result;
@@ -147,6 +153,7 @@ public class AnnService {
     public List<String> optExcel(File srcDir, File tarDir) throws IOException {
         File[] files = srcDir.listFiles();
         List<String> fileNames = new ArrayList<>();
+        int totalCount = 0;
         for (int i = 0; i < files.length; i++) {
             String fileName = files[i].getName();
             System.out.println("==========> 正在处理第" + (i + 1) + "个文档，共" + files.length + "个：【" + fileName + "】<==========");
@@ -199,8 +206,10 @@ public class AnnService {
             if (newLine) {
                 System.out.println();
             }
+            totalCount += count;
             System.out.println("==========> 【" + fileName + "】处理完成，共处理数据" + count + "条  <==========");
         }
+        System.out.println("==========> 总计共处理初审数据" + totalCount + "条  <==========");
         return fileNames;
     }
 
