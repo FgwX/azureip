@@ -49,8 +49,8 @@ public class AnnService {
     /**
      * 查询本地公告数据库中最新一期数据量
      */
-    public Map<String,String> queryLocalLatest(){
-        Map<String,String> result = new HashMap<>();
+    public Map<String, String> queryLocalLatest() {
+        Map<String, String> result = new HashMap<>();
         mapper.queryLocalLatest();
         return result;
     }
@@ -87,7 +87,7 @@ public class AnnService {
     @Transactional
     public int importAnns(AnnQueryPojo queryPojo) throws IOException {
         CloseableHttpClient client = HttpClients.createDefault();
-        RequestConfig config = RequestConfig.custom().setConnectionRequestTimeout(2000).setConnectTimeout(3000).setSocketTimeout(30000).build();
+        RequestConfig config = RequestConfig.custom().setConnectionRequestTimeout(3000).setConnectTimeout(3000).setSocketTimeout(30000).build();
         if (queryPojo.getTotal() < 1) {
             StringBuilder countUrl = new StringBuilder("http://sbgg.saic.gov.cn:9080/tmann/annInfoView/annSearchDG.html");
             countUrl.append("?page=1&rows=1")
@@ -119,7 +119,8 @@ public class AnnService {
                 listUrl.append("&appDateBegin=" + queryPojo.getAppDateBegin())
                         .append("&appDateEnd=" + queryPojo.getAppDateEnd());
             }
-            System.out.println("第" + (i + 1) + "次请求URL：" + listUrl.toString());
+            String prefix = "[第" + (i + 1) + "次请求]";
+            System.out.println(prefix + "URL: " + listUrl.toString());
             HttpPost post = new HttpPost(listUrl.toString());
             post.setHeader("User-Agent", AGENT);
             post.setHeader("Connection", "keep-alive");
@@ -127,18 +128,19 @@ public class AnnService {
             long listQureyStart = System.currentTimeMillis();
             CloseableHttpResponse resp = client.execute(post);
             long listQueryEnd = System.currentTimeMillis();
-            System.out.println("查询耗时：" + (listQueryEnd - listQureyStart) + "毫秒");
+            System.out.println(prefix + "请求响应耗时: " + (listQueryEnd - listQureyStart) + "毫秒");
             AnnListPojo annList = gson.fromJson(EntityUtils.toString(resp.getEntity()), AnnListPojo.class);
-            long insertStart = System.currentTimeMillis();
+            long assembleEnd = System.currentTimeMillis();
+            System.out.println(prefix + "拼装数据耗时: " + (assembleEnd - listQueryEnd) + "毫秒");
             int result = 0;
             try {
                 result = batchSave(annList.getRows());
             } catch (Exception e) {
-                System.err.println("数据库异常：" + e.getMessage());
+                System.err.println("数据库异常: " + e.getMessage());
                 return 0;
             }
             long insertEnd = System.currentTimeMillis();
-            System.out.println("插入" + result + "条数据耗时：" + (insertEnd - insertStart) + "毫秒");
+            System.out.println(prefix + "插入数据耗时: " + (insertEnd - assembleEnd) + "毫秒");
             successCount += result;
         }
         client.close();
@@ -239,7 +241,7 @@ public class AnnService {
             List<XSSFRow> rows3 = new ArrayList<>();
             for (int j = 1; j < sheet.getLastRowNum(); j++) {
                 XSSFRow row = sheet.getRow(j);
-                switch (j%4){
+                switch (j % 4) {
                     case 0:
                         rows0.add(row);
                         break;
@@ -306,7 +308,7 @@ public class AnnService {
     /**
      * 根据注册号查询公告数量
      */
-    public Integer getCountByRegNum (String regNum){
+    public Integer getCountByRegNum(String regNum) {
         return mapper.getCountByRegNum(regNum);
     }
 
