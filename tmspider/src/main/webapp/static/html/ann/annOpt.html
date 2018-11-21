@@ -1,10 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
     <title>初审数据处理 - TMSpider</title>
-    <link rel="stylesheet" type="text/css" href="/css/common.css"/>
-    <script type="text/javascript" src="/js/jquery-3.3.1.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="../../css/common.css">
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.1.3/css/bootstrap.min.css">
+    <script src="https://cdn.staticfile.org/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/popper.js/1.14.5/umd/popper.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/4.1.3/js/bootstrap.min.js"></script>
     <script type="text/javascript">
         // 请求获取通知权限
         Notification.requestPermission().then(function (result) {
@@ -13,7 +17,7 @@
 
         // 通知方法
         function notify(title, body) {
-            if (Notification.permission == "granted") {
+            if (Notification.permission === "granted") {
                 var notification = new Notification(title, {
                     icon: "asset/image/notify_jay.jpg",
                     body: body,
@@ -36,17 +40,13 @@
         }
 
         function formCheck() {
-            if ($("#annNum").val() && $("#total").val()) {
-                return true;
-            } else {
-                return false;
-            }
+            return !!($("#annNum").val() && $("#total").val());
         }
 
         $(function () {
             $("#queryCount").click(function () {
                 if (!formCheck()) {
-                    alert("请输入必填项！")
+                    alert("请输入必填项！");
                     return;
                 }
                 var data = $("#annImportForm").serializeArray();
@@ -56,7 +56,7 @@
                     data: data,
                     async: false,
                     success: function (resp) {
-                        if (resp.status == "S") {
+                        if (resp.status === "S") {
                             $("#total").val(resp.result);
                             alert("查询成功，第" + data[2].value + "期公告中共有" + resp.result + "条数据！");
                         } else {
@@ -68,7 +68,7 @@
 
             $("#import").click(function () {
                 if (!formCheck()) {
-                    alert("请输入必填项！")
+                    alert("请输入必填项！");
                     return;
                 }
                 var data = $("#annImportForm").serializeArray();
@@ -81,12 +81,12 @@
                         data: data,
                         async: false,
                         success: function (resp) {
-                            if (resp.status == "S") {
+                            if (resp.status === "S") {
                                 // alert("已成功导入第" + data[2].value + "期公告，共" + resp.result + "条数据！");
-                                notify("初审数据导入成功","已成功导入第" + data[2].value + "期公告，共" + resp.result + "条数据！");
+                                notify("初审数据导入成功", "已成功导入第" + data[2].value + "期公告，共" + resp.result + "条数据！");
                             } else {
                                 // alert("导入失败，原因如下：\n" + resp.message);
-                                notify("初审数据导入失败","导入失败，原因如下：\n" + resp.message);
+                                notify("初审数据导入失败", "导入失败，原因如下：\n" + resp.message);
                             }
                         }
                     });
@@ -100,16 +100,16 @@
                         url: "/ann/optExcel",
                         async: false,
                         success: function (resp) {
-                            if (resp.status == "S") {
+                            if (resp.status === "S") {
                                 var fileNames = "";
                                 for (var i = 0; i < resp.resultList.length; i++) {
                                     fileNames += (i + 1) + ".  " + resp.resultList[i] + "\n";
                                 }
                                 // alert("已成功处理以下文档：\n" + fileNames);
-                                notify("Excel表格处理完成","已成功处理以下文档：\n" + fileNames);
+                                notify("Excel表格处理完成", "已成功处理以下文档：\n" + fileNames);
                             } else {
                                 // alert("处理失败，原因如下：" + resp.message);
-                                notify("Excel表格处理失败","处理失败，原因如下：\n" + resp.message);
+                                notify("Excel表格处理失败", "处理失败，原因如下：\n" + resp.message);
                             }
                         }
                     });
@@ -124,18 +124,28 @@
 <hr>
 <h4>【初审公告导入】</h4>
 <form id="annImportForm">
-    <input name="page" type="number" value="1" style="display: none"/>
-    <input name="rows" type="number" value="20000" style="display: none"/>
-    公告期号：<input id="annNum" name="annNum" type="number"/><br>
-    公告类型：<select name="annType">
-    <option label="商标初审公告" value="TMZCSQ" selected/>
-</select><br>
-    公告总量：<input id="total" name="total" type="number" value="0" disabled/><br>
+    <label>
+        <input name="page" type="number" value="1" style="display: none"/>
+    </label>
+    <label>
+        <input name="rows" type="number" value="20000" style="display: none"/>
+    </label>
+    公告期号：<label for="annNum"></label><input id="annNum" name="annNum" type="number"/><br>
+    公告类型：<label>
+    <select name="annType">
+    <option label="商标初审公告" value="TMZCSQ" selected></option>
+</select>
+</label><br>
+    公告总量：<label for="total"></label><input id="total" name="total" type="number" value="0" disabled/><br>
     <!--开始日期：<input name="appDateBegin" type="date" value="2017-09-01" disabled="disabled"/>-->
     <!--结束日期：<input name="appDateEnd" type="date" value="2017-09-30" disabled="disabled"/>-->
     <!-- 不限制注册起始日期，查询指定公告中所有数据 -->
-    开始日期：<input type="date" value="2017-01-01" disabled="disabled"/>
-    结束日期：<input type="date" value="2017-01-01" disabled="disabled"/>
+    开始日期：<label>
+    <input type="date" value="2017-01-01" disabled="disabled"/>
+</label>
+    结束日期：<label>
+    <input type="date" value="2017-01-01" disabled="disabled"/>
+</label>
     <br><br>
     <input id="queryCount" type="button" value="查询总量"/> <input id="import" type="button" value="导入"/>
 </form>
