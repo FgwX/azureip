@@ -12,6 +12,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Controller
 public class TestController {
@@ -23,6 +25,12 @@ public class TestController {
     }
 
     public static strictfp void main(String[] args) {
-        System.out.println(Character.isJavaIdentifierPart('a'));
+        //System.out.println(Character.isJavaIdentifierPart('a'));
+        String str = "www.runoob.com/w3cnote/programm-sdf-as223er.html";
+//        String regex = "http://www\\.runoob\\.com/w3cnote/.+\\.html";
+        String regex = "http://www\\.runoob\\.com/w3cnote/page/\\d+\\.html";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(str);
+        System.out.println(matcher.matches());
     }
 }

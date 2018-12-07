@@ -1,5 +1,6 @@
 package com.azureip.tmspider.controller;
 
+import com.alibaba.druid.util.StringUtils;
 import com.azureip.tmspider.pojo.AnnQueryPojo;
 import com.azureip.tmspider.pojo.GlobalResponse;
 import com.azureip.tmspider.service.AnnService;
@@ -14,23 +15,46 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Controller
 @RequestMapping("ann")
 public class AnnController {
 
+    private final AnnService annService;
+
     @Autowired
-    private AnnService annService;
+    public AnnController(AnnService annService) {
+        this.annService = annService;
+    }
 
     /**
-     * 查询本地公告数据库中最新一期数据量
+     * 查询本地公告中最新一期的期号
      */
-    @GetMapping("queryLocalLatest")
+    @GetMapping("queryLocalLatestAnnNum")
     @ResponseBody
-    public GlobalResponse<Map<String,String>> queryLocalLatest(){
+    public GlobalResponse<String> queryLocalLatestAnnNum() {
+        GlobalResponse<String> response = new GlobalResponse<>();
+        String annNum = annService.queryLocalLatestAnnNum();
+        if (!StringUtils.isEmpty(annNum)) {
+            response.setStatus(GlobalResponse.SUCCESS);
+            response.setResult(annNum);
+        } else {
+            response.setStatus(GlobalResponse.ERROR);
+            response.setMessage("没有查询到公告！");
+        }
+        return response;
+    }
 
-        return null;
+    /**
+     * 查询公告总数 - 前端测试方法
+     */
+    @PostMapping("queryAnnCountTest")
+    @ResponseBody
+    public GlobalResponse<Integer> queryAnnCountTest(AnnQueryPojo pojo) {
+        GlobalResponse<Integer> response = new GlobalResponse<>();
+        response.setStatus(GlobalResponse.SUCCESS);
+        response.setResultList(annService.queryAnnCountTest(pojo));
+        return response;
     }
 
     /**
@@ -39,11 +63,10 @@ public class AnnController {
     @PostMapping("queryAnnCount")
     @ResponseBody
     public GlobalResponse<Integer> queryAnnCount(AnnQueryPojo pojo) {
-        GlobalResponse<Integer> response = new GlobalResponse<Integer>();
+        GlobalResponse<Integer> response = new GlobalResponse<>();
         try {
-            int count = annService.queryAnnCount(pojo);
             response.setStatus(GlobalResponse.SUCCESS);
-            response.setResult(count);
+            response.setResultList(annService.queryAnnCount(pojo));
         } catch (IOException e) {
             e.printStackTrace();
             response.setStatus(GlobalResponse.ERROR);
@@ -58,10 +81,10 @@ public class AnnController {
     @PostMapping("importAnns")
     @ResponseBody
     public GlobalResponse<Integer> importAnns(AnnQueryPojo pojo) {
-        GlobalResponse<Integer> response = new GlobalResponse<Integer>();
+        GlobalResponse<Integer> response = new GlobalResponse<>();
         try {
             int successCount = annService.importAnns(pojo);
-            if (successCount > 0){
+            if (successCount > 0) {
                 response.setStatus(GlobalResponse.SUCCESS);
                 response.setResult(successCount);
             } else {

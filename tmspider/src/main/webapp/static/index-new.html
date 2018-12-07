@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<!--suppress JSJQueryEfficiency, JSUnresolvedVariable -->
+<html lang="en">
+<head>
+    <title>首页 - TMSpider</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="http://azure-ip.com/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.1.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/3.0.0/css/ionicons.css">
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/fresca.css">
+    <script src="https://cdn.staticfile.org/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/popper.js/1.14.5/umd/popper.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <script src="js/fresca.js"></script>
+    <script type="text/javascript">
+        var annNumEle;
+        $(function () {
+            annNumEle = $("input[name='annNum']");
+            //查询本地公告中最新一期的公告期号
+            $.ajax({
+                type: "GET",
+                url: "/ann/queryLocalLatestAnnNum",
+                async: false,
+                success: function (resp) {
+                    if (resp.status === "S") {
+                        //查询期号为本地最新期号加1
+                        annNumEle.val(parseInt(resp.result) + 1);
+                    }
+                }
+            });
+        });
+
+        // 公告表单检查
+        function annFormCheck() {
+            if (annNumEle.val()) {
+                $("#annNumCheck").hide();
+                return true;
+            } else {
+                $("#annNumCheck").show();
+                return false;
+            }
+        }
+
+        // 提交公告表单
+        function submitAnnForm() {
+            if (annFormCheck()) {
+                $("#maskLayer").modal('show');
+                var data = $("#annImportForm").serializeArray();
+                $.ajax({
+                    type: "POST",
+                    url: "/ann/queryAnnCountTest",
+                    // url: "/ann/queryAnnCount",
+                    data: data,
+                    async: false,
+                    success: function (resp) {
+                        if (resp.status === "S") {
+                            var localCount = resp.resultList[0];
+                            var remoteCount = resp.resultList[1];
+                            $("#localAnnCount").val(localCount);
+                            $("#remoteAnnCount").val(remoteCount);
+                            if (localCount !== remoteCount && localCount !== 0) {
+                                $("#localAnnCount").addClass("bg-danger");
+                                $("#remoteAnnCount").addClass("bg-danger");
+                                $("#importRemoteAnnBtn").attr("disabled", "disabled");
+                                $("#delLocalAnnBtn").removeAttr("disabled");
+                            } else {
+                                $("#localAnnCount").removeClass("bg-danger");
+                                $("#remoteAnnCount").removeClass("bg-danger");
+                                $("#importRemoteAnnBtn").removeAttr("disabled");
+                                $("#delLocalAnnBtn").attr("disabled", "disabled");
+                            }
+                        } else {
+                            alert("查询失败，原因如下：\n" + resp.message);
+                        }
+                    }
+                });
+            }
+        }
+
+        // 导入官网公告
+        function importRemoteAnn() {
+            alert("importRemoteAnn OK!");
+            $("#importRemoteAnnBtn").attr("disabled", "disabled")
+        }
+
+        // 清除本地公告（与官网数量不一致，需要重新导入）
+        function delLocalAnnByAnnNum() {
+            alert("delLocalAnnByAnnNum OK!");
+            $("#localAnnCount").val(0);
+            $("#localAnnCount").removeClass("bg-danger");
+            $("#remoteAnnCount").removeClass("bg-danger");
+            $("#delLocalAnnBtn").attr("disabled", "disabled")
+            $("#importRemoteAnnBtn").removeAttr("disabled");
+        }
+    </script>
+</head>
+<body data-spy="scroll" data-target="#navbar1" data-offset="60">
+<!--<header class="bg-primary">
+    <div class="container h-100">
+        <div class="row h-100">
+            <div class="col-12">
+                <div class="text-center m-0 vh-100 d-flex flex-column justify-content-center text-light">
+                    <h1 class="display-4">TMSpider</h1>
+                    <p class="lead">Private spider application for Azure Intellectual Property Inc.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>-->
+<nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary" id="navbar1">
+    <div class="container">
+        <a class="navbar-brand mr-1 mb-1 mt-0" href="#">TMSpider</a>
+        <div class="navbar-collapse collapse justify-content-center" id="collapsingNavbar">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="annNav" data-toggle="dropdown" aria-haspopup="true"
+                       aria-expanded="false">
+                        初审数据处理
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="annNav">
+                        <a class="dropdown-item px-2" href="#annQuery">初审公告查询</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item px-2" href="#excelOpt">表格处理</a>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="rejectNav" data-toggle="dropdown"
+                       aria-haspopup="true" aria-expanded="false">
+                        驳回数据处理
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="rejectNav">
+                        <a class="dropdown-item px-2" href="#more"></a>
+                        <a class="dropdown-item px-2" href="#more">待开发</a>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#cards">测试单元</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<main>
+    <div id="annQuery"></div>
+    <section class="container pb-5" style="margin-top: 40px;">
+        <h4>初审数据处理</h4>
+        <hr/>
+        <div class="d-flex">
+            <div class="jumbotron w-100 py-2 mx-auto">
+                <h5>初审公告查询、导入</h5>
+                <span class="text-muted" style="font-size: smaller;">
+                    1、页面载入后自动查询本地最新公告期号，确定本次所需查询的期号；<br>
+                    2、查询往期公告时，如果出现本地公告数量与官网公告数量不一致的情况，需要清除本地公告并重新导入；<br>
+                    3、仅在本地公告数量为0时，才可导入官网公告数据。
+                </span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <form id="annImportForm" role="form">
+                    <!-- 隐藏参数：页码、每页数据量 -->
+                    <label><input name="page" type="number" value="1" style="display: none"/></label>
+                    <label><input name="rows" type="number" value="20000" style="display: none"/></label>
+                    <div class="form-group row">
+                        <label class="col-md-2 col-form-label text-muted text-right">公告期号</label>
+                        <div class="col-md-4">
+                            <input name="annNum" class="form-control" type="number" placeholder="请输入公告期号...">
+                            <div id="annNumCheck" class="invalid-feedback">公告期号是必要条件！</div>
+                        </div>
+                        <div class="col-md-6"></div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-md-2 col-form-label text-muted text-right">本地公告数量</label>
+                        <div class="col-md-4">
+                            <input id="localAnnCount" title="本地公告数量" class="form-control" type="number" disabled>
+                        </div>
+                        <label class="col-md-2 col-form-label text-muted text-right">官网公告数量</label>
+                        <div class="col-md-4">
+                            <input id="remoteAnnCount" title="官网公告数量" class="form-control" type="number" disabled>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-md-2 col-form-label text-muted text-right">公告类型</label>
+                        <div class="col-md-4">
+                            <select name="annType" title="公告类型" class="form-control">
+                                <option label="商标初审公告" value="TMZCSQ" selected></option>
+                                <!--<option label="无效选项" value="XXXXXX"></option>-->
+                            </select>
+                        </div>
+                        <div class="col-md-6"></div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-md-2 col-form-label text-muted text-right">开始时间</label>
+                        <div class="col-md-4">
+                            <input name="appDateBegin" title="开始时间" class="form-control" type="date" disabled
+                                   value="2018-01-01">
+                        </div>
+                        <label class="col-md-2 col-form-label text-muted text-right">结束时间</label>
+                        <div class="col-md-4">
+                            <input name="appDateEnd" title="结束时间" class="form-control" type="date" disabled
+                                   value="2018-02-01">
+                        </div>
+                    </div>
+                    <hr/>
+                    <div class="form-group row">
+                        <label class="col-md-2 col-form-label form-control-label"></label>
+                        <div class="col-md-2">
+                            <button type="reset" class="btn btn-outline-secondary">重置条件</button>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-primary"
+                                    onclick="submitAnnForm()">提交查询
+                            </button>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="button" id="importRemoteAnnBtn" class="btn btn-outline-primary"
+                                    onclick="importRemoteAnn(this)" disabled>
+                                导入官网公告
+                            </button>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="button" id="delLocalAnnBtn" class="btn btn-danger"
+                                    onclick="delLocalAnnByAnnNum(this)"
+                                    disabled>清除本地冲突公告
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div id="excelOpt"></div>
+        <div class="d-flex" style="margin-top: 80px;">
+            <div class="jumbotron w-100 py-2 mx-auto">
+                <h5>本地表格处理</h5>
+                <span class="text-muted" style="font-size: smaller;">
+                    1、在导入完官网公告（前面的步骤）后再进行表格处理；<br>
+                    1、请先将待处理文档移动至指定源目录（D:\TMSpider\src）下；<br>
+                    2、处理完成后，新生成的文档位于指定目标目录（D:\TMSpider\tar）下。
+                </span>
+            </div>
+        </div>
+    </section>
+
+    <div class="modal fade" id="maskLayer" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel">
+                        标题
+                    </h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                </div>
+                <div class="modal-body">
+                    内容...
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--<section id="modals" class="container pb-5">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="container-fluid">
+                    <div class="position-relative" style="z-index:1000">
+                        <div id="myModal" class="modal d-block position-relative" tabindex="-1" role="dialog"
+                             aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h3>Modal</h3>
+                                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>This is a basic Bootstrap 4 modal. The modal also comes in a <a
+                                                href="#" data-toggle="modal">smaller</a> and <a href="#"
+                                                                                                data-toggle="modal">larger</a>
+                                            sizes.</p>
+                                        <p>
+                                            What will you put in your modal? Lorem ipsum dolor sit amet, consectetur
+                                            adipiscing elit.
+                                            in sagittis nisi. Sed ac orci quis tortor imperdiet venenatis. Duis
+                                            elementum auctor accumsan. Aliquam in felis sit amet augue.
+                                        </p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button class="btn" data-dismiss="alert" aria-hidden="true">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9"></div>
+        </div>
+    </section>-->
+</main>
+<footer id="footer" class="bg-dark text-light py-5">
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-6 col-md-6 col-lg-3 mb-2">
+                <h6 class="text-uppercase">Tools</h6>
+                <ul class="nav flex-column">
+                    <li><a class="text-white" target="ext" rel="nofollow" href="https://themestr.app"
+                           title="Bootstrap theme builder">Themestr.app</a></li>
+                    <li><a class="text-white" target="ext" rel="nofollow" href="http://themes.guide"
+                           title="Bootstrap free and pro themes">Themes.guide</a></li>
+                    <li><a class="text-white" target="ext" rel="nofollow" href="http://codeply.com"
+                           title="Prototype and edit code for Bootstrap and other responsive frameworks">Codeply</a>
+                    </li>
+                    <li><a class="text-white" target="ext" rel="nofollow" href="http://bootply.com">Bootply</a></li>
+                </ul>
+            </div>
+            <div class="col-6 col-md-6 col-lg-3 mb-2">
+                <h6 class="text-uppercase">More</h6>
+                <ul class="nav flex-column">
+                    <li><a class="text-white" target="_new" href="http://wdstack.com"
+                           title="The top projects, tools and apps for Web developers">WDStack</a></li>
+                    <li><a class="text-white" target="_new" href="http://theme.cards">Theme.cards</a></li>
+                    <li><a class="text-white" target="_new" href="http://www.bootbundle.com">BootBundle</a></li>
+                    <li><a class="text-white" target="_new" title="Learn about Bootstrap 4 using this free theme"
+                           href="http://bootstrap4.guide">Bootstrap4.guide</a></li>
+                </ul>
+            </div>
+            <div class="col-12 col-md-12 col-lg-6 mb-2 text-right">
+                <h6 class="text-uppercase">Follow</h6>
+                <ul class="nav float-right">
+                    <li><a class="text-white mr-2" rel="nofollow" href="http://twitter.com/ThemesGuide"
+                           title="Follow on Twitter"><i class="h1 fa fa-fw fa-twitter fa-2x ion-logo-twitter"></i></a>
+                    </li>
+                    <li><a class="text-white mr-2" rel="nofollow" href="https://www.facebook.com/codeply"
+                           title="Follow on Facebook"><i
+                            class="h1 fa fa-fw fa-facebook fa-2x ion-logo-facebook"></i></a></li>
+                    <li><a class="text-white mr" rel="nofollow" href="https://github.com/ThemesGuide/bootstrap-themes"
+                           title="Follow on GitHub"><i class="h1 fa fa-fw fa-facebook fa-2x ion-logo-github"></i></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <!--/row-->
+    </div>
+</footer>
+</body>
+</html>

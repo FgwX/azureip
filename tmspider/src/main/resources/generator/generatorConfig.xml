@@ -74,7 +74,7 @@
         <javaModelGenerator targetPackage="com.azureip.tmspider.model" targetProject="src/main/java">
             <!-- for MyBatis3/MyBatis3Simple
             自动为每一个生成的类创建一个构造方法，构造方法包含了所有的field，而不是使用setter -->
-            <!--<property name="constructorBased" value="false"/>-->
+            <property name="constructorBased" value="false"/>
 
             <!-- 在targetPackage的基础上，根据数据库的schema再生成一层package，最终生成的类放在这个package下，默认为false -->
             <property name="enableSubPackages" value="true"/>
@@ -241,6 +241,12 @@
             注意：一个table元素中可以有多个ignoreColumn元素 -->
             <!--<ignoreColumn column="deptId" delimitedColumnName=""/>-->
 
+        </table>
+        <table tableName="excelOptRecord" domainObjectName="ExcelOptRecord" enableCountByExample="false"
+               enableUpdateByExample="false"
+               enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+            <property name="constructorBased" value="false"/>
+            <property name="useActualColumnNames" value="false"/>
         </table>
 
     </context>

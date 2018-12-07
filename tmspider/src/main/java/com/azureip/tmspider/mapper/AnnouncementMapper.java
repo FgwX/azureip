@@ -21,9 +21,11 @@ public interface AnnouncementMapper {
     int updateByPrimaryKey(Announcement record);
 
     /**
-     * 查询本地公告数据库中最新一期数据量
+     * 查询本地公告中最新一期的期号
      */
-    void queryLocalLatest();
+    String queryLocalLatestAnnNum();
+
+    int queryAnnCountByAnnNum(int annNum);
 
     /**
      * 插入公告集合

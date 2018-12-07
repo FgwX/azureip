@@ -134,6 +134,16 @@
         where id = #{id,jdbcType=VARCHAR}
     </update>
 
+    <!--查询本地公告中最新一期的期号-->
+    <select id="queryLocalLatestAnnNum" resultType="java.lang.String">
+        select max(ann_num) from announcement
+    </select>
+
+    <!--queryAnnCountByAnnNum-->
+    <select id="queryAnnCountByAnnNum" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+        select count(1) from announcement where ann_num = #{annNum}
+    </select>
+
     <!--插入公告集合-->
     <insert id="insertList" parameterType="java.util.List">
         insert into announcement (id,page_no,ann_type_code,ann_type,ann_num,ann_date,reg_name,reg_num,tm_name)
