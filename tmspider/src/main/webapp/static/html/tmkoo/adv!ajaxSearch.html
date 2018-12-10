@@ -1,0 +1,368 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>商标综合查询_标库网</title>
+    <meta name="Keywords" content="商标高级综合查询,中国商标网,商标注册查询,商标数据库,标库网商标查询"/>
+    <meta name="Description" content="商标高级综合查询，可在中国最全商标数据库——标库网中查询到商标信息。"/>
+
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    <meta http-equiv="Cache-Control" content="max-age=5000"/>
+    <meta http-equiv="Pragma" content="no-cache"/>
+    <meta http-equiv="Expires" content="0"/>
+    <meta name="viewport" content="width=1180,initial-scale=0.1">
+    <LINK media=screen href="/favicon.ico?i=1" type=image/x-icon rel="shortcut icon">
+    <link rel="stylesheet" href="/css/base.css?v=201810" type="text/css" media="screen"/>
+    <script>
+        var globalLoginSysSend = 15;
+        var globalInviteUserSysSend = 300;
+        var globalRenlingZchConsume = 12;
+        var globalViewDetailZchConsume = 1;
+        var showConfirmOverScore = 0;
+    </script>
+    <script src="/js/jquery-1.7.2.min.js" type="text/javascript"></script>
+    <script src="/js/artDialog/artDialog.js?skin=twitter" type="text/javascript"></script>
+    <script src="/js/artDialog/other.js" type="text/javascript"></script>
+    <script src="/js/artDialog/plugins/iframeTools.source.js" type="text/javascript"></script>
+    <script src="/js/blockUI/JQuery.BlockUI.min.2.39.js?v=2015" type="text/javascript"></script>
+    <script src="/js/base.js?v=20161209" type="text/javascript"></script>
+    <script src="/js/layer/layer.js?v=2018" type="text/javascript"></script>
+    <link href="/js/cart/css/select.css" rel="stylesheet" type="text/css"/>
+    <script src="/js/rlzch.js?v=20140626"></script>
+</head>
+<body>
+<div class="comm_head">
+    <div class="w1200">
+        <ul class="fl">
+            <li>[同行QQ群:469309655]&nbsp;[交易QQ群:83559870 | 137403365]</li>
+        </ul>
+        <ul class="fr" id="head-menu">
+            <li><span>您好，欢迎来到标库网</span></li>
+            <li><a href='/home/myaccount.php'>18803318286 (积分:<span id='myscore'>-</span>)</a></li>
+            <li><a href="javascript:if(confirm('您确定退出吗？')) location.href='/j_spring_security_logout';">退出</a></li>
+            </li>
+            <li class="border0"><a href="/product/sail50.html">充值</a></li>
+            <li class="border0"><a href="/home/order-info.php">我的订单</a></li>
+        </ul>
+    </div>
+</div>
+<div class="format_head w1200 padding19">
+    <div class="logo-box loan-head">
+        <a href="/"><img src="http://upload.tmkoo.com/images/logo.png" border="0"></a>
+        <h2>商标服务专家</h2>
+        <h3>用心服务，追求完美！</h3>
+    </div>
+    <div class="form">
+        <form id="topF" name="topF" action="/search.php" method="get" target="_blank">
+            <div class="topselect">
+                <div class="showselect">
+                    全部
+
+
+                </div>
+                <em></em>
+                <ul class="select">
+                    <li data-st="4">全部</li>
+                    <li data-st="1">商标名</li>
+                    <li data-st="3">申请人</li>
+                    <li data-st="2">注册号</li>
+                </ul>
+            </div>
+            <input type="hidden" id="stT" name="st" value=""/>
+            <input type="text" id="keywordT" name="searchKey" onkeydown="javascript:if(event.keyCode==13) topS('key');"
+                   value="" autocomplete="off" class="text">
+        </form>
+        <button onclick="topS();" class="button"><i></i>搜索</button>
+    </div>
+
+    <div class="head-tel-loan fl">
+        <label>免费咨询：</label> <span>400-880-8920</span>
+    </div>
+    <div class="fr">
+        <ul class="nav-main head-nav-loan">
+            <li class=""><a href="/index.html">&nbsp;&nbsp;首页&nbsp;&nbsp;</a></li>
+            <li class="zc"><a href="/product/regfast.html">商标注册</a>
+                <i class="btg"></i>
+            </li>
+            <li class=""><a href="/jinsi.php">商标监测</a></li>
+            <li class=""><a href="/searchsimilar.php">近似查询</a></li>
+            <li class="active"><a href="/searchmore-zch.php">综合查询</a></li>
+            <li class=""><a href="/sbgg.php">商标公告</a>
+            <li class="navHover  "><a href="javascript:void(-1);">商标工具</a><i></i>
+                <div class="global-nav hoverBox" style="display: none;">
+                    <div class="global-box">
+                        <a href="/app.php">商标软件</a>
+                        <a href="/tm-class/">商品分类(2018)</a>
+                        <!--<a href="/qiming.php">商标起名</a>-->
+                        <a href="/tmtuxing.php">图形要素</a>
+                        <a href="/shushi.php">申请书式下载</a>
+                        <a href="/spw-ws.php">商评委评审文书</a>
+                    </div>
+                </div>
+            </li>
+            <li class="wordsNum4 "><a href="/dlr.php">代理大全</a>
+            </li>
+
+
+        </ul>
+    </div>
+    <div class="clear"></div>
+</div>
+<div class="brand-sub-banner"></div>
+<div id="J-global-toolbar">
+    <div class="jdm-toolbar-wrap">
+        <div class="jdm-toolbar">
+            <div class="jdm-toolbar-tabs">
+                <div class="jdm-toolbar-tab">
+                    <a href="http://p.qiao.baidu.com/cps/chat?siteId=5669068&userId=7874567" target="_blank"
+                       class="tab-ico-kf"></a>
+                    <a href="http://p.qiao.baidu.com/cps/chat?siteId=5669068&userId=7874567" target="_blank"
+                       class="tab-text">咨询</a>
+                </div>
+                <div class="jdm-toolbar-tab">
+                    <em class="tab-ico-dh"></em>
+                    <em class="tab-text">400-880-8920</em>
+                </div>
+                <div class="jdm-toolbar-tab">
+                    <a href="http://www.tmkoo.com/tm-class/" target="_blank" class="tab-ico-sh"
+                       rel="external nofollow"></a>
+                    <a href="http://www.tmkoo.com/tm-class/" target="_blank" class="tab-text" rel="external nofollow">进入商标分类</a>
+                </div>
+                <div class="jdm-toolbar-tab">
+                    <em class="tab-ico-top" onclick="$('html,body').animate({scrollTop:0}, 300); "></em>
+                    <em class="tab-text" onclick="$('html,body').animate({scrollTop:0}, 300); ">返回顶端</em>
+                </div>
+            </div>
+            <div class="jdm-toolbar-mini"></div>
+        </div>
+        <div id="J-toolbar-load-hook"
+             clstag="thirdtype|keycount|cebianlan_thirdtype|load"></div>
+    </div>
+</div>
+<script type="text/javascript">
+    headReflashScore();
+    $(".jdm-toolbar-tab").hover(function () {
+        $(this).addClass("z-jdm-tbar-tab-hover");
+    }, function () {
+        $(this).removeClass("z-jdm-tbar-tab-hover");
+    });
+</script>
+
+<form id="mainForm" name="mainForm" action="" method="post">
+    <input type="hidden" id="orderBy" name="orderBy" value="SQR"/>
+    <input type="hidden" id="order" name="order" value="ASC"/>
+    <input type="hidden" id="pageNo" name="pageNo" value="1"/>
+    <input type="hidden" id="d" name="d" value="1"/>
+    <input type="hidden" id="l" name="l" value=""/>
+    <input type="hidden" id="lczt" name="lczt" value=""/>
+    <input type="hidden" id="gjfl" name="gjfl" value=""/>
+    <input type="hidden" id="qzhs" name="qzhs" value=""/>
+    <input type="hidden" id="csggqhStart" name="csggqhStart" value=""/>
+    <input type="hidden" id="csggqhEnd" name="csggqhEnd" value=""/>
+    <input type="hidden" id="zcggqhStart" name="zcggqhStart" value=""/>
+    <input type="hidden" id="zcggqhEnd" name="zcggqhEnd" value=""/>
+    <input type="hidden" id="csggrqStart" name="csggrqStart" value=""/>
+    <input type="hidden" id="csggrqEnd" name="csggrqEnd" value=""/>
+    <input type="hidden" id="zcggrqStart" name="zcggrqStart" value=""/>
+    <input type="hidden" id="zcggrqEnd" name="zcggrqEnd" value=""/>
+    <input type="hidden" id="sqrqStart" name="sqrqStart" value="20180701"/>
+    <input type="hidden" id="sqrqEnd" name="sqrqEnd" value="20180731"/>
+    <input type="hidden" id="sqrmcZw" name="sqrmcZw" value=""/>
+    <input type="hidden" id="dlrmc" name="dlrmc" value=""/>
+    <input type="hidden" id="sqrdzZw" name="sqrdzZw" value="台湾"/>
+
+</form>
+<div class="mainBox">
+    <div class="main">
+        <div class="leftbox" style="width:1160px">
+            <div class="secNav clearfix" style="background-color:white;width:1158px;border-top:none;">
+                <ul>
+                    <li><a href="/searchmore-zch.php">注册号</a></li>
+                    <li><a href="/searchmore-name.php">商标名</a></li>
+                    <li><a href="/searchmore-sqr.php">申请人</a></li>
+                    <li class="active">
+                        <a href="/searchmore-adv.php">高级查询</a><img src="/images/hot.png">
+                    </li>
+                    <li id="tab9" style="border-top:0px;"></li>
+                </ul>
+            </div>
+            <div>
+                【综合高级查询】
+                <ul>
+                    <li class="cntip">分类：全部</li>
+                    <li class="cntip">申请日期：[20180701——20180731]</li>
+                    <li class="cntip">申请人地址：台湾</li>
+                </ul>
+                <div style="clear: both;"></div>
+            </div>
+            <div style="border-bottom: 3px solid gainsboro;"></div>
+            <div id="gjfls">国际分类：查询中...</div>
+            <div class="dando" style="margin-top: -5px;width:1160px;">
+                <div class="displayTypeDiv">
+                    <a id="d0" href="javascript:changeD(0);" class="list list_add_hover" title="列表式"></a>
+                    <a id="d1" href="javascript:changeD(1);" class="pic " title="图片式"></a>
+                </div>
+                <div class="orderDiv">
+                    <a id="order2" href="javascript:sorder(2,'SQR','ASC');" class="add_hover">申请日期<i
+                            class="f-ico-arrow-u"></i></a><a id="order3"
+                                                             href="javascript:sorder(3,'SQR','DESC');">申请日期<i
+                        class="f-ico-arrow-d"></i></a><a id="order0" href="javascript:sorder(0,'ZCH','ASC');">注册号<i
+                        class="f-ico-arrow-u"></i></a><a id="order1" href="javascript:sorder(1,'ZCH','DESC');">注册号<i
+                        class="f-ico-arrow-d"></i></a><a id="order4" href="javascript:sorder(4,'NEW','ASC');">状态日期<i
+                        class="f-ico-arrow-u"></i></a><a id="order5" href="javascript:sorder(5,'NEW','DESC');">状态日期<i
+                        class="f-ico-arrow-d"></i></a>
+                </div>
+            </div>
+            <div style="clear:both"></div>
+            <div class="bBorder">
+                <div id="page"></div>
+            </div>
+        </div>
+        <div class="clear"></div>
+    </div>
+</div>
+<script>
+    //======展示商标列表函数=================================
+    //点击排序按钮
+    function sorder(index, orderBy, order) {
+        for (var i = 0; i < 7; i++) {
+            $("#order" + i).removeClass("add_hover");
+        }
+        $("#order" + index).addClass("add_hover");
+        $("#orderBy").val(orderBy);
+        $("#order").val(order);
+        $("#pageNo").val("1");
+        findPageSetp1(1);
+    }
+
+    //点击显示模式查看
+    function changeD(index) {
+        if (index == 0) {
+            $("#d0").addClass("list_add_hover");
+            $("#d1").removeClass("pic_add_hover");
+        }
+        else {
+            $("#d1").addClass("pic_add_hover");
+            $("#d0").removeClass("list_add_hover");
+        }
+        $("#d").val(index == 0 ? "1" : "2");
+        //$("#pageNo").val("1");
+        findPageSetp1($("#pageNo").val());
+    }
+
+    var isSoing = false;
+
+    //开搜，获得记录数+l
+    function ajaxSearchSetp1() {
+        if (isSoing) {
+            return;
+        }
+        isSoing = true;
+        $.blockUI({message: "<div style='font-weight: bold;height:100px;'><img src='/images/loading.gif'  alt='加载中'/></div>"});
+        TMRAsynPost("/searchmore/adv!ajaxSearch.php", "mainForm", "text", ajaxSearchSetp2);
+    }
+
+    function ajaxSearchSetp2(data) {
+        isSoing = false;
+        if (data.indexOf("SUCCESS") < 0) {
+            art.dialog.tips(data, 1);
+            return;
+        }
+        else {
+            // SUCCESS:2014061000321:22;32;22    是否成功:sessiong的key值:国际分类分号分隔
+            $.unblockUI();
+            var l = data.split(":")[1];
+            $("#l").val(l);
+            $("#pageNo").val("1");
+            var gjfls = data.split(":")[2].split(";");
+            var gjflsHtml = "国际分类：<a id='g0' href='javascript:gjfl(\"0\");' class='aUnActive aActive'>全部</a>";
+            for (var i = 0; i < gjfls.length; i++) {
+                gjflsHtml += "<a  id='g" + gjfls[i] + "' href='javascript:gjfl(" + gjfls[i] + ")' class='aUnActive'>" + gjfls[i] + "</a>";
+                if (i == 35) {
+                    gjflsHtml += "<br/><div style='float:left;width:60px;'>&nbsp;</div>";
+                }
+            }
+            $("#gjfls").html(gjflsHtml);
+            findPageSetp1(1);//查第一页
+        }
+    }
+
+    function gjfl(g) {
+        if (g != '0' && g > 0) {
+            $("#gjfl").val(g);
+        }
+        else {
+            $("#gjfl").val("0");
+        }
+        $(".aUnActive").removeClass("aActive");
+        $("#g" + g).addClass("aActive");
+        findPageSetp1(1);
+    }
+
+    //翻页
+    function findPageSetp1(pageNo) {
+        $("#pageNo").val(pageNo);
+        $.blockUI({message: "<div style='font-weight: bold;height:100px;'><img src='/images/loading.gif'  alt='加载中'/></div>"});
+        TMRAsynPost("/searchmore/adv!ajaxPage.php", "mainForm", "html", findPageSetp2);
+    }
+
+    function findPageSetp2(html) {
+        var d = $("#d").val();
+        $.unblockUI();
+        $("#page").html(html);
+
+    }
+
+    $(document).ready(function () {
+        //开始搜索
+        ajaxSearchSetp1();
+    });
+
+
+    //=======================================
+    //关注： 界面提示
+    function renlingzchFinish(data) {
+        if (data.indexOf("SUCCESS") >= 0) {
+            //显示已关注
+            $("#" + rZch + "_" + rGjfl).html("<a href='/home/detail.php?zch=" + rZch + "&gjfl=" + rGjfl + "' target='_blank'>已关注，查看</a>");
+            //增加动画
+            addShoping(rZch + "_" + rGjfl);
+
+            // 刷新head的积分
+            headReflashScore();
+
+            art.dialog.notice({
+                title: '扣分提示',
+                width: 220,
+                content: "<div ><span class='score' style='font-size:22px;'> - </span><span class='jifen'></span><span class='score' style='font-size:22px;'>" + data.split(":")[1] + "</span></div>",
+                icon: 'face-sad',
+                time: 2
+            });
+            //刷新缓存
+            TMRAsynGet("/searchmore/adv!renling.php?l=" + $("#l").val() + "&zch=" + rZch + "&gjfl=" + rGjfl, "text", null);
+        }
+        else {
+            art.dialog.tips(data, 1);
+        }
+    }
+
+    //=======================================
+</script>
+
+<!--尾 -->
+<div style="clear:both"></div>
+<div class="footer">
+    <div class="f_bottom">Copyright © 标库网 京ICP备17003906号</div>
+</div>
+
+<script>
+    var _hmt = _hmt || [];
+    (function () {
+        var hm = document.createElement("script");
+        hm.src = "//hm.baidu.com/hm.js?55d3982f9d41b99f56a44ddcd44b78be";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+</body>
+</html>

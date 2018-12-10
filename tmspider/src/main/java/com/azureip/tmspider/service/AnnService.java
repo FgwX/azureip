@@ -37,7 +37,6 @@ public class AnnService {
 
     private final AnnouncementMapper announcementMapper;
     private final ExcelOptRecordMapper excelOptRecordMapper;
-    //@Autowired
     //private ThreadPoolTaskExecutor executor;
 
     private static Gson gson = new Gson();
