@@ -30,14 +30,13 @@ public class TmkooController {
 
     @PostMapping("importTMKooRecords")
     @ResponseBody
-    public GlobalResponse importTMKooRecords(TmkooQueryPojo pojo) {
+    public GlobalResponse<String> importTMKooRecords(TmkooQueryPojo pojo) {
         try {
-            tmkooService.importRegDataByMonth(pojo);
+            return tmkooService.importRegDataByMonth(pojo);
         } catch (IOException | ParseException e) {
             e.printStackTrace();
-            return new GlobalResponse(GlobalResponse.ERROR, "ERROR");
+            return new GlobalResponse<>(GlobalResponse.ERROR, e.getMessage());
         }
-        return new GlobalResponse(GlobalResponse.SUCCESS, "SUCCESS");
     }
 
     @GetMapping("test")
