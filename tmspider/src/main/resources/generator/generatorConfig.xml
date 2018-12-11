@@ -153,9 +153,11 @@
                 使用的是`（反引号，那么还需要设置context的beginningDelimiter和endingDelimiter属性）
             15，delimitAllColumns：设置是否所有生成的SQL中的列名都使用标识符引起来。默认为false，delimitIdentifiers参考context的属性
         注意：table里面很多参数都是对javaModelGenerator，context等元素的默认属性的一个复写 -->
-        <table tableName="announcement" domainObjectName="Announcement" enableCountByExample="false"
-               enableUpdateByExample="false"
-               enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+
+        <!--公告数据表-->
+        <!--<table tableName="announcement" domainObjectName="Announcement" enableCountByExample="false"-->
+               <!--enableUpdateByExample="false"-->
+               <!--enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">-->
 
             <!-- 参考 javaModelGenerator的constructorBased属性 -->
             <!--<property name="constructorBased" value="false"/>-->
@@ -189,7 +191,7 @@
             <!--<property name="selectAllOrderByClause" value="age desc,username asc"/>-->
 
             <!-- 如果设置为true，生成的model类会直接使用column本身的名字，而不会再使用驼峰命名方法，比如BORN_DATE，生成的属性名字就是BORN_DATE,而不会是bornDate -->
-            <property name="useActualColumnNames" value="true"/>
+            <!--<property name="useActualColumnNames" value="true"/>-->
 
             <!-- generatedKey用于生成生成主键的方法，如果设置了该元素，MBG会在生成的<insert>元素中生成一条正确的<selectKey>元素（可选）
                 column:主键的列名；
@@ -240,14 +242,28 @@
                 delimitedColumnName：参考table元素的delimitAllColumns配置，默认为false
             注意：一个table元素中可以有多个ignoreColumn元素 -->
             <!--<ignoreColumn column="deptId" delimitedColumnName=""/>-->
+        <!--</table>-->
 
-        </table>
-        <table tableName="excelOptRecord" domainObjectName="ExcelOptRecord" enableCountByExample="false"
-               enableUpdateByExample="false"
-               enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
-            <property name="constructorBased" value="false"/>
+        <!--表格处理记录表-->
+        <!--<table tableName="excel_opt_record" domainObjectName="ExcelOptRecord"
+               enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false"
+               enableSelectByExample="false" selectByExampleQueryId="false">
             <property name="useActualColumnNames" value="false"/>
-        </table>
+        </table>-->
+
+        <!--标库网商标信息表-->
+        <!--<table tableName="tmkoo_record" domainObjectName="TMKooRecord"
+               enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false"
+               enableSelectByExample="false" selectByExampleQueryId="false">
+            <property name="useActualColumnNames" value="false"/>
+        </table>-->
+
+        <!--商标注册申请信息表-->
+        <!--<table tableName="registration" domainObjectName="Registration"
+               enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false"
+               enableSelectByExample="false" selectByExampleQueryId="false">
+            <property name="useActualColumnNames" value="false"/>
+        </table>-->
 
     </context>
 </generatorConfiguration>

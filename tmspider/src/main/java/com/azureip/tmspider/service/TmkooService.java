@@ -1,5 +1,7 @@
 package com.azureip.tmspider.service;
 
+import com.azureip.tmspider.mapper.TMKooRecordMapper;
+import com.azureip.tmspider.model.TMKooRecord;
 import com.azureip.tmspider.pojo.TmkooQueryPojo;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -20,16 +22,24 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class TmkooService {
+
+    private final TMKooRecordMapper tmKooRecordMapper;
 
     private static final String DOMAIN_URL = "http://www.tmkoo.com";
     private static final String LOGIN_COOKIE_URL = "http://www.tmkoo.com/j_spring_security_check";
@@ -38,7 +48,12 @@ public class TmkooService {
 
     private static CookieStore cookieStore = new BasicCookieStore();
 
-    public String queryRegDataByMonth(TmkooQueryPojo pojo) throws IOException {
+    @Autowired
+    public TmkooService(TMKooRecordMapper tmKooRecordMapper) {
+        this.tmKooRecordMapper = tmKooRecordMapper;
+    }
+
+    public String importRegDataByMonth(TmkooQueryPojo pojo) throws IOException, ParseException {
         CloseableHttpClient client = HttpClients.custom().setDefaultCookieStore(cookieStore).build();
         List<Header> headers = new ArrayList<>();
         headers.add(new BasicHeader("Connection", "keep-alive"));
@@ -46,75 +61,118 @@ public class TmkooService {
         headers.add(new BasicHeader("Host", "www.tmkoo.com"));
         headers.add(new BasicHeader("Origin", "http://www.tmkoo.com"));
         headers.add(new BasicHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36"));
-
+        long start = System.currentTimeMillis();
         // 一、模拟登陆，获取并设置Cookie
         List<NameValuePair> loginParams = new ArrayList<>();
         loginParams.add(new BasicNameValuePair("j_username", "15930771833"));
         loginParams.add(new BasicNameValuePair("j_password", "lihuan328829"));
+        System.out.println("[Step 01].Begin...");
+
         CloseableHttpResponse loginResponse = executePostRequest(client, LOGIN_COOKIE_URL, headers, loginParams);
+        loginResponse.close();
+        long loginEnd = System.currentTimeMillis();
+        System.out.println("[Step 04].Login success in " + (loginEnd - start) + "ms");
 
         // 二、拼装条件，查询Session的Key值（本次查询的身份标识）
         CloseableHttpResponse keyResponse = executePostRequest(client, QUERY_SESSION_KEY_URL, headers, convertToPairParams(pojo));
         // SUCCESS:201812081017111565221:1;2;3;4
         String keyResponseStr = EntityUtils.toString(keyResponse.getEntity());
+        keyResponse.close();
         if (!"SUCCESS".equals(keyResponseStr.split(":")[0]))
             return "Failed";
-        System.out.println("SessionKey: " + keyResponseStr.split(":")[1]);
+        System.out.println("[Step 05].SessionKey: " + keyResponseStr.split(":")[1]);
         pojo.setL(keyResponseStr.split(":")[1]);
+        long queryKeyEnd = System.currentTimeMillis();
+        System.out.println("[Step 06].SessionKey query cost " + (queryKeyEnd - loginEnd) + "ms");
 
         // 三、进行分页查询，获取数据并写入表格
-        int maxPageNo = 1, pageNo = 1;
-        while (pageNo <= maxPageNo) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        int maxPageNo = 1;
+        AtomicInteger pageNo = new AtomicInteger(1);
+        while (pageNo.get() <= maxPageNo) {
             // 请求获取列表页面
-            pojo.setPageNo(String.valueOf(pageNo));
+            pojo.setPageNo(pageNo.toString());
             CloseableHttpResponse pageResponse = executePostRequest(client, QUERY_PAGE_URL, headers, convertToPairParams(pojo));
             Document listPage = Jsoup.parse(EntityUtils.toString(pageResponse.getEntity(), "UTF-8"));
+            pageResponse.close();
             // 首次请求获取总页数
-            if (pageNo++ == 1) {
+            if (pageNo.get() == 1) {
                 String navText = listPage.select("body>div:eq(0)").text();
                 String totalPage = navText.split(",")[0];
                 maxPageNo = Integer.parseInt(totalPage.substring(2, totalPage.length() - 1));
             }
 
-            // 获取所有列表项
-            Elements regList = listPage.select("body>table>tbody>tr");
-            for (Element regData : regList) {
-                String regNum = regData.select("td:eq(1)").text();
-                String tmType = regData.select("td:eq(2)").text();
-                String tmName = regData.select("td:eq(3)").text();
-                String regDate = regData.select("td:eq(4)").text();
-                String regDetailUrl = DOMAIN_URL + regData.select("td:eq(1)>a").attr("href");
-                CloseableHttpResponse detailResponse = executeGetRequest(client, regDetailUrl, headers);
-                Element detailBody = Jsoup.parse(EntityUtils.toString(detailResponse.getEntity(), "UTF-8")).body();
-                String appName = detailBody.select(".result>table>tr:eq(1)>td:eq(1)>div").text();
-                String appAddress = detailBody.select(".result>table>tr:eq(2)>td:eq(1)").text();
-                System.out.println(regNum + "|" + tmType + "|" + regDate + "|" + tmName + "|" + appName + "|" + appAddress);
-            }
+            // 多线程调用
+            getDetailByPage(client, pageNo.get(), listPage, dateFormat);
+            pageNo.incrementAndGet();
         }
+        long listQueryEnd = System.currentTimeMillis();
+        System.out.println("【详情查询导入】耗时：" + (listQueryEnd - queryKeyEnd) + "毫秒…");
+        System.out.println("共计耗时：" + (int) (listQueryEnd - start) / 1000 + "秒。");
 
         client.close();
         return "Success";
+    }
+
+    @Async("tmAsyncExecutor")
+    public void getDetailByPage(CloseableHttpClient client, int pageNo, Document listPage, SimpleDateFormat dateFormat)
+            throws IOException, ParseException {
+        // 获取所有列表项
+        Elements regList = listPage.select("body>table>tbody>tr");
+        for (Element regData : regList) {
+            // 请求详情页
+            String regDetailUrl = DOMAIN_URL + regData.select("td:eq(1)>a").attr("href");
+            CloseableHttpResponse detailResponse = client.execute(new HttpGet(regDetailUrl));
+            Document detailHtml = Jsoup.parse(EntityUtils.toString(detailResponse.getEntity(), "UTF-8"));
+            Element detailBody = detailHtml.body();
+            TMKooRecord record = new TMKooRecord();
+            record.setRegNum(regData.select("td:eq(1)").text());
+            record.setTmName(regData.select("td:eq(3)").text());
+            record.setTmType(Integer.parseInt(regData.select("td:eq(2)").text()));
+            record.setAppName(detailBody.select("#wd").val());
+            Date appDate = dateFormat.parse(regData.select("td:eq(4)").text());
+            record.setAppDate(appDate);
+            record.setAppAddress(detailBody.select("div.result>table>tbody>tr:eq(2)>td:eq(1)").text());
+            System.out.println("Page[" + pageNo + "]: " + record.getRegNum() + "|" + record.getTmName() + "|" + record.getTmType() + "|" + record.getAppName() + "|"
+                    + record.getAppDate().toLocaleString() + "|" + record.getAppAddress());
+
+            try {
+                tmKooRecordMapper.insert(record);
+            } catch (Exception e) {
+                System.out.println("Insert cause exception: " + e.getMessage());
+            }
+        }
     }
 
     // 执行GET请求
     private CloseableHttpResponse executeGetRequest(CloseableHttpClient client, String url, List<Header> headers) throws IOException {
         HttpGet get = new HttpGet(url);
         get.setHeaders(headers.toArray(new Header[0]));
-        CloseableHttpResponse response = client.execute(get);
-        if (null != response.getFirstHeader("Set-Cookie"))
-            setCookieStore(response, get.getURI().getHost());
-        return response;
+        return client.execute(get);
     }
 
     // 执行POST请求
     private CloseableHttpResponse executePostRequest(CloseableHttpClient client, String url, List<Header> headers, List<NameValuePair> params) throws IOException {
-        HttpPost post = new HttpPost(url);
+        HttpPost loginPost = new HttpPost(url);
         UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params, "UTF-8");
-        post.setHeaders(headers.toArray(new Header[0]));
-        post.setEntity(entity);
-        CloseableHttpResponse response = client.execute(post);
-        if (null != response.getFirstHeader("Set-Cookie"))
-            setCookieStore(response, post.getURI().getHost());
+        loginPost.setHeaders(headers.toArray(new Header[0]));
+        loginPost.setEntity(entity);
+        CloseableHttpResponse response = client.execute(loginPost);
+        if (null != response.getFirstHeader("Set-Cookie")) {
+            System.out.println("[Step 02].Setting cookie...");
+            // Cookie: JSESSIONID=A6D67124762076255F3E20D1B4FAD740; Path=/; HttpOnly
+            String setCookie = response.getFirstHeader("Set-Cookie").getValue();
+            response.close();
+            String jSessionID = setCookie.substring("JSESSIONID=".length(), setCookie.indexOf(";"));
+            BasicClientCookie cookie = new BasicClientCookie("JSESSIONID", jSessionID);
+            cookie.setPath("/");
+            cookie.setDomain("www.tmkoo.com");
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.YEAR, 20);
+            cookie.setExpiryDate(calendar.getTime());
+            cookieStore.addCookie(cookie);
+            System.out.println("[Step 03].Printing cookie: " + cookie);
+        }
         return response;
     }
 

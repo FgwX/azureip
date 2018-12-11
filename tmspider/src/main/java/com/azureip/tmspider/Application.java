@@ -7,11 +7,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 @SpringBootApplication
-@EnableAutoConfiguration
-@MapperScan("com.azureip.tmspider.mapper")
+@MapperScan({"com.azureip.tmspider.mapper"})
 public class Application extends SpringBootServletInitializer {
 
     public static void main(String[] args) {

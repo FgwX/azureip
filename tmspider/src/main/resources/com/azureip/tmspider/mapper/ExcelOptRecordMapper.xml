@@ -9,7 +9,7 @@
     <result column="mark_first_trial_count" jdbcType="INTEGER" property="markFirstTrialCount" />
   </resultMap>
   <insert id="insert" parameterType="com.azureip.tmspider.model.ExcelOptRecord">
-    insert into exceloptrecord (file_name, opt_time, total_count,
+    insert into excel_opt_record (file_name, opt_time, total_count, 
       exist_first_trial_count, mark_first_trial_count
       )
     values (#{fileName,jdbcType=VARCHAR}, #{optTime,jdbcType=TIMESTAMP}, #{totalCount,jdbcType=INTEGER}, 
@@ -17,7 +17,7 @@
       )
   </insert>
   <insert id="insertSelective" parameterType="com.azureip.tmspider.model.ExcelOptRecord">
-    insert into exceloptrecord
+    insert into excel_opt_record
     <trim prefix="(" suffix=")" suffixOverrides=",">
       <if test="fileName != null">
         file_name,
