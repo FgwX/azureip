@@ -3,7 +3,7 @@ package com.azureip.tmspider.controller;
 import com.alibaba.druid.util.StringUtils;
 import com.azureip.tmspider.pojo.AnnQueryPojo;
 import com.azureip.tmspider.pojo.GlobalResponse;
-import com.azureip.tmspider.service.AnnService;
+import com.azureip.tmspider.service.AnnouncementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,18 +13,17 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 @Controller
 @RequestMapping("ann")
-public class AnnController {
+public class AnnouncementController {
 
-    private final AnnService annService;
+    private final AnnouncementService announcementService;
 
     @Autowired
-    public AnnController(AnnService annService) {
-        this.annService = annService;
+    public AnnouncementController(AnnouncementService announcementService) {
+        this.announcementService = announcementService;
     }
 
     /**
@@ -34,7 +33,7 @@ public class AnnController {
     @ResponseBody
     public GlobalResponse<String> queryLocalLatestAnnNum() {
         GlobalResponse<String> response = new GlobalResponse<>();
-        String annNum = annService.queryLocalLatestAnnNum();
+        String annNum = announcementService.queryLocalLatestAnnNum();
         if (!StringUtils.isEmpty(annNum)) {
             response.setStatus(GlobalResponse.SUCCESS);
             response.setResult(annNum);
@@ -53,7 +52,7 @@ public class AnnController {
     public GlobalResponse<Integer> queryAnnCountTest(AnnQueryPojo pojo) {
         GlobalResponse<Integer> response = new GlobalResponse<>();
         response.setStatus(GlobalResponse.SUCCESS);
-        response.setResultList(annService.queryAnnCountTest(pojo));
+        response.setResultList(announcementService.queryAnnCountTest(pojo));
         return response;
     }
 
@@ -66,7 +65,7 @@ public class AnnController {
         GlobalResponse<Integer> response = new GlobalResponse<>();
         try {
             response.setStatus(GlobalResponse.SUCCESS);
-            response.setResultList(annService.queryAnnCount(pojo));
+            response.setResultList(announcementService.queryAnnCount(pojo));
         } catch (IOException e) {
             e.printStackTrace();
             response.setStatus(GlobalResponse.ERROR);
@@ -83,7 +82,7 @@ public class AnnController {
     public GlobalResponse<Integer> importAnns(AnnQueryPojo pojo) {
         GlobalResponse<Integer> response = new GlobalResponse<>();
         try {
-            int successCount = annService.importAnns(pojo);
+            int successCount = announcementService.importAnns(pojo);
             if (successCount > 0) {
                 response.setStatus(GlobalResponse.SUCCESS);
                 response.setResult(successCount);
@@ -110,7 +109,7 @@ public class AnnController {
         File srcDir = new File("D:\\TMSpider\\src");
         File tarDir = new File("D:\\TMSpider\\tar");
         try {
-            List<String> fileNames = annService.optExcel(srcDir, tarDir);
+            List<String> fileNames = announcementService.optExcel(srcDir, tarDir);
             response.setStatus(GlobalResponse.SUCCESS);
             response.setResultList(fileNames);
         } catch (IOException e) {

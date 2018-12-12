@@ -33,7 +33,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 @Service
-public class AnnService {
+public class AnnouncementService {
 
     private final AnnouncementMapper announcementMapper;
     private final ExcelOptRecordMapper excelOptRecordMapper;
@@ -45,7 +45,7 @@ public class AnnService {
     private static final String FIRST_TRIAL_ANN = "初审公告";
 
     @Autowired
-    public AnnService(AnnouncementMapper announcementMapper, ExcelOptRecordMapper excelOptRecordMapper) {
+    public AnnouncementService(AnnouncementMapper announcementMapper, ExcelOptRecordMapper excelOptRecordMapper) {
         this.announcementMapper = announcementMapper;
         this.excelOptRecordMapper = excelOptRecordMapper;
     }
