@@ -64,8 +64,8 @@ public class TmkooService {
         long start = System.currentTimeMillis();
         // 一、模拟登陆，获取并设置Cookie
         List<NameValuePair> loginParams = new ArrayList<>();
-        loginParams.add(new BasicNameValuePair("j_username", "18803318286"));
-        loginParams.add(new BasicNameValuePair("j_password", "860328"));
+        loginParams.add(new BasicNameValuePair("j_username", "15930771833"));
+        loginParams.add(new BasicNameValuePair("j_password", "lihuan328829"));
         System.out.println("==>[Step 01].Begin...");
         CloseableHttpResponse loginResponse = executePostRequest(client, LOGIN_COOKIE_URL, headers, loginParams);
         setCookieStore(loginResponse);
@@ -122,7 +122,7 @@ public class TmkooService {
         while (true) {
             if (threadCount.get() == 0) {
                 long listQueryEnd = System.currentTimeMillis();
-                System.out.println("==>[Step 08].Page query costs "+ (listQueryEnd - queryKeyEnd) + "ms");
+                System.out.println("==>[Step 08].Page query costs " + (listQueryEnd - queryKeyEnd) + "ms");
                 System.out.println("==>[Step 09].Total cost " + (int) (listQueryEnd - start) / 1000 + "s");
                 client.close();
                 return new GlobalResponse<>(GlobalResponse.SUCCESS, "导入完成!");
@@ -138,32 +138,38 @@ public class TmkooService {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         // 获取所有列表项
         Elements regList = listPage.select("body>table>tbody>tr");
+        System.out.println("==> Page[" + pageNo + "] Size: " + regList.size());
+        List<TMKooRecord> records = new ArrayList<>();
         for (int i = 0; i < regList.size(); i++) {
             Element regData = regList.get(i);
             try {
                 // 请求详情页
-                String regDetailUrl = DOMAIN_URL + regData.select("td:eq(1)>a").attr("href");
-                CloseableHttpResponse detailResponse = client.execute(new HttpGet(regDetailUrl));
-                Document detailHtml = Jsoup.parse(EntityUtils.toString(detailResponse.getEntity(), "UTF-8"));
-                detailResponse.close();
-                Element detailBody = detailHtml.body();
+                // String regDetailUrl = DOMAIN_URL + regData.select("td:eq(1)>a").attr("href");
+                // CloseableHttpResponse detailResponse = client.execute(new HttpGet(regDetailUrl));
+                // System.out.println(regDetailUrl);
+                // Document detailHtml = Jsoup.parse(EntityUtils.toString(detailResponse.getEntity(), "UTF-8"));
+                // detailResponse.close();
+                // Element detailBody = detailHtml.body();
                 TMKooRecord record = new TMKooRecord();
                 record.setRegNum(regData.select("td:eq(1)").text());
                 record.setTmName(regData.select("td:eq(3)").text());
                 record.setTmType(Integer.parseInt(regData.select("td:eq(2)").text()));
-                record.setAppName(detailBody.select("#wd").val());
                 Date appDate = dateFormat.parse(regData.select("td:eq(4)").text());
                 record.setAppDate(appDate);
-                record.setAppAddress(detailBody.select("div.result>table>tbody>tr:eq(2)>td:eq(1)").text());
+                // record.setAppName(detailBody.select("#wd").val());
+                // record.setAppAddress(detailBody.select("div.result>table>tbody>tr:eq(2)>td:eq(1)").text());
                 System.out.println("Page[" + pageNo + "]: " + record.getRegNum() + "|" + record.getTmName() + "|" + record.getTmType() + "|" + record.getAppName() + "|"
                         + record.getAppDate().toString() + "|" + record.getAppAddress());
-                // 插入数据库
-                tmKooRecordMapper.insert(record);
-            } catch (IOException | ParseException e) {
+                records.add(record);
+            // } catch (IOException | ParseException e) {
+            } catch (ParseException e) {
+                System.out.println(e.getMessage());
                 System.err.println("Page[" + pageNo + "]: Line[" + (i + 1) + "], RegNum["
                         + (regData.select("td:eq(1)").text()) + "], query throws exception - " + e.getMessage());
             }
         }
+        // 插入数据库
+        tmKooRecordMapper.insertAll(records);
         threadCount.decrementAndGet();
     }
 

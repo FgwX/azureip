@@ -40,7 +40,7 @@
         }
 
         function formCheck() {
-            return ($("#annNum").val() && $("#total").val());
+            return $("#annNum").val();
         }
 
         $(function () {
@@ -58,7 +58,7 @@
                     success: function (resp) {
                         if (resp.status === "S") {
                             $("#total").val(resp.result);
-                            alert("查询成功，第" + data[2].value + "期公告中共有" + resp.result + "条数据！");
+                            alert("查询成功，第" + data[2].value + "期公告中共有" + resp.resultList[1] + "条数据！");
                         } else {
                             alert("查询失败，原因如下：\n" + resp.message);
                         }
