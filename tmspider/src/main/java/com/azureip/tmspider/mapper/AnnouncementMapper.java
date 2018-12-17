@@ -25,6 +25,9 @@ public interface AnnouncementMapper {
      */
     String queryLocalLatestAnnNum();
 
+    /**
+     * 根据期号查询公告数量
+     */
     int queryAnnCountByAnnNum(int annNum);
 
     /**
@@ -35,11 +38,15 @@ public interface AnnouncementMapper {
     /**
      * 根据注册号查询公告
      */
-    List<Announcement> getByRegNum(String reg_num);
+    List<Announcement> getByRegNum(String regNum);
 
     /**
      * 根据注册号查询公告数量
      */
-    Integer getCountByRegNum(String reg_num);
+    Integer getCountByRegNum(String regNum);
 
+    /**
+     * 根据期号删除公告
+     */
+    void deleteAnnByAnnNum(int annNum);
 }

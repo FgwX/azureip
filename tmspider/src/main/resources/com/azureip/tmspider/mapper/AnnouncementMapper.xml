@@ -139,7 +139,7 @@
         select max(ann_num) from announcement
     </select>
 
-    <!--queryAnnCountByAnnNum-->
+    <!--根据期号查询公告数量-->
     <select id="queryAnnCountByAnnNum" parameterType="java.lang.Integer" resultType="java.lang.Integer">
         select count(1) from announcement where ann_num = #{annNum}
     </select>
@@ -158,14 +158,17 @@
         select
         <include refid="BaseColumnList" />
         from announcement
-        where reg_num = #{reg_num}
+        where reg_num = #{regNum}
     </select>
 
     <!--通过注册号查询公告数量-->
     <select id="getCountByRegNum" parameterType="java.lang.String" resultType="java.lang.Integer">
-        select count(1)
-        from announcement
-        where reg_num = #{reg_num}
+        select count(1) from announcement where reg_num = #{regNum}
     </select>
+
+    <!--根据期号删除公告-->
+    <delete id="deleteAnnByAnnNum" parameterType="java.lang.Integer">
+        delete from announcement where ann_num = #{annNum}
+    </delete>
 
 </mapper>

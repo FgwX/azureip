@@ -90,4 +90,18 @@ public class AnnQueryPojo implements Serializable {
     public void setTotal(int total) {
         this.total = total;
     }
+
+    @Override
+    public String toString() {
+        return "AnnQueryPojo{" +
+                "page=" + page +
+                ", rows=" + rows +
+                ", annNum=" + annNum +
+                ", annType='" + annType + '\'' +
+                ", totalYOrN=" + totalYOrN +
+                ", appDateBegin='" + appDateBegin + '\'' +
+                ", appDateEnd='" + appDateEnd + '\'' +
+                ", total=" + total +
+                '}';
+    }
 }

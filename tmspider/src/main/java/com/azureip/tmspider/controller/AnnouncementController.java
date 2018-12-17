@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -50,9 +51,18 @@ public class AnnouncementController {
     @PostMapping("queryAnnCountTest")
     @ResponseBody
     public GlobalResponse<Integer> queryAnnCountTest(AnnQueryPojo pojo) {
+        try {
+            System.out.println("queryAnnCountTest begins...");
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         GlobalResponse<Integer> response = new GlobalResponse<>();
         response.setStatus(GlobalResponse.SUCCESS);
-        response.setResultList(announcementService.queryAnnCountTest(pojo));
+        List<Integer> list = new ArrayList<>();
+        list.add(1234);
+        list.add(2345);
+        response.setResultList(list);
         return response;
     }
 
@@ -62,6 +72,7 @@ public class AnnouncementController {
     @PostMapping("queryAnnCount")
     @ResponseBody
     public GlobalResponse<Integer> queryAnnCount(AnnQueryPojo pojo) {
+        System.out.println(pojo);
         GlobalResponse<Integer> response = new GlobalResponse<>();
         try {
             response.setStatus(GlobalResponse.SUCCESS);
@@ -96,6 +107,22 @@ public class AnnouncementController {
             response.setMessage(e.getMessage());
         }
         return response;
+    }
+
+    /**
+     * 根据期号删本地公告
+     */
+    @PostMapping("deleteByAnnNum")
+    @ResponseBody
+    public GlobalResponse deleteAnnByAnnNum(AnnQueryPojo pojo) {
+        try {
+            System.out.println("正在删除第" + pojo.getAnnNum() + "期公告...");
+            announcementService.deleteAnnByAnnNum(pojo.getAnnNum());
+            return new GlobalResponse(GlobalResponse.SUCCESS, "删除成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new GlobalResponse(GlobalResponse.ERROR, "删除失败");
+        }
     }
 
     /**

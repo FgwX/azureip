@@ -60,7 +60,7 @@ public class AnnouncementService {
     /**
      * 多条件查询公告总数
      */
-    public List<Integer> queryAnnCountTest(AnnQueryPojo pojo){
+    public List<Integer> queryAnnCountTest(AnnQueryPojo pojo) {
         List<Integer> resultList = new ArrayList<>();
         System.out.println(pojo.getAnnNum());
         int i = announcementMapper.queryAnnCountByAnnNum(pojo.getAnnNum());
@@ -157,6 +157,13 @@ public class AnnouncementService {
         client.close();
         System.out.println("插入成功！共计: " + successCount + "条公告。");
         return successCount;
+    }
+
+    /**
+     * 根据期号删除公告
+     */
+    public void deleteAnnByAnnNum(int annNum) {
+        announcementMapper.deleteAnnByAnnNum(annNum);
     }
 
     /**

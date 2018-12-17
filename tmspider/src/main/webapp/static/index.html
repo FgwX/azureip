@@ -1,23 +1,465 @@
 <!DOCTYPE html>
+<!--suppress JSJQueryEfficiency, JSUnresolvedVariable -->
 <html lang="en">
 <head>
     <title>首页 - TMSpider</title>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="http://azure-ip.com/favicon.ico">
     <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.1.3/css/bootstrap.min.css">
+    大d
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/3.0.0/css/ionicons.min.css">-->
+    <!--<link rel="stylesheet" href="https://cdn.staticfile.org/Ladda/1.0.6/ladda-themeless.min.css">-->
+    <link rel="stylesheet" href="https://cdn.staticfile.org/Ladda/1.0.6/ladda.min.css">
+    <!--<link rel="stylesheet" href="https://cdn.staticfile.org/jquery-confirm/3.3.2/jquery-confirm.min.css">-->
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/fresca.css">
     <script src="https://cdn.staticfile.org/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdn.staticfile.org/popper.js/1.14.5/umd/popper.min.js"></script>
     <script src="https://cdn.staticfile.org/twitter-bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <!--<script src="https://cdn.staticfile.org/Ladda/1.0.6/ladda.jquery.min.js"></script>-->
+    <script src="https://cdn.staticfile.org/Ladda/1.0.6/spin.min.js"></script>
+    <script src="https://cdn.staticfile.org/Ladda/1.0.6/ladda.min.js"></script>
+    <!--<script src="https://cdn.staticfile.org/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>-->
+    <script src="js/fresca.js"></script>
+    <script type="text/javascript">
+        // 请求获取通知权限
+        Notification.requestPermission().then(function (result) {
+            // 暂无功能
+        });
+
+        var annNumEle, localLatestAnnInfo;
+        var submitQueryLoading, importAnnLoading, delLocalLoading;
+
+        $(function () {
+            annNumEle = $("input[name='annNum']");
+            localLatestAnnInfo = $("#localLatestAnnInfo");
+            queryLocalLatestAnn();
+            // 创建按钮Loading效果
+            submitQueryLoading = Ladda.create(document.getElementById("submitQueryBtn"));
+            importAnnLoading = Ladda.create(document.getElementById("importRemoteAnnBtn"));
+            delLocalLoading = Ladda.create(document.getElementById("delLocalAnnBtn"));
+            optExcelLoading = Ladda.create(document.getElementById("optExcelBtn"));
+        });
+
+        //查询本地公告中最新一期的公告期号
+        function queryLocalLatestAnn() {
+            $.ajax({
+                type: "GET",
+                url: "/ann/queryLocalLatestAnnNum",
+                async: false,
+                success: function (resp) {
+                    if (resp.status === "S") {
+                        //查询期号为本地最新期号加1
+                        annNumEle.val(parseInt(resp.result) + 1);
+                        localLatestAnnInfo.html("数据库中公告截止第" + resp.result + "期")
+                    }
+                }
+            });
+        }
+
+        // 公告表单检查
+        function annFormCheck() {
+            if (annNumEle.val()) {
+                $("#annNumCheck").hide();
+                return true;
+            } else {
+                $("#annNumCheck").show();
+                return false;
+            }
+        }
+
+        // 提交公告表单
+        function submitAnnForm() {
+            if (annFormCheck()) {
+                submitQueryLoading.start();
+                $.ajax({
+                    type: "POST",
+                    url: "/ann/queryAnnCount",
+                    data: $("#annImportForm").serializeArray(),
+                    success: function (resp) {
+                        if (resp.status === "S") {
+                            var localCount = resp.resultList[0];
+                            var remoteCount = resp.resultList[1];
+                            $("#localAnnCount").val(localCount);
+                            $("#remoteAnnCount").val(remoteCount);
+                            if (localCount === remoteCount) {
+                                $("#importRemoteAnnBtn").attr("disabled", "disabled");
+                                $("#delLocalAnnBtn").attr("disabled", "disabled");
+                                $("#localAnnCount").removeClass("bg-danger");
+                                $("#remoteAnnCount").removeClass("bg-danger");
+                            } else {
+                                $("#delLocalAnnBtn").attr("disabled", "disabled");
+                                if (localCount === 0) {
+                                    $("#importRemoteAnnBtn").removeAttr("disabled");
+                                } else {
+                                    $("#importRemoteAnnBtn").attr("disabled", "disabled");
+                                    if (remoteCount !== 0) {
+                                        $("#delLocalAnnBtn").removeAttr("disabled");
+                                        $("#localAnnCount").addClass("bg-danger");
+                                        $("#remoteAnnCount").addClass("bg-danger");
+                                    }
+                                }
+                            }
+                        } else {
+                            // $("#maskLayer").modal('show');
+                            // $('#maskLayer').modal({backdrop: 'static', keyboard: false});
+                            alert("查询失败，原因如下：\n" + resp.message);
+                        }
+                    },
+                    complete: function () {
+                        submitQueryLoading.stop();
+                    }
+                });
+            }
+        }
+
+        // 导入官网公告
+        function importRemoteAnn() {
+            $("#submitQueryBtn").attr("disabled", "disabled");
+            importAnnLoading.start();
+            $.ajax({
+                type: "POST",
+                url: "/ann/importAnns",
+                data: $("#annImportForm").serializeArray(),
+                success: function (resp) {
+                    if (resp.status === "S") {
+                        $("#localAnnCount").val(resp.result);
+                        notify("提示 - TMSpider", "第" + $("input[name='annNum']").val() + "期公告导入成功！");
+                        importAnnLoading.disable();
+                    } else {
+                        notify("警告 - TMSpider", "第" + $("input[name='annNum']").val() + "期公告导入失败，请重试！");
+                    }
+                },
+                complete: function () {
+                    $("#submitQueryBtn").removeAttr("disabled");
+                    importAnnLoading.stop();
+                }
+            });
+        }
+
+        // 清除本地公告（与官网数量不一致，需要重新导入）
+        function delLocalAnnByAnnNum() {
+            $("#submitQueryBtn").attr("disabled", "disabled");
+            delLocalLoading.start();
+            $.ajax({
+                type: "POST",
+                url: "/ann/deleteByAnnNum",
+                data: $("#annImportForm").serializeArray(),
+                success: function (resp) {
+                    if (resp.status === "S") {
+                        notify("提示 - TMSpider", "第" + $("input[name='annNum']").val() + "期公告删除成功！");
+                        $("#localAnnCount").val(0);
+                        $("#localAnnCount").removeClass("bg-danger");
+                        $("#remoteAnnCount").removeClass("bg-danger");
+                        $("#importRemoteAnnBtn").removeAttr("disabled");
+                        delLocalLoading.disable();
+                    } else {
+                        notify("警告 - TMSpider", "第" + $("input[name='annNum']").val() + "期公告删除失败，请重试！");
+                    }
+                },
+                complete: function () {
+                    $("#submitQueryBtn").removeAttr("disabled");
+                    delLocalLoading.stop();
+                }
+            });
+        }
+
+        // 处理本地表格
+        function optExcel() {
+            if (confirm("即将开始处理，请误打开待处理的表格！\n是否继续？")) {
+                optExcelLoading.start();
+                $.ajax({
+                    type: "GET",
+                    url: "/ann/optExcel",
+                    success: function (resp) {
+                        if (resp.status === "S") {
+                            var fileNames = "";
+                            for (var i = 0; i < resp.resultList.length; i++) {
+                                fileNames += (i + 1) + ".  " + resp.resultList[i] + "\n";
+                            }
+                            notify("提示 - TMSpider", "已成功处理以下文档：\n" + fileNames);
+                        } else {
+                            notify("警告 - TMSpider", "表格处理失败！原因如下：\n" + resp.message);
+                        }
+                    },
+                    complete: function () {
+                        optExcelLoading.stop();
+                    }
+                });
+            }
+        }
+
+        // 通知方法
+        function notify(title, body) {
+            if (Notification.permission === "granted") {
+                var notification = new Notification(title, {
+                    icon: "asset/icon/azure_log.png",
+                    body: body,
+                    tag: 0,
+                    renotify: false
+                });
+                notification.onclick = function () {
+                    window.focus();
+                    notification.close();
+                };
+            } else {
+
+            }
+        }
+    </script>
 </head>
-<body>
-<div class="container">
-    <h3>首页 - TMSpider</h3>
-    <hr/>
-    <a href="html/ann/annOpt.html">初审数据处理</a>
-    <br><br>
-    <a href="html/reject/rejectOpt.html">驳回数据处理</a>
-    <br><br>
-    <a href="html/test.html">测试页面</a>
-</div>
+<body data-spy="scroll" data-target="#navbar1" data-offset="60">
+<header class="bg-primary">
+    <div class="container h-100">
+        <div class="row h-100">
+            <div class="col-12">
+                <div class="text-center m-0 vh-100 d-flex flex-column justify-content-center text-light">
+                    <h1 class="display-4">TMSpider</h1>
+                    <p class="lead">Private spider application for Azure Intellectual Property Inc.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+<nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary" id="navbar1">
+    <div class="container">
+        <a class="navbar-brand mr-1 mb-1 mt-0" href="#">TMSpider</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsingNavbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="navbar-collapse collapse justify-content-center" id="collapsingNavbar">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="annNav" data-toggle="dropdown" aria-haspopup="true"
+                       aria-expanded="false">
+                        初审数据处理
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="annNav">
+                        <a class="dropdown-item px-2" href="#annQuery">初审公告查询</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item px-2" href="#excelOpt">表格处理</a>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="rejectNav" data-toggle="dropdown"
+                       aria-haspopup="true" aria-expanded="false">
+                        驳回数据处理
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="rejectNav">
+                        <a class="dropdown-item px-2" href="#more"></a>
+                        <a class="dropdown-item px-2" href="#more">待开发</a>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#cards">测试单元</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<main>
+    <section class="container pb-5" style="margin-top: 40px;">
+        <div id="annQuery"></div>
+        <h4>初审数据处理</h4>
+        <hr/>
+        <div class="d-flex">
+            <div class="jumbotron w-100 py-2 mx-auto">
+                <h5>初审公告查询、导入</h5>
+                <span class="text-muted" style="font-size: smaller;">
+                    1、页面载入后自动查询本地最新公告期号，确定本次所需查询的期号；<br>
+                    2、查询往期公告时，如果出现本地公告数量与官网公告数量不一致的情况，需要清除本地公告并重新导入；<br>
+                    3、仅在本地公告数量为0时，才可导入官网公告数据。
+                </span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <form id="annImportForm" role="form">
+                    <!-- 隐藏参数：页码、每页数据量 -->
+                    <label><input name="page" type="number" value="1" style="display: none"/></label>
+                    <label><input name="rows" type="number" value="20000" style="display: none"/></label>
+                    <div class="form-group row">
+                        <label class="col-md-2 col-form-label text-muted text-right">公告期号</label>
+                        <div class="col-md-4">
+                            <input name="annNum" class="form-control" type="number" placeholder="请输入公告期号...">
+                            <div id="annNumCheck" class="invalid-feedback">公告期号是必要条件！</div>
+                        </div>
+                        <label id="localLatestAnnInfo" class="col-md-6 col-form-label text-success text-right"></label>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-md-2 col-form-label text-muted text-right">本地公告数量</label>
+                        <div class="col-md-4">
+                            <input id="localAnnCount" title="本地公告数量" class="form-control" type="number" disabled>
+                        </div>
+                        <label class="col-md-2 col-form-label text-muted text-right">官网公告数量</label>
+                        <div class="col-md-4">
+                            <input id="remoteAnnCount" title="官网公告数量" class="form-control" type="number" disabled>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-md-2 col-form-label text-muted text-right">公告类型</label>
+                        <div class="col-md-4">
+                            <select name="annType" title="公告类型" class="form-control">
+                                <option value="TMZCSQ" selected>商标初审公告</option>
+                                <!--<option label="无效选项" value="XXXXXX"></option>-->
+                            </select>
+                        </div>
+                        <div class="col-md-6"></div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-md-2 col-form-label text-muted text-right">开始时间</label>
+                        <div class="col-md-4">
+                            <input name="appDateBegin" title="开始时间" class="form-control" type="date" disabled
+                                   value="2111-11-11">
+                        </div>
+                        <label class="col-md-2 col-form-label text-muted text-right">结束时间</label>
+                        <div class="col-md-4">
+                            <input name="appDateEnd" title="结束时间" class="form-control" type="date" disabled
+                                   value="2111-11-11">
+                        </div>
+                    </div>
+                    <hr/>
+                    <div class="form-group row">
+                        <label class="col-md-2 col-form-label form-control-label"></label>
+                        <div class="col-md-2">
+                            <button type="reset" class="btn btn-outline-secondary" disabled>重置条件</button>
+                        </div>
+                        <div class="col-md-2">
+                            <button id="submitQueryBtn" type="button" class="btn btn-primary ladda-button"
+                                    data-style="zoom-out"
+                                    onclick="submitAnnForm()">
+                                <span class="ladda-label">提交查询</span><span class="ladda-spinner"></span>
+                            </button>
+                        </div>
+                        <div class="col-md-3">
+                            <button id="importRemoteAnnBtn" type="button" class="btn btn-secondary ladda-button"
+                                    data-style="zoom-out"
+                                    onclick="importRemoteAnn()" disabled>
+                                <span class="ladda-label">导入官网公告</span><span class="ladda-spinner"></span>
+                            </button>
+                        </div>
+                        <div class="col-md-3">
+                            <button id="delLocalAnnBtn" type="button" class="btn btn-danger  ladda-button"
+                                    data-style="zoom-out"
+                                    onclick="delLocalAnnByAnnNum()" disabled>
+                                <span class="ladda-label">清除本地冲突公告</span><span class="ladda-spinner"></span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div id="excelOpt"></div>
+        <div class="d-flex" style="margin-top: 80px;">
+            <div class="jumbotron w-100 py-2 mx-auto">
+                <h5>本地表格处理</h5>
+                <span class="text-muted" style="font-size: smaller;">
+                    1、在导入完官网公告（前面的步骤）后再进行表格处理；<br>
+                    1、请先将待处理文档移动至指定源目录（D:\TMSpider\src）下；<br>
+                    2、处理完成后，新生成的文档位于指定目标目录（D:\TMSpider\tar）下。
+                </span>
+            </div>
+        </div>
+        <div class="row">
+            <label class="col-md-2 col-form-label text-muted text-right">开始处理：</label>
+            <div class="col-md-4">
+                <button id="optExcelBtn" type="button" class="btn btn-primary ladda-button" data-style="zoom-out"
+                        onclick="optExcel()">
+                    <span class="ladda-label">处理表格</span><span class="ladda-spinner"></span>
+                </button>
+            </div>
+        </div>
+    </section>
+    <section class="container pb-5" style="margin-top: 40px;">
+        <form id="mainForm" name="mainForm" action="" method="post">
+            <input type="hidden" id="orderBy" name="orderBy" value="SQR"/>
+            <input type="hidden" id="order" name="order" value="ASC"/>
+            <input type="hidden" id="pageNo" name="pageNo" value="1"/>
+            <input type="hidden" id="d" name="d" value="1"/>
+            <input type="hidden" id="l" name="l" value=""/>
+            <input type="hidden" id="lczt" name="lczt" value=""/>
+            <input type="hidden" id="gjfl" name="gjfl" value=""/>
+            <input type="hidden" id="qzhs" name="qzhs" value=""/>
+            <input type="hidden" id="csggqhStart" name="csggqhStart" value=""/>
+            <input type="hidden" id="csggqhEnd" name="csggqhEnd" value=""/>
+            <input type="hidden" id="zcggqhStart" name="zcggqhStart" value=""/>
+            <input type="hidden" id="zcggqhEnd" name="zcggqhEnd" value=""/>
+            <input type="hidden" id="csggrqStart" name="csggrqStart" value=""/>
+            <input type="hidden" id="csggrqEnd" name="csggrqEnd" value=""/>
+            <input type="hidden" id="zcggrqStart" name="zcggrqStart" value=""/>
+            <input type="hidden" id="zcggrqEnd" name="zcggrqEnd" value=""/>
+            <input type="hidden" id="sqrqStart" name="sqrqStart" value="20180801"/>
+            <input type="hidden" id="sqrqEnd" name="sqrqEnd" value="20180831"/>
+            <input type="hidden" id="sqrmcZw" name="sqrmcZw" value=""/>
+            <input type="hidden" id="dlrmc" name="dlrmc" value=""/>
+            <input type="hidden" id="sqrdzZw" name="sqrdzZw" value="台湾"/>
+        </form>
+    </section>
+    <div class="modal fade" id="maskLayer" role="dialog" aria-labelledby="maskTitle" aria-hidden="true"
+         data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 id="maskTitle" class="modal-title">
+                    </h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                </div>
+                <div id="maskContent" class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <button id="refuseBtn" type="button" class="btn btn-default" data-dismiss="modal">取消
+                    </button>
+                    <button id="allowBtn" type="button" class="btn btn-primary">确认</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<footer id="footer" class="bg-dark text-light py-5">
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-6 col-md-6 col-lg-3 mb-2">
+                <h6 class="text-uppercase">Tools</h6>
+                <ul class="nav flex-column">
+                    <li><a class="text-white" target="ext" rel="nofollow" href="https://themestr.app"
+                           title="Bootstrap theme builder">Themestr.app</a></li>
+                    <li><a class="text-white" target="ext" rel="nofollow" href="http://themes.guide"
+                           title="Bootstrap free and pro themes">Themes.guide</a></li>
+                    <li><a class="text-white" target="ext" rel="nofollow" href="http://codeply.com"
+                           title="Prototype and edit code for Bootstrap and other responsive frameworks">Codeply</a>
+                    </li>
+                    <li><a class="text-white" target="ext" rel="nofollow" href="http://bootply.com">Bootply</a></li>
+                </ul>
+            </div>
+            <div class="col-6 col-md-6 col-lg-3 mb-2">
+                <h6 class="text-uppercase">More</h6>
+                <ul class="nav flex-column">
+                    <li><a class="text-white" target="_new" href="http://wdstack.com"
+                           title="The top projects, tools and apps for Web developers">WDStack</a></li>
+                    <li><a class="text-white" target="_new" href="http://theme.cards">Theme.cards</a></li>
+                    <li><a class="text-white" target="_new" href="http://www.bootbundle.com">BootBundle</a></li>
+                    <li><a class="text-white" target="_new" title="Learn about Bootstrap 4 using this free theme"
+                           href="http://bootstrap4.guide">Bootstrap4.guide</a></li>
+                </ul>
+            </div>
+            <div class="col-12 col-md-12 col-lg-6 mb-2 text-right">
+                <h6 class="text-uppercase">Follow</h6>
+                <ul class="nav float-right">
+                    <li><a class="text-white mr-2" rel="nofollow" href="http://twitter.com/ThemesGuide"
+                           title="Follow on Twitter"><i class="h1 fa fa-fw fa-twitter fa-2x ion-logo-twitter"></i></a>
+                    </li>
+                    <li><a class="text-white mr-2" rel="nofollow" href="https://www.facebook.com/codeply"
+                           title="Follow on Facebook"><i
+                            class="h1 fa fa-fw fa-facebook fa-2x ion-logo-facebook"></i></a></li>
+                    <li><a class="text-white mr" rel="nofollow" href="https://github.com/ThemesGuide/bootstrap-themes"
+                           title="Follow on GitHub"><i class="h1 fa fa-fw fa-facebook fa-2x ion-logo-github"></i></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <!--/row-->
+    </div>
+</footer>
 </body>
 </html>
