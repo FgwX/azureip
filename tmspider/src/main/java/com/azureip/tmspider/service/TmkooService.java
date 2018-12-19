@@ -111,8 +111,7 @@ public class TmkooService {
             while (true) {
                 if (threadCount.get() < 8) {
                     // 获取Spring管理的代理对象，而非TmkooService本身，以开启多线程调用
-                    TmkooService tmkooServiceProxy = SpringUtils.getBean(TmkooService.class);
-                    tmkooServiceProxy.getDetailByPage(client, listPage, pageNo);
+                    SpringUtils.getBean(TmkooService.class).getDetailByPage(client, listPage, pageNo);
                     break;
                 }
             }
