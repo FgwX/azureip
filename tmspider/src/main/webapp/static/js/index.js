@@ -15,6 +15,30 @@ $(function () {
     importAnnLoading = Ladda.create(document.getElementById("importRemoteAnnBtn"));
     delLocalLoading = Ladda.create(document.getElementById("delLocalAnnBtn"));
     optExcelLoading = Ladda.create(document.getElementById("optExcelBtn"));
+
+    $("#sqrqStart").daterangepicker({
+
+            singleDatePicker: true,
+            showDropdowns: true,
+            autoUpdateInput: true,
+            // timePicker24Hour: true,
+            timePicker: false,
+            "locale": {
+                format: 'YYYYMMDD',
+                applyLabel: "应用",
+                cancelLabel: "取消",
+                resetLabel: "重置",
+            }
+        },
+        function (start, end, label) {
+            // beginTimeTake = start;
+            // if (!this.startDate) {
+            //     this.element.val('');
+            // } else {
+            //     this.element.val(this.startDate.format(this.locale.format));
+            // }
+        }
+    );
 });
 
 //查询本地公告中最新一期的公告期号

@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="http://azure-ip.com/favicon.ico">
     <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.1.3/css/bootstrap.min.css">
-    大d
     <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/3.0.0/css/ionicons.min.css">-->
     <!--<link rel="stylesheet" href="https://cdn.staticfile.org/Ladda/1.0.6/ladda-themeless.min.css">-->
     <link rel="stylesheet" href="https://cdn.staticfile.org/Ladda/1.0.6/ladda.min.css">
@@ -234,15 +233,16 @@
                     <input type="hidden" id="csggrqEnd" name="csggrqEnd" value=""/>
                     <input type="hidden" id="zcggrqStart" name="zcggrqStart" value=""/>
                     <input type="hidden" id="zcggrqEnd" name="zcggrqEnd" value=""/>
-                    <input type="hidden" id="sqrqStart" name="sqrqStart" value="20180801"/>
+                    <!--<input type="hidden" id="sqrqStart" name="sqrqStart" value="20180801"/>-->
                     <input type="hidden" id="sqrqEnd" name="sqrqEnd" value="20180831"/>
                     <input type="hidden" id="sqrmcZw" name="sqrmcZw" value=""/>
                     <input type="hidden" id="dlrmc" name="dlrmc" value=""/>
                     <input type="hidden" id="sqrdzZw" name="sqrdzZw" value="台湾"/>
                     <div class="form-group row">
-                        <label class="col-md-2 col-form-label text-muted text-right">公告期号</label>
+                        <label class="col-md-2 col-form-label text-muted text-right">日期范围</label>
                         <div class="col-md-4">
-                            <input name="annNum" class="form-control" type="number" placeholder="请输入公告期号...">
+                            <input type="text" id="sqrqStart" name="sqrqStart" class="form-control" title="申请日期范围">
+                            <input name="sqrqEnd" class="form-control" type="number">
                             <div id="tmkooCheck" class="invalid-feedback">公告期号是必要条件！</div>
                         </div>
                         <label id="1" class="col-md-6 col-form-label text-success text-right"></label>
