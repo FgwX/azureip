@@ -3,6 +3,7 @@ package com.azureip.tmspider.controller;
 import com.azureip.tmspider.util.SpringUtils;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -16,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Controller
@@ -26,6 +26,8 @@ public class SeleniumController {
     private static String searchWinTitle = "商标状态检索";
     private static String resultWinTitle = "商标检索结果";
     private static String detailWinTitle = "商标详细内容";
+    private static String rejectionMark = "驳回通知发文";
+
     private static AtomicBoolean isOperating = new AtomicBoolean(true);
 
     @GetMapping("test")
@@ -110,8 +112,7 @@ public class SeleniumController {
         String chromeBinDir = "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe";
         String firefoxDriverDir = "D:\\Project\\IDEA\\azureip\\tmspider\\src\\main\\resources\\drivers\\geckodriver.exe";
         String firefoxBinDir = "C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe";
-        String userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)" +
-                " Chrome/70.0.3538.110 Safari/537.36";
+        String userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36";
 
         // 设置系统属性
         // System.setProperty("webdriver.chrome.driver", chromeDriverDir);
@@ -132,65 +133,129 @@ public class SeleniumController {
 
         // 设置等待方式及时间
         // driver.manage().window().setSize(new Dimension(1200, 700));
-        driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+        // driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
         // driver.manage().timeouts().pageLoadTimeout(15, TimeUnit.SECONDS);
         // driver.manage().timeouts().setScriptTimeout(10, TimeUnit.SECONDS);
-        Actions action = new Actions(driver);
+        // Actions action = new Actions(driver);
 
-        // 打开检索系统主页
         driver.get("http://wsjs.saic.gov.cn");
-        // 选择商标状态查询
-        driver.findElementByCssSelector("body > div.centent > div.left_side > ul > li:nth-child(3) > table").click();
+        WebElement statusQueryEle = null;
+        while (statusQueryEle == null) {
+            // 打开检索系统主页
+            try {
+                WebDriverWait wait = new WebDriverWait(driver, 5, 500);
+                statusQueryEle = wait.until(new ExpectedCondition<WebElement>() {
+                    @Override
+                    public WebElement apply(WebDriver driver) {
+                        // 选择商标状态查询
+                        return ((FirefoxDriver) driver).findElementByCssSelector("body > div.centent > div.left_side > ul > li:nth-child(3) > table");
+                    }
+                });
+            } catch (TimeoutException e) {
+                System.out.println("====> redo getting...");
+                driver.get("http://wsjs.saic.gov.cn");
+            }
+        }
+        statusQueryEle.click();
 
         String regNums = "31347083,31348939,31347548";
-        action.moveByOffset(1024, 0);
+        // final WebElement rejectEle = queryRejectionWithFxDriver(driver, "31347083");
+
         driver.findElementByCssSelector("#submitForm>div>div.searchbox>table>tbody>tr>td:nth-child(2)>div>input").sendKeys(regNums.split(",")[1]);
-        action.moveByOffset(1024, 512);
         driver.findElementById("_searchButton").submit();
         switchWindows(driver, resultWinTitle);
-        // wait.until(ExpectedConditions.textToBe(By.xpath("//*[@id='list_box']/table/tbody/tr[2]/td[2]/a"),"31348939"));
         WebElement linkElement = null;
         while (linkElement == null) {
             try {
-                WebDriverWait wait = new WebDriverWait(driver, 10, 2000);
-                // 每隔200毫秒去调用一下until中的函数，默认是0.5秒，如果等待3秒还没有找到元素，则抛出异常。
+                WebDriverWait wait = new WebDriverWait(driver, 5, 500);
+                // 每隔500毫秒去调用一下until中的函数，如果等待5秒还没有找到元素，则抛出异常。
                 linkElement = wait.until(new ExpectedCondition<WebElement>() {
-                    @NullableDecl
                     @Override
-                    public WebElement apply(@NullableDecl WebDriver webDriver) {
+                    public WebElement apply(WebDriver webDriver) {
                         System.out.println("====> applying...");
-                        WebElement element = webDriver.findElement(By.xpath("//*[@id='list_box']/table/tbody/tr[2]/td[2]"));
-                        if (element != null && "31348939".equals(element.findElement(By.tagName("a")).getText())) {
-                            System.out.println("====> apply success");
-                            return element;
-                        } else {
-                            System.out.println("====> apply failed");
-                            return null;
-                        }
+                        return webDriver.findElement(By.xpath("//*[@id='list_box']/table/tbody/tr[2]/td[2]"));
                     }
                 });
-            } catch (Exception e) {
+            } catch (TimeoutException e) {
+                switchWindows(driver, searchWinTitle);
+                System.out.println("====> redo searchWin submit...");
+                driver.findElementById("_searchButton").submit();
+                switchWindows(driver, resultWinTitle);
+            }
+        }
+        linkElement.click();
+        switchWindows(driver, detailWinTitle);
 
+        List<WebElement> regFlows = null;
+        try {
+            WebDriverWait wait = new WebDriverWait(driver, 5, 500);
+            regFlows = wait.until(new ExpectedCondition<List<WebElement>>() {
+                @Override
+                public List<WebElement> apply(WebDriver driver) {
+                    return ((FirefoxDriver) driver).findElementsByCssSelector("body>div.xqboxx>div>ul>li");
+                }
+            });
+        } catch (TimeoutException e) {
+            switchWindows(driver, resultWinTitle);
+            System.out.println("====> redo resultWin click...");
+            linkElement.click();
+            switchWindows(driver, detailWinTitle);
+        }
+
+        for (WebElement flow : regFlows) {
+            WebElement element = flow.findElement(By.cssSelector("table>tbody>tr>td:nth-child(3)>span"));
+            System.out.println(element.getText());
+        }
+
+    }
+
+    // 使用FirefoxDriver通过注册号查询驳回信息
+    private static WebElement queryRejectionWithFxDriver(FirefoxDriver driver, String regNum) {
+        // 切换到查询页，输入注册号，进行查询
+        switchWindows(driver, searchWinTitle);
+        driver.findElementByCssSelector("#submitForm>div>div.searchbox>table>tbody>tr>td:nth-child(2)>div>input").sendKeys(regNum);
+        driver.findElementById("_searchButton").submit();
+
+        // 切换到结果页，等待结果加载完成后，点击详情页链接
+        switchWindows(driver, resultWinTitle);
+        WebElement linkElement = null;
+        while (linkElement == null) {
+            try {
+                WebDriverWait wait = new WebDriverWait(driver, 5, 500);
+                // 每隔500毫秒去调用一下until中的函数，默认是0.5秒，如果等待3秒还没有找到元素，则抛出异常。
+                linkElement = wait.until(new ExpectedCondition<WebElement>() {
+                    @Override
+                    public WebElement apply(WebDriver webDriver) {
+                        System.out.println("====> applying...");
+                        return webDriver.findElement(By.xpath("//*[@id='list_box']/table/tbody/tr[2]/td[2]"));
+                    }
+                });
+            } catch (TimeoutException e) {
                 switchWindows(driver, searchWinTitle);
                 System.out.println("====> redo submit...");
                 driver.findElementById("_searchButton").submit();
                 switchWindows(driver, resultWinTitle);
             }
         }
-        // driver.findElementByXPath("//*[@id='list_box']/table/tbody/tr[2]/td[2]").click();
-        // wait(5000);
         linkElement.click();
-        // action.moveByOffset(0, 0);
+
+        // 切换到详情页，判断是否驳回
         switchWindows(driver, detailWinTitle);
         List<WebElement> regFlows = driver.findElementsByCssSelector("body>div.xqboxx>div>ul>li");
-        // action.moveByOffset(1024, 0);
+        WebElement rejectFlow = null;
         for (WebElement flow : regFlows) {
-            // action.moveByOffset(1024, 512);
             WebElement element = flow.findElement(By.cssSelector("table>tbody>tr>td:nth-child(3)>span"));
-            System.out.println(element.getText());
+            System.out.println();
+            if (rejectionMark.equals(element.getText())) {
+                rejectFlow = element;
+            }
         }
-        // action.moveByOffset(1024, 0);
+        return rejectFlow;
+    }
 
+    // 等待方法
+    private static WebElement waitAndGet(FirefoxDriver driver, String xpath){
+        return null;
     }
 
     private static WebElement isAppear(WebDriver driver, String xPath, String conString) {
