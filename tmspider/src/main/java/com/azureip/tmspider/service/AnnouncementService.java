@@ -83,10 +83,11 @@ public class AnnouncementService {
         CloseableHttpClient client = HttpClients.createDefault();
         RequestConfig config = RequestConfig.custom().setConnectionRequestTimeout(2000).setConnectTimeout(3000).setSocketTimeout(30000).build();
         StringBuilder countUrl = new StringBuilder("http://sbgg.saic.gov.cn:9080/tmann/annInfoView/annSearchDG.html");
-        countUrl.append("?page=1&rows=1").append("&annNum=").append(pojo.getAnnNum()).append("&annType=").append(pojo.getAnnType()).append("&totalYOrN=true");
+        countUrl.append("?page=1&rows=0").append("&annNum=").append(pojo.getAnnNum()).append("&annType=").append(pojo.getAnnType()).append("&totalYOrN=true");
         if (!StringUtils.isEmpty(pojo.getAppDateBegin()) && !StringUtils.isEmpty(pojo.getAppDateEnd())) {
             countUrl.append("&appDateBegin=").append(pojo.getAppDateBegin()).append("&appDateEnd=").append(pojo.getAppDateEnd());
         }
+        countUrl.append("&agentName=");
         System.out.println("总量查询URL：" + countUrl.toString());
         HttpPost countPost = new HttpPost(countUrl.toString());
         countPost.setHeader("User-Agent", AGENT);
@@ -108,11 +109,12 @@ public class AnnouncementService {
         RequestConfig config = RequestConfig.custom().setConnectionRequestTimeout(3000).setConnectTimeout(3000).setSocketTimeout(30000).build();
         if (queryPojo.getTotal() < 1) {
             StringBuilder countUrl = new StringBuilder("http://sbgg.saic.gov.cn:9080/tmann/annInfoView/annSearchDG.html");
-            countUrl.append("?page=1&rows=1").append("&annNum=").append(queryPojo.getAnnNum()).append("&annType=").append(queryPojo.getAnnType())
+            countUrl.append("?page=1&rows=0").append("&annNum=").append(queryPojo.getAnnNum()).append("&annType=").append(queryPojo.getAnnType())
                     .append("&totalYOrN=true");
             if (!StringUtils.isEmpty(queryPojo.getAppDateBegin()) && !StringUtils.isEmpty(queryPojo.getAppDateEnd())) {
                 countUrl.append("&appDateBegin=").append(queryPojo.getAppDateBegin()).append("&appDateEnd=").append(queryPojo.getAppDateEnd());
             }
+            countUrl.append("&agentName=");
             System.out.println("总量查询URL：" + countUrl.toString());
             HttpPost countPost = new HttpPost(countUrl.toString());
             countPost.setHeader("User-Agent", AGENT);
@@ -130,6 +132,7 @@ public class AnnouncementService {
             if (!StringUtils.isEmpty(queryPojo.getAppDateBegin()) && !StringUtils.isEmpty(queryPojo.getAppDateEnd())) {
                 listUrl.append("&appDateBegin=").append(queryPojo.getAppDateBegin()).append("&appDateEnd=").append(queryPojo.getAppDateEnd());
             }
+            listUrl.append("&agentName=");
             String prefix = "[第" + (i + 1) + "次请求]";
             System.out.println(prefix + "URL: " + listUrl.toString());
             HttpPost post = new HttpPost(listUrl.toString());
@@ -185,9 +188,9 @@ public class AnnouncementService {
             int existCount = 0, markCount = 0, dotCount = 0;
             for (int j = 1; j < sheet.getLastRowNum(); j++) {
                 XSSFRow row = sheet.getRow(j);
-                XSSFCell regNumCell = row.getCell(1);
+                XSSFCell regNumCell = row.getCell(0);
                 if (null != regNumCell && !StringUtils.isEmpty(regNumCell.getStringCellValue())) {
-                    XSSFCell annStatCell = row.getCell(6);
+                    XSSFCell annStatCell = row.getCell(7);
                     if (null != annStatCell && FIRST_TRIAL_ANN.equals(annStatCell.getStringCellValue())) {
                         // 已标记过初审公告状态
                         System.out.print(":");
@@ -196,7 +199,7 @@ public class AnnouncementService {
                         String regNum = regNumCell.getStringCellValue();
                         int annCount = getCountByRegNum(regNum);
                         if (annCount > 0) {
-                            row.createCell(6).setCellValue(FIRST_TRIAL_ANN);
+                            row.createCell(7).setCellValue(FIRST_TRIAL_ANN);
                             markCount++;
                             System.out.print("!");
                         } else {
