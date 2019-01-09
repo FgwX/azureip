@@ -1,0 +1,58 @@
+Configuration:
+  # 设置log4j2的自身log级别为WARN（优先级：OFF>FATAL>ERROR>WARN>INFO>DEBUG>TRACE>ALL）
+  status: WARN
+  # 每隔10秒（最小5秒）检查配置文件是否修改，并自动重新配置
+  monitorInterval: 10
+####################################################################################################
+  # 定义全局变量
+  Properties:
+    # 缺省参数配置，其他环境需要在VM参数中指定，如下：
+    Property:
+      - name: log.level.console
+        value: info
+      - name: log.level.file
+        value: warn
+      - name: log.path
+        value: D:/TMSpider/logs
+      - name: project.name
+        value: azureip
+####################################################################################################
+  Appenders:
+    # 控制台输出配置
+    Console:
+      name: CONSOLE
+      target: SYSTEM_OUT
+      ThresholdFilter:
+        # “sys:”表示：如果VM参数中没指定这个变量值，则使用本文件中定义的缺省全局变量值
+        level: ${sys:log.level.console}
+        onMatch: ACCEPT
+        onMismatch: DENY
+      PatternLayout:
+        pattern: "%d{yyyy-MM-dd HH:mm:ss,SSS}:%4p %t (%F:%L) - %m%n"
+    RollingFile: # 输出到文件，超过128MB归档
+      - name: ROLLING_FILE
+        ignoreExceptions: false
+        fileName: ${log.path}/${project.name}.log
+        filePattern: "${log.path}/$${date:yyyy-MM}/${project.name}-%d{yyyy-MM-dd}-%i.log.gz"
+        PatternLayout:
+          pattern: "%d{yyyy-MM-dd HH:mm:ss,SSS}:%4p %t (%F:%L) - %m%n"
+        Policies:
+          SizeBasedTriggeringPolicy:
+            size: "128 MB"
+        DefaultRolloverStrategy:
+          max: 1000
+####################################################################################################
+  Loggers:
+    Root:
+      level: info
+      AppenderRef:
+        - ref: CONSOLE
+        - ref: ROLLING_FILE
+    Logger: # 为com.xjj包配置特殊的Log级别，方便调试
+      - name: com.azureip
+        additivity: false
+        level: ${sys:log.level.file}
+        AppenderRef:
+          - ref: CONSOLE
+          - ref: ROLLING_FILE
+####################################################################################################

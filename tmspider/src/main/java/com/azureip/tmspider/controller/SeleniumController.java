@@ -110,33 +110,6 @@ public class SeleniumController {
         regNums.add("32612659");
         regNums.add("32613004");
         regNums.add("32613005");
-        regNums.add("32613229");
-        regNums.add("32613230");
-        regNums.add("32613231");
-        regNums.add("32613232");
-        regNums.add("32613233");
-        regNums.add("32613234");
-        regNums.add("32613235");
-        regNums.add("32613236");
-        regNums.add("32613945");
-        regNums.add("32614778");
-        regNums.add("32614825");
-        regNums.add("32615059");
-        regNums.add("32615291");
-        regNums.add("32615339");
-        regNums.add("32616403");
-        regNums.add("32616561");
-        regNums.add("32617124");
-        regNums.add("32617144");
-        regNums.add("32617166");
-        regNums.add("32617575");
-        regNums.add("32617623");
-        regNums.add("32617658");
-        regNums.add("32617663");
-        regNums.add("32617671");
-        regNums.add("32618001");
-        regNums.add("32618454");
-
 
         String chromeDriverDir = "D:\\Project\\IDEA\\azureip\\tmspider\\src\\main\\resources\\drivers\\chromedriver.exe";
         String chromeBinDir = "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe";
@@ -384,7 +357,7 @@ public class SeleniumController {
     }
 
     // 切换到指定窗口
-    public static boolean switchWindows(WebDriver driver, String windowsTitle) {
+    private static boolean switchWindows(WebDriver driver, String windowsTitle) {
         //获取所有的窗口句柄
         Set<String> handles = driver.getWindowHandles();
         //获取当前窗口的句柄

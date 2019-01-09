@@ -4,6 +4,8 @@ import com.alibaba.druid.util.StringUtils;
 import com.azureip.tmspider.pojo.AnnQueryPojo;
 import com.azureip.tmspider.pojo.GlobalResponse;
 import com.azureip.tmspider.service.AnnouncementService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +21,8 @@ import java.util.List;
 @Controller
 @RequestMapping("ann")
 public class AnnouncementController {
+    // private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(AnnouncementController.class);
+    private static final Logger LOG = LogManager.getLogger(AnnouncementController.class);
 
     private final AnnouncementService announcementService;
 
@@ -73,6 +77,7 @@ public class AnnouncementController {
     @ResponseBody
     public GlobalResponse<Integer> queryAnnCount(AnnQueryPojo pojo) {
         System.out.println(pojo);
+        LOG.info("QueryPojo: " + pojo);
         GlobalResponse<Integer> response = new GlobalResponse<>();
         try {
             response.setStatus(GlobalResponse.SUCCESS);
