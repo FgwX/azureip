@@ -3,6 +3,7 @@ package com.azureip.tmspider.service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.common.usermodel.HyperlinkType;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.xssf.usermodel.*;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.openqa.selenium.*;
@@ -53,17 +54,16 @@ public class RegistrationService {
             String fileName = pendingFiles[i].getName();
             FileInputStream in = new FileInputStream(pendingFiles[i]);
             XSSFWorkbook workbook = new XSSFWorkbook(in);
-            XSSFCreationHelper creationHelper = workbook.getCreationHelper();
             XSSFSheet sheet = workbook.getSheetAt(0);
             in.close();
             LOG.info("[" + (i + 1) + "" + pendingFiles.length + "]开始处理《" + pendingFiles[i].getName() + "》，"
                     + "共计" + sheet.getLastRowNum() + "条数据");
             List<XSSFRow> rows = new ArrayList<>();
-            for (int j = 1; j < sheet.getLastRowNum(); j++) {
+            for (int j = 1; j <= sheet.getLastRowNum(); j++) {
                 rows.add(sheet.getRow(j));
             }
             try {
-                operation(fileName, rows, creationHelper);
+                operation(fileName, rows, workbook);
             } catch (Exception e) {
                 e.printStackTrace();
                 LOG.error("处理《" + fileName + "》时发生异常：" + e.getMessage());
@@ -80,7 +80,7 @@ public class RegistrationService {
     }
 
     // 操作查询表格注册数据，标记驳回并添加链接
-    private void operation(String fileName, List<XSSFRow> rows, XSSFCreationHelper creationHelper) {
+    private void operation(String fileName, List<XSSFRow> rows, XSSFWorkbook workbook) {
         WebDriver driver = initQueryPage();
 
         // 循环处理行
@@ -92,7 +92,7 @@ public class RegistrationService {
                 continue;
             }
             WebElement rejectDateEle = null;
-            rejectDateEle = queryRejectionData(driver, row, creationHelper);
+            rejectDateEle = queryRejectionData(driver, row, workbook);
             if (rejectDateEle != null) {
                 LOG.info(prefix + "的第" + (i + 1) + "行查询到驳回，日期为：" + rejectDateEle.getText());
             } else {
@@ -152,7 +152,7 @@ public class RegistrationService {
     }
 
     // 查询驳回信息并添加链接
-    private WebElement queryRejectionData(WebDriver driver, XSSFRow row, XSSFCreationHelper creationHelper) {
+    private WebElement queryRejectionData(WebDriver driver, XSSFRow row, XSSFWorkbook workbook) {
         String regNum = row.getCell(0).getStringCellValue();
         // 切换到查询页，输入注册号，进行查询
         switchWindows(driver, SEARCH_WIN);
@@ -224,10 +224,18 @@ public class RegistrationService {
             }
         }
 
+        XSSFCell tmNmeCell = row.getCell(4) != null ? row.getCell(4) : row.createCell(4);
         // 设置链接
+        XSSFCreationHelper creationHelper = workbook.getCreationHelper();
+        XSSFCellStyle linkStyle = workbook.createCellStyle();
+        XSSFFont linkFont = workbook.createFont();
+        linkFont.setUnderline((byte) 1);
+        linkFont.setColor(IndexedColors.BLUE.index);
+        linkStyle.setFont(linkFont);
         XSSFHyperlink hyperLink = creationHelper.createHyperlink(HyperlinkType.URL);
         hyperLink.setAddress(driver.getCurrentUrl());
-        row.getCell(4).setHyperlink(hyperLink);
+        tmNmeCell.setHyperlink(hyperLink);
+        tmNmeCell.setCellStyle(linkStyle);
         // 判断并记录驳回日期
         List<WebElement> regFlows = regFlowsEle.findElements(By.xpath("/html/body/div[@class='xqboxx']/div/ul/li"));
         WebElement rejectDate = null;
@@ -236,11 +244,14 @@ public class RegistrationService {
             if (REJECT_MARK.equals(element.getText())) {
                 // XSSFDataFormat dataFormat = creationHelper.createDataFormat();
                 rejectDate = flow.findElement(By.xpath("/html/body/div[@class='xqboxx']/div/ul/li/table/tbody/tr/td[5]"));
+                XSSFCell rejDateCell = row.getCell(6) != null ? row.getCell(6) : row.createCell(6);
                 try {
-                    row.getCell(6).setCellValue(dateFormat.parse(rejectDate.getText()));
+                    XSSFCellStyle dateStyle = workbook.createCellStyle();
+                    dateStyle.setDataFormat(creationHelper.createDataFormat().getFormat("yyyy-mm-dd"));
+                    rejDateCell.setCellValue(dateFormat.parse(rejectDate.getText()));
+                    rejDateCell.setCellStyle(dateStyle);
                 } catch (ParseException e) {
-                    LOG.error("日期转换异常！");
-                    row.getCell(6).setCellValue("转换异常");
+                    rejDateCell.setCellValue("日期转换异常");
                 }
             }
         }
