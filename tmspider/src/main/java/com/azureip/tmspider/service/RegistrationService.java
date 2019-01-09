@@ -2,14 +2,12 @@ package com.azureip.tmspider.service;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.common.usermodel.HyperlinkType;
+import org.apache.poi.xssf.usermodel.*;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.openqa.selenium.*;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
-import org.openqa.selenium.firefox.internal.ProfilesIni;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Service;
@@ -19,6 +17,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -37,28 +37,23 @@ public class RegistrationService {
     // private static final String USER_AGENT_IE = "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko";
     // private static final String FF_BIN_DIR = "C:/Program Files (x86)/Mozilla Firefox/firefox.exe";
     private static final String FF_DRIVER_DIR = "D:/Project/IDEA/azureip/tmspider/src/main/resources/drivers/geckodriver.exe";
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy年MM月dd日");
 
     public List<String> optRejections(File srcDir, File tarDir) throws IOException {
         LOG.info("开始查询驳回数据...");
         File[] pendingFiles = srcDir.listFiles();
         List<String> fileNames = new ArrayList<>();
 
-        // 初始化Selenium功能
+        // 初始化Selenium功能参数
         System.setProperty("webdriver.chrome.driver", CHROME_DRIVER_DIR);
-        // System.setProperty("webdriver.firefox.bin", FF_BIN_DIR);
         System.setProperty("webdriver.gecko.driver", FF_DRIVER_DIR);
-        // ChromeOptions options = new ChromeOptions();
-        // options.addArguments("user-data-dir=C:/Users/lewiszhang/AppData/Local/Google/Chrome/User Data");
-        // ChromeDriver driver = new ChromeDriver();
-        FirefoxOptions options = new FirefoxOptions();
-        // C:/Users/lewiszhang/AppData/Local/Mozilla/Firefox/Profiles
-        // options.setProfile(new ProfilesIni().getProfile("default"));
-        FirefoxDriver driver = new FirefoxDriver(options);
+        // System.setProperty("webdriver.firefox.bin", FF_BIN_DIR);
 
         for (int i = 0; i < (pendingFiles == null ? 0 : pendingFiles.length); i++) {
             String fileName = pendingFiles[i].getName();
             FileInputStream in = new FileInputStream(pendingFiles[i]);
             XSSFWorkbook workbook = new XSSFWorkbook(in);
+            XSSFCreationHelper creationHelper = workbook.getCreationHelper();
             XSSFSheet sheet = workbook.getSheetAt(0);
             in.close();
             LOG.info("[" + (i + 1) + "" + pendingFiles.length + "]开始处理《" + pendingFiles[i].getName() + "》，"
@@ -67,19 +62,52 @@ public class RegistrationService {
             for (int j = 1; j < sheet.getLastRowNum(); j++) {
                 rows.add(sheet.getRow(j));
             }
-            operation(driver, fileName, rows);
+            try {
+                operation(fileName, rows, creationHelper);
+            } catch (Exception e) {
+                e.printStackTrace();
+                LOG.error("处理《" + fileName + "》时发生异常：" + e.getMessage());
+            }
             // 输出目标文件
             FileOutputStream out = new FileOutputStream(tarDir + File.separator + fileName);
             workbook.write(out);
             out.close();
-            fileNames.add(pendingFiles[i].getName());
-            LOG.info("[" + (i + 1) + "" + pendingFiles.length + "]《" + pendingFiles[i].getName() + "》处理完成");
+            fileNames.add(fileName);
+            LOG.info("[" + (i + 1) + "" + pendingFiles.length + "]《" + fileName + "》处理完成");
         }
         LOG.info("驳回数据处理完成！");
         return fileNames;
     }
 
-    private void operation(WebDriver driver, String fileName, List<XSSFRow> rows) {
+    // 操作查询表格注册数据，标记驳回并添加链接
+    private void operation(String fileName, List<XSSFRow> rows, XSSFCreationHelper creationHelper) {
+        WebDriver driver = initQueryPage();
+
+        // 循环处理行
+        for (int i = 0; i < rows.size(); i++) {
+            String prefix = "[" + fileName + "]";
+            XSSFRow row = rows.get(i);
+            if (StringUtils.isEmpty(row.getCell(0).getStringCellValue())) {
+                LOG.warn(prefix + "的第" + (i + 1) + "行注册号为空！");
+                continue;
+            }
+            WebElement rejectDateEle = null;
+            rejectDateEle = queryRejectionData(driver, row, creationHelper);
+            if (rejectDateEle != null) {
+                LOG.info(prefix + "的第" + (i + 1) + "行查询到驳回，日期为：" + rejectDateEle.getText());
+            } else {
+                LOG.info(prefix + "的第" + (i + 1) + "行未查询到驳回");
+            }
+        }
+    }
+
+    // 初始化查询页面
+    private WebDriver initQueryPage() {
+        // Firefox用户文件夹：C:/Users/%USER%/AppData/Local/Mozilla/Firefox/Profiles
+        FirefoxOptions options = new FirefoxOptions();
+        // options.setProfile(new ProfilesIni().getProfile("default"));
+        FirefoxDriver driver = new FirefoxDriver(options);
+
         int retryTimes = 0;
         // 打开检索系统主页
         WebElement statusQueryEle = null;
@@ -87,7 +115,7 @@ public class RegistrationService {
             retryTimes++;
             driver.get("http://wsjs.saic.gov.cn");
             try {
-                statusQueryEle = new WebDriverWait(driver, 3, 500).until(new ExpectedCondition<WebElement>() {
+                statusQueryEle = new WebDriverWait(driver, 5, 500).until(new ExpectedCondition<WebElement>() {
                     @NullableDecl
                     @Override
                     public WebElement apply(@NullableDecl WebDriver driver) {
@@ -97,41 +125,35 @@ public class RegistrationService {
                 });
             } catch (TimeoutException e) {
                 LOG.error("重新打开[http://wsjs.saic.gov.cn]...");
-                driver.get("http://wsjs.saic.gov.cn");
+                // driver.get("http://wsjs.saic.gov.cn");
             }
             if (retryTimes >= 5) {
                 LOG.error("打开检索系统主页超时！");
-                return;
+                driver.quit();
+                return null;
             }
         }
         statusQueryEle.click();
-        // 等待页面加载完成
-        new WebDriverWait(driver, 10, 1000).until(new ExpectedCondition<WebElement>() {
-            @NullableDecl
-            @Override
-            public WebElement apply(@NullableDecl WebDriver driver) {
-                return driver.findElement(By.xpath("//*[@id='submitForm']//input[@name='request:sn']"));
-            }
-        });
-
-        for (int i = 0; i < rows.size(); i++) {
-            String prefix = "[" + fileName + "]";
-            String regNum = rows.get(i).getCell(0).getStringCellValue();
-            if (StringUtils.isEmpty(regNum)) {
-                LOG.warn(prefix + "的第" + (i + 1) + "行注册号为空！");
-                continue;
-            }
-            WebElement rejectDateEle = queryRejectDate(driver, regNum);
-            // String prefix = "[" + (i + 1) + "]" + rows.get(i) + ": ";
-            if (rejectDateEle != null) {
-                LOG.info(prefix + "的第" + (i + 1) + "行查询到驳回，日期为：" + rejectDateEle.getText());
-            } else {
-                LOG.info(prefix + "的第" + (i + 1) + "行未查询到驳回");
-            }
+        // 等待页面加载完成（通过查询按钮判断页面是否加载完成）
+        try {
+            new WebDriverWait(driver, 15, 500).until(new ExpectedCondition<WebElement>() {
+                @NullableDecl
+                @Override
+                public WebElement apply(@NullableDecl WebDriver driver) {
+                    return driver.findElement(By.id("_searchButton"));
+                }
+            });
+        } catch (TimeoutException e) {
+            LOG.error("跳转到“状态查询”超时！");
+            driver.quit();
+            return null;
         }
+        return driver;
     }
 
-    private WebElement queryRejectDate(WebDriver driver, String regNum) {
+    // 查询驳回信息并添加链接
+    private WebElement queryRejectionData(WebDriver driver, XSSFRow row, XSSFCreationHelper creationHelper) {
+        String regNum = row.getCell(0).getStringCellValue();
         // 切换到查询页，输入注册号，进行查询
         switchWindows(driver, SEARCH_WIN);
         WebElement inputBox = driver.findElement(By.xpath("//*[@id='submitForm']//input[@name='request:sn']"));
@@ -146,7 +168,7 @@ public class RegistrationService {
         while (resultEle == null) {
             try {
                 // 每隔500毫秒去调用一下until中的函数，默认是0.5秒，如果等待3秒还没有找到元素，则抛出异常。
-                resultEle = new WebDriverWait(driver, 3, 1000).until(new ExpectedCondition<WebElement>() {
+                resultEle = new WebDriverWait(driver, 3, 500).until(new ExpectedCondition<WebElement>() {
                     @NullableDecl
                     @Override
                     public WebElement apply(@NullableDecl WebDriver driver) {
@@ -176,7 +198,7 @@ public class RegistrationService {
         WebElement regFlowsEle = null;
         while (regFlowsEle == null) {
             try {
-                WebDriverWait wait = new WebDriverWait(driver, 3, 1000);
+                WebDriverWait wait = new WebDriverWait(driver, 3, 500);
                 regFlowsEle = wait.until(new ExpectedCondition<WebElement>() {
                     @NullableDecl
                     @Override
@@ -202,12 +224,24 @@ public class RegistrationService {
             }
         }
 
+        // 设置链接
+        XSSFHyperlink hyperLink = creationHelper.createHyperlink(HyperlinkType.URL);
+        hyperLink.setAddress(driver.getCurrentUrl());
+        row.getCell(4).setHyperlink(hyperLink);
+        // 判断并记录驳回日期
         List<WebElement> regFlows = regFlowsEle.findElements(By.xpath("/html/body/div[@class='xqboxx']/div/ul/li"));
         WebElement rejectDate = null;
         for (WebElement flow : regFlows) {
             WebElement element = flow.findElement(By.xpath("/html/body/div[@class='xqboxx']/div/ul/li/table/tbody/tr/td[3]/span"));
             if (REJECT_MARK.equals(element.getText())) {
+                // XSSFDataFormat dataFormat = creationHelper.createDataFormat();
                 rejectDate = flow.findElement(By.xpath("/html/body/div[@class='xqboxx']/div/ul/li/table/tbody/tr/td[5]"));
+                try {
+                    row.getCell(6).setCellValue(dateFormat.parse(rejectDate.getText()));
+                } catch (ParseException e) {
+                    LOG.error("日期转换异常！");
+                    row.getCell(6).setCellValue("转换异常");
+                }
             }
         }
         return rejectDate;

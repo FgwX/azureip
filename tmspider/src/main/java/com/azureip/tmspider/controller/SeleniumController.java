@@ -140,10 +140,16 @@ public class SeleniumController {
         // driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
         // driver.manage().timeouts().pageLoadTimeout(15, TimeUnit.SECONDS);
         // driver.manage().timeouts().setScriptTimeout(10, TimeUnit.SECONDS);
-        // Actions action = new Actions(driver);
-        int retryTimes = 0;
 
-        // 打开检索系统主页
+        driver.get("https://www.baidu.com");
+        wait(1000);
+        driver.quit();
+        // driver = null;
+        driver = new FirefoxDriver();
+        driver.get("https://www.baidu.com");
+
+        /*// 打开检索系统主页
+        int retryTimes = 0;
         WebElement statusQueryEle = null;
         while (statusQueryEle == null) {
             retryTimes++;
@@ -178,65 +184,6 @@ public class SeleniumController {
             }
         });
 
-        /*WebElement inputBox = null;
-        while (inputBox == null) {
-            try {
-                WebDriverWait wait = new WebDriverWait(driver, 10, 1000);
-                inputBox = wait.until(new ExpectedCondition<WebElement>() {
-                    @NullableDecl
-                    @Override
-                    public WebElement apply(@NullableDecl WebDriver webDriver) {
-                        return driver.findElementByCssSelector("#submitForm>div>div.searchbox>table>tbody>tr>td:nth-child(2)>div>input");
-                    }
-                });
-            } catch (TimeoutException e) {
-                e.printStackTrace();
-                return;
-            }
-        }
-
-        // 查询
-        inputBox.sendKeys(regNums.split(",")[1]);
-        driver.findElementById("_searchButton").submit();
-        switchWindows(driver, resultWinTitle);
-        WebElement linkElement = null;
-        while (linkElement == null) {
-            try {
-                WebDriverWait wait = new WebDriverWait(driver, 5, 500);
-                // 每隔500毫秒去调用一下until中的函数，如果等待5秒还没有找到元素，则抛出异常。
-                linkElement = wait.until(new ExpectedCondition<WebElement>() {
-                    @Override
-                    public WebElement apply(WebDriver webDriver) {
-                        System.out.println("====> applying...");
-                        return webDriver.findElement(By.xpath("//*[@id='list_box']/table/tbody/tr[2]/td[2]"));
-                    }
-                });
-            } catch (TimeoutException e) {
-                switchWindows(driver, searchWinTitle);
-                System.out.println("====> redo searchWin submit...");
-                driver.findElementById("_searchButton").submit();
-                switchWindows(driver, resultWinTitle);
-            }
-        }
-        linkElement.click();
-        switchWindows(driver, detailWinTitle);
-
-        List<WebElement> regFlows = null;
-        try {
-            WebDriverWait wait = new WebDriverWait(driver, 5, 500);
-            regFlows = wait.until(new ExpectedCondition<List<WebElement>>() {
-                @Override
-                public List<WebElement> apply(WebDriver driver) {
-                    return ((FirefoxDriver) driver).findElementsByCssSelector("body>div.xqboxx>div>ul>li");
-                }
-            });
-        } catch (TimeoutException e) {
-            switchWindows(driver, resultWinTitle);
-            System.out.println("====> redo resultWin click...");
-            linkElement.click();
-            switchWindows(driver, detailWinTitle);
-        }*/
-
         for (String regNum : regNums) {
             WebElement rejectDateEle = queryRejectDateWithFxDriver(driver, regNum);
             if (rejectDateEle != null) {
@@ -244,7 +191,7 @@ public class SeleniumController {
             } else {
                 System.out.println(regNum + "未查询到驳回通知");
             }
-        }
+        }*/
 
     }
 
