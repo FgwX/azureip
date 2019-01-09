@@ -47,11 +47,12 @@ Configuration:
       level: info
       AppenderRef:
         - ref: CONSOLE
-        - ref: ROLLING_FILE
-    Logger: # 为com.xjj包配置特殊的Log级别，方便调试
-      - name: com.azureip
+        # - ref: ROLLING_FILE
+    # 自定义Logger
+    Logger:
+      - name: com.azureip.tmspider.controller
         additivity: false
-        level: ${sys:log.level.file}
+        level: info
         AppenderRef:
           - ref: CONSOLE
           - ref: ROLLING_FILE
