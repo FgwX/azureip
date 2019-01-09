@@ -2,10 +2,7 @@ package com.azureip.tmspider.controller;
 
 import com.azureip.tmspider.util.SpringUtils;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
-import org.openqa.selenium.By;
-import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
@@ -15,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -108,11 +106,44 @@ public class SeleniumController {
     }
 
     public static void main(String[] args) {
+        List<String> regNums = new ArrayList<>();
+        regNums.add("32612659");
+        regNums.add("32613004");
+        regNums.add("32613005");
+        regNums.add("32613229");
+        regNums.add("32613230");
+        regNums.add("32613231");
+        regNums.add("32613232");
+        regNums.add("32613233");
+        regNums.add("32613234");
+        regNums.add("32613235");
+        regNums.add("32613236");
+        regNums.add("32613945");
+        regNums.add("32614778");
+        regNums.add("32614825");
+        regNums.add("32615059");
+        regNums.add("32615291");
+        regNums.add("32615339");
+        regNums.add("32616403");
+        regNums.add("32616561");
+        regNums.add("32617124");
+        regNums.add("32617144");
+        regNums.add("32617166");
+        regNums.add("32617575");
+        regNums.add("32617623");
+        regNums.add("32617658");
+        regNums.add("32617663");
+        regNums.add("32617671");
+        regNums.add("32618001");
+        regNums.add("32618454");
+
+
         String chromeDriverDir = "D:\\Project\\IDEA\\azureip\\tmspider\\src\\main\\resources\\drivers\\chromedriver.exe";
         String chromeBinDir = "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe";
         String firefoxDriverDir = "D:\\Project\\IDEA\\azureip\\tmspider\\src\\main\\resources\\drivers\\geckodriver.exe";
         String firefoxBinDir = "C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe";
         String userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36";
+        String userAgentIE = "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko";
 
         // 设置系统属性
         // System.setProperty("webdriver.chrome.driver", chromeDriverDir);
@@ -130,18 +161,20 @@ public class SeleniumController {
         //         .usingFirefoxBinary(new FirefoxBinary(new File(firefoxBinDir)))
         //         .usingDriverExecutable(new File(firefoxDriverDir)).build();
         FirefoxDriver driver = new FirefoxDriver();
-
+        // driver.manage().addCookie(new Cookie("JSESSIONID","8358404E2F0617FBACFD9BD97CA76C34"));
         // 设置等待方式及时间
         // driver.manage().window().setSize(new Dimension(1200, 700));
         // driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
         // driver.manage().timeouts().pageLoadTimeout(15, TimeUnit.SECONDS);
         // driver.manage().timeouts().setScriptTimeout(10, TimeUnit.SECONDS);
         // Actions action = new Actions(driver);
+        int retryTimes = 0;
 
-        driver.get("http://wsjs.saic.gov.cn");
+        // 打开检索系统主页
         WebElement statusQueryEle = null;
         while (statusQueryEle == null) {
-            // 打开检索系统主页
+            retryTimes++;
+            driver.get("http://wsjs.saic.gov.cn");
             try {
                 WebDriverWait wait = new WebDriverWait(driver, 5, 500);
                 statusQueryEle = wait.until(new ExpectedCondition<WebElement>() {
@@ -155,13 +188,42 @@ public class SeleniumController {
                 System.out.println("====> redo getting...");
                 driver.get("http://wsjs.saic.gov.cn");
             }
+            if (retryTimes >= 5) {
+                System.out.println("Retried too many times, end operation...");
+                return;
+            }
         }
+        retryTimes = 0;
         statusQueryEle.click();
 
-        String regNums = "31347083,31348939,31347548";
-        // final WebElement rejectEle = queryRejectionWithFxDriver(driver, "31347083");
+        WebDriverWait wait = new WebDriverWait(driver, 10, 1000);
+        wait.until(new ExpectedCondition<WebElement>() {
+            @NullableDecl
+            @Override
+            public WebElement apply(@NullableDecl WebDriver webDriver) {
+                return driver.findElementByCssSelector("#submitForm>div>div.searchbox>table>tbody>tr>td:nth-child(2)>div>input");
+            }
+        });
 
-        driver.findElementByCssSelector("#submitForm>div>div.searchbox>table>tbody>tr>td:nth-child(2)>div>input").sendKeys(regNums.split(",")[1]);
+        /*WebElement inputBox = null;
+        while (inputBox == null) {
+            try {
+                WebDriverWait wait = new WebDriverWait(driver, 10, 1000);
+                inputBox = wait.until(new ExpectedCondition<WebElement>() {
+                    @NullableDecl
+                    @Override
+                    public WebElement apply(@NullableDecl WebDriver webDriver) {
+                        return driver.findElementByCssSelector("#submitForm>div>div.searchbox>table>tbody>tr>td:nth-child(2)>div>input");
+                    }
+                });
+            } catch (TimeoutException e) {
+                e.printStackTrace();
+                return;
+            }
+        }
+
+        // 查询
+        inputBox.sendKeys(regNums.split(",")[1]);
         driver.findElementById("_searchButton").submit();
         switchWindows(driver, resultWinTitle);
         WebElement linkElement = null;
@@ -200,61 +262,110 @@ public class SeleniumController {
             System.out.println("====> redo resultWin click...");
             linkElement.click();
             switchWindows(driver, detailWinTitle);
-        }
+        }*/
 
-        for (WebElement flow : regFlows) {
-            WebElement element = flow.findElement(By.cssSelector("table>tbody>tr>td:nth-child(3)>span"));
-            System.out.println(element.getText());
+        for (String regNum : regNums) {
+            WebElement rejectDateEle = queryRejectDateWithFxDriver(driver, regNum);
+            if (rejectDateEle != null) {
+                System.out.println(regNum + "驳回通知发文日期：" + rejectDateEle.getText());
+            } else {
+                System.out.println(regNum + "未查询到驳回通知");
+            }
         }
 
     }
 
     // 使用FirefoxDriver通过注册号查询驳回信息
-    private static WebElement queryRejectionWithFxDriver(FirefoxDriver driver, String regNum) {
+    private static WebElement queryRejectDateWithFxDriver(FirefoxDriver driver, String regNum) {
         // 切换到查询页，输入注册号，进行查询
         switchWindows(driver, searchWinTitle);
-        driver.findElementByCssSelector("#submitForm>div>div.searchbox>table>tbody>tr>td:nth-child(2)>div>input").sendKeys(regNum);
-        driver.findElementById("_searchButton").submit();
+        WebElement inputBox = driver.findElementByCssSelector("#submitForm>div>div.searchbox>table>tbody>tr>td:nth-child(2)>div>input");
+        inputBox.clear();
+        inputBox.sendKeys(regNum);
+        WebElement submitBtn = driver.findElementById("_searchButton");
+        submitBtn.submit();
 
         // 切换到结果页，等待结果加载完成后，点击详情页链接
         switchWindows(driver, resultWinTitle);
         WebElement linkElement = null;
         while (linkElement == null) {
             try {
-                WebDriverWait wait = new WebDriverWait(driver, 5, 500);
+                WebDriverWait wait = new WebDriverWait(driver, 3, 1000);
                 // 每隔500毫秒去调用一下until中的函数，默认是0.5秒，如果等待3秒还没有找到元素，则抛出异常。
                 linkElement = wait.until(new ExpectedCondition<WebElement>() {
                     @Override
-                    public WebElement apply(WebDriver webDriver) {
-                        System.out.println("====> applying...");
-                        return webDriver.findElement(By.xpath("//*[@id='list_box']/table/tbody/tr[2]/td[2]"));
+                    public WebElement apply(WebDriver driver) {
+                        try {
+                            String curRegNum = driver.findElement(By.cssSelector("input[name='request:sn']")).getAttribute("value");
+                            // System.out.println("result page regNum: " + curRegNum);
+                            if (regNum.equals(curRegNum)) {
+                                return driver.findElement(By.xpath("//*[@id='list_box']/table/tbody/tr[2]/td[2]"));
+                            } else {
+                                return null;
+                            }
+                        } catch (StaleElementReferenceException e) {
+                            return null;
+                        }
                     }
                 });
             } catch (TimeoutException e) {
                 switchWindows(driver, searchWinTitle);
-                System.out.println("====> redo submit...");
-                driver.findElementById("_searchButton").submit();
+                // System.out.println("====> redo submit...");
+                submitBtn.submit();
                 switchWindows(driver, resultWinTitle);
             }
         }
         linkElement.click();
-
-        // 切换到详情页，判断是否驳回
         switchWindows(driver, detailWinTitle);
-        List<WebElement> regFlows = driver.findElementsByCssSelector("body>div.xqboxx>div>ul>li");
-        WebElement rejectFlow = null;
-        for (WebElement flow : regFlows) {
-            WebElement element = flow.findElement(By.cssSelector("table>tbody>tr>td:nth-child(3)>span"));
-            System.out.println();
-            if (rejectionMark.equals(element.getText())) {
-                rejectFlow = element;
+
+        // 切换到详情页，获取流程列表
+        WebElement regFlowsEle = null;
+        while (regFlowsEle == null) {
+            try {
+                WebDriverWait wait = new WebDriverWait(driver, 3, 1000);
+                regFlowsEle = wait.until(new ExpectedCondition<WebElement>() {
+                    @NullableDecl
+                    @Override
+                    public WebElement apply(@NullableDecl WebDriver driver) {
+                        try {
+                            String curRegNum = driver.findElement(By.cssSelector("input[name='info:rn']")).getAttribute("value");
+                            // System.out.println("detail page regNum: " + curRegNum);
+                            if (curRegNum.equals(regNum)) {
+                                return driver.findElement(By.cssSelector("body>div.xqboxx>div>ul"));
+                            } else {
+                                return null;
+                            }
+                        } catch (StaleElementReferenceException e) {
+                            return null;
+                        }
+                    }
+                });
+            } catch (TimeoutException e) {
+                switchWindows(driver, resultWinTitle);
+                // System.out.println("====> redo resultWin click: " + linkElement.findElement(By.cssSelector("a")).getText());
+                linkElement.click();
+                // driver.findElement(By.xpath("//*[@id='list_box']/table/tbody/tr[2]/td[2]")).click();
+                switchWindows(driver, detailWinTitle);
             }
         }
-        return rejectFlow;
+        // switchWindows(driver, detailWinTitle);
+        List<WebElement> regFlows = regFlowsEle.findElements(By.cssSelector("body>div.xqboxx>div>ul>li"));
+        WebElement rejectDate = null;
+        for (WebElement flow : regFlows) {
+            WebElement element = flow.findElement(By.cssSelector("table>tbody>tr>td:nth-child(3)>span"));
+            if (rejectionMark.equals(element.getText())) {
+                rejectDate = flow.findElement(By.cssSelector("table>tbody>tr>td:nth-child(5)"));
+            }
+        }
+        return rejectDate;
     }
 
     // 等待方法
-    private static WebElement waitAndGet(FirefoxDriver driver, String xpath){
+    private static WebElement waitAndGet(FirefoxDriver driver, String xpath) {
+        WebElement element = null;
+        while (element == null) {
+
+        }
         return null;
     }
 
