@@ -17,6 +17,7 @@ import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,9 +38,9 @@ public class RegistrationService {
     // private static final String FF_BIN_DIR = "C:/Program Files (x86)/Mozilla Firefox/firefox.exe";
     private static final String FF_DRIVER_DIR = "D:/Project/IDEA/azureip/tmspider/src/main/resources/drivers/geckodriver.exe";
 
-    public List<String> optRejections(File tarDir) throws IOException {
+    public List<String> optRejections(File srcDir, File tarDir) throws IOException {
         LOG.info("开始查询驳回数据...");
-        File[] pendingFiles = tarDir.listFiles();
+        File[] pendingFiles = srcDir.listFiles();
         List<String> fileNames = new ArrayList<>();
 
         // 初始化Selenium功能
@@ -51,23 +52,30 @@ public class RegistrationService {
         // ChromeDriver driver = new ChromeDriver();
         FirefoxOptions options = new FirefoxOptions();
         // C:/Users/lewiszhang/AppData/Local/Mozilla/Firefox/Profiles
-        options.setProfile(new ProfilesIni().getProfile("default"));
+        // options.setProfile(new ProfilesIni().getProfile("default"));
         FirefoxDriver driver = new FirefoxDriver(options);
 
         for (int i = 0; i < (pendingFiles == null ? 0 : pendingFiles.length); i++) {
+            String fileName = pendingFiles[i].getName();
             FileInputStream in = new FileInputStream(pendingFiles[i]);
-            XSSFSheet sheet = new XSSFWorkbook(in).getSheetAt(0);
+            XSSFWorkbook workbook = new XSSFWorkbook(in);
+            XSSFSheet sheet = workbook.getSheetAt(0);
             in.close();
             LOG.info("[" + (i + 1) + "" + pendingFiles.length + "]开始处理《" + pendingFiles[i].getName() + "》，"
                     + "共计" + sheet.getLastRowNum() + "条数据");
             List<XSSFRow> rows = new ArrayList<>();
             for (int j = 1; j < sheet.getLastRowNum(); j++) {
-                rows.add(sheet.getRow(i));
+                rows.add(sheet.getRow(j));
             }
-            operation(driver, pendingFiles[i].getName(), rows);
+            operation(driver, fileName, rows);
+            // 输出目标文件
+            FileOutputStream out = new FileOutputStream(tarDir + File.separator + fileName);
+            workbook.write(out);
+            out.close();
             fileNames.add(pendingFiles[i].getName());
+            LOG.info("[" + (i + 1) + "" + pendingFiles.length + "]《" + pendingFiles[i].getName() + "》处理完成");
         }
-
+        LOG.info("驳回数据处理完成！");
         return fileNames;
     }
 
@@ -149,7 +157,7 @@ public class RegistrationService {
                                 return null;
                             }
                         } catch (StaleElementReferenceException e) {
-                            System.err.println("Getting resultElement throws exception: \r\n" + e.getMessage());
+                            LOG.warn("Getting resultElement throws exception: \r\n" + e.getMessage());
                             return null;
                         }
                     }
@@ -195,7 +203,6 @@ public class RegistrationService {
         }
 
         List<WebElement> regFlows = regFlowsEle.findElements(By.xpath("/html/body/div[@class='xqboxx']/div/ul/li"));
-        System.out.println("regFlows's size: " + regFlows.size());
         WebElement rejectDate = null;
         for (WebElement flow : regFlows) {
             WebElement element = flow.findElement(By.xpath("/html/body/div[@class='xqboxx']/div/ul/li/table/tbody/tr/td[3]/span"));

@@ -45,9 +45,10 @@ public class RegistrationController {
     public GlobalResponse optRejections() {
         GlobalResponse<String> response = new GlobalResponse<>();
         // 获取待处理的EXCEL文件夹
-        File tarDir = new File("D:/TMSpider/mark_ann");
+        File srcDir = new File("D:/TMSpider/mark_ann");
+        File tarDir = new File("D:/TMSpider/mark_rej");
         try {
-            List<String> fileNames = registrationService.optRejections(tarDir);
+            List<String> fileNames = registrationService.optRejections(srcDir, tarDir);
             response.setStatus(GlobalResponse.SUCCESS);
             response.setResultList(fileNames);
         } catch (Exception e) {
