@@ -9,11 +9,8 @@ import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.xssf.usermodel.*;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.openqa.selenium.*;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
-import org.openqa.selenium.firefox.FirefoxProfile;
-import org.openqa.selenium.firefox.internal.ProfilesIni;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Service;
@@ -40,7 +37,7 @@ public class RegistrationService {
     private static final String CHROME_DRIVER_DIR = "D:/Project/IDEA/azureip/tmspider/src/main/resources/drivers/chromedriver.exe";
     // private static final String CHROME_BIN_DIR = "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe";
     // private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36";
-    private static final String USER_AGENT_IE = "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko";
+    // private static final String USER_AGENT_IE = "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko";
     // private static final String FF_BIN_DIR = "C:/Program Files (x86)/Mozilla Firefox/firefox.exe";
     private static final String FF_DRIVER_DIR = "D:/Project/IDEA/azureip/tmspider/src/main/resources/drivers/geckodriver.exe";
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy年MM月dd日");
@@ -83,35 +80,37 @@ public class RegistrationService {
         String prefix = "[" + fileName + "] - ";
         XSSFSheet sheet = workBook.getSheetAt(0);
         WebDriver driver = initQueryPage();
-        try {
-            // 循环处理行（跳过标题行）
-            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
-                XSSFRow row = sheet.getRow(i);
-                String regNum = row.getCell(0).getStringCellValue();
-                if (StringUtils.isEmpty(regNum)) {
-                    LOG.error(prefix + "的第" + (i + 1) + "行注册号为空！");
-                    continue;
-                }
-                boolean success = false;
-                while (!success) {
-                    try {
-                        success = queryRejectionData(driver, row, workBook);
-                    } catch (RetriedTooManyTimesException e) {
-                        quitBrowser(driver);
-                        driver = initQueryPage();
-                        LOG.error(prefix + "[" + regNum + "]重试次数过多，重新初始化查询...");
-                    } catch (NoSuchElementException e) {
-                        quitBrowser(driver);
-                        driver = initQueryPage();
-                        LOG.error(prefix + "[" + regNum + "]页面切换出错，重新初始化查询...");
-                    }
-                }
-                // 速度控制
-                threadWait(500);
+        // 循环处理行（跳过标题行）
+        for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+            XSSFRow row = sheet.getRow(i);
+            String regNum = row.getCell(0).getStringCellValue();
+            if (StringUtils.isEmpty(regNum)) {
+                LOG.error(prefix + "的第" + (i + 1) + "行注册号为空！");
+                continue;
             }
-        } catch (StaleElementReferenceException e) {
-            e.printStackTrace();
-            LOG.error("StaleElementReferenceException: " + e.getMessage());
+            boolean success = false;
+            while (!success) {
+                try {
+                    success = queryRejectionData(driver, row, workBook);
+                } catch (RetriedTooManyTimesException e) {
+                    quitBrowser(driver);
+                    driver = initQueryPage();
+                    LOG.error(prefix + "[" + regNum + "]重试次数过多，重新初始化查询...");
+                } catch (NoSuchElementException e) {
+                    quitBrowser(driver);
+                    driver = initQueryPage();
+                    LOG.error(prefix + "[" + regNum + "]页面切换出错，重新初始化查询...");
+                } catch (StaleElementReferenceException e) {
+                    quitBrowser(driver);
+                    driver = initQueryPage();
+                    LOG.error(prefix + "[" + regNum + "]操作元素已过期，重新初始化查询...");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    LOG.error(prefix + "[" + regNum + "]未知异常");
+                }
+            }
+            // 速度控制
+            threadWait(500);
         }
         quitBrowser(driver);
     }
@@ -126,6 +125,9 @@ public class RegistrationService {
         FirefoxDriver driver = new FirefoxDriver(options);
         // ChromeDriver driver = new ChromeDriver();
 
+        driver.manage().window().setPosition(new Point(0, 0));
+        driver.manage().window().setSize(new Dimension(1100, 700));
+
         int retryTimes = 0;
         // 打开检索系统主页
         WebElement statusQueryEle = null;
@@ -134,9 +136,8 @@ public class RegistrationService {
             driver.get("http://wsjs.saic.gov.cn");
             try {
                 statusQueryEle = new WebDriverWait(driver, 5, 500).until(new ExpectedCondition<WebElement>() {
-                    @NullableDecl
                     @Override
-                    public WebElement apply(@NullableDecl WebDriver driver) {
+                    public WebElement apply(WebDriver driver) {
                         // 选择商标状态查询
                         return driver.findElement(By.xpath("//*[@id='txnS03']"));
                     }
@@ -154,9 +155,8 @@ public class RegistrationService {
         // 等待页面加载完成（通过查询按钮判断页面是否加载完成）
         try {
             new WebDriverWait(driver, 15, 500).until(new ExpectedCondition<WebElement>() {
-                @NullableDecl
                 @Override
-                public WebElement apply(@NullableDecl WebDriver driver) {
+                public WebElement apply(WebDriver driver) {
                     return driver.findElement(By.id("_searchButton"));
                 }
             });
@@ -188,11 +188,10 @@ public class RegistrationService {
             resultQueryTimes++;
             try {
                 // 每隔500毫秒去调用一下until中的函数，默认是0.5秒，如果等待3秒还没有找到元素，则抛出异常。
-                resultEle = new WebDriverWait(driver, (resultQueryTimes > 1 ? 4 : 6), 500)
+                resultEle = new WebDriverWait(driver, (resultQueryTimes > 1 ? 4 : 7), 500)
                         .until(new ExpectedCondition<WebElement>() {
-                            @NullableDecl
                             @Override
-                            public WebElement apply(@NullableDecl WebDriver driver) {
+                            public WebElement apply(WebDriver driver) {
                                 try {
                                     if (regNum.equals(driver.findElement(By.xpath("//*[@id='request_sn']")).getAttribute("value"))) {
                                         return driver.findElement(By.xpath("//*[@id='list_box']/table/tbody/tr[2]/td[2]/a"));
@@ -225,29 +224,28 @@ public class RegistrationService {
         while (regFlowsEle == null) {
             detailQueryTimes++;
             try {
-                WebDriverWait wait = new WebDriverWait(driver, (detailQueryTimes > 1 ? 4 : 6), 500);
-                regFlowsEle = wait.until(new ExpectedCondition<WebElement>() {
+                final int returnFlag = detailQueryTimes;
+                regFlowsEle = new WebDriverWait(driver, (detailQueryTimes > 1 ? 4 : 7), 500).until(new ExpectedCondition<WebElement>() {
                     @NullableDecl
                     @Override
-                    public WebElement apply(@NullableDecl WebDriver driver) {
+                    public WebElement apply(WebDriver driver) {
                         try {
                             WebElement curRegNumEle = driver.findElement(By.xpath("//div[@id='detailParameter']/input[@name='info:rn']"));
                             WebElement requestID = driver.findElement(By.xpath("//input[@id='request_tid']"));
                             if (regNum.equals(curRegNumEle.getAttribute("value"))) {
                                 return driver.findElement(By.xpath("/html/body/div[@class='xqboxx']/div/ul"));
-                            } else if (!StringUtils.isEmpty(requestID.getAttribute("value"))) {
-                                // 页面加载完成且未查询到流程数据，返回隐藏参数request:tid
+                            } else if (returnFlag >= 5 && !StringUtils.isEmpty(requestID.getAttribute("value"))) {
                                 return requestID;
-                            } else {
-                                return null;
                             }
+                            return null;
                         } catch (StaleElementReferenceException e) {
                             LOG.error("获取流程列表异常: " + e.getMessage());
                             return null;
                         }
                     }
                 });
-            } catch (TimeoutException e) {
+            } catch (TimeoutException | ElementNotInteractableException e) {
+                LOG.debug("[248] - TimeoutException | ElementNotInteractableException");
                 switchWindows(driver, RESULT_WIN);
                 resultEle.click();
             } finally {
@@ -260,12 +258,27 @@ public class RegistrationService {
 
         XSSFCreationHelper creationHelper = workbook.getCreationHelper();
         // 如果返回Input[id=request_tid]，则说明此商标正等待受理，暂无法查询详细信息
+        List<WebElement> regFlows = regFlowsEle.findElements(By.xpath("/html/body/div[@class='xqboxx']/div/ul/li"));
         if ("request_tid".equals(regFlowsEle.getAttribute("id"))) {
+            // if (regFlows == null || regFlows.size() == 0) {
+            LOG.debug("[264] - 未受理");
+            // 设置链接
+            XSSFCell tmNmeCell = row.getCell(4) != null ? row.getCell(4) : row.createCell(4);
+            XSSFCellStyle linkStyle = workbook.createCellStyle();
+            XSSFFont linkFont = workbook.createFont();
+            linkFont.setUnderline((byte) 1);
+            linkFont.setColor(IndexedColors.BLUE.index);
+            linkStyle.setFont(linkFont);
+            XSSFHyperlink hyperLink = creationHelper.createHyperlink(HyperlinkType.URL);
+            hyperLink.setAddress(driver.getCurrentUrl());
+            tmNmeCell.setHyperlink(hyperLink);
+            tmNmeCell.setCellStyle(linkStyle);
             // 设置公告状态为“未受理”
             XSSFCell annStatCell = row.getCell(7) != null ? row.getCell(7) : row.createCell(7);
             annStatCell.setCellValue("未受理");
             LOG.info(prefix + "商标未受理，暂无详细信息");
         } else {
+            LOG.debug("[281] - 判断是否驳回");
             // 设置链接
             XSSFCell tmNmeCell = row.getCell(4) != null ? row.getCell(4) : row.createCell(4);
             XSSFCellStyle linkStyle = workbook.createCellStyle();
@@ -278,7 +291,6 @@ public class RegistrationService {
             tmNmeCell.setHyperlink(hyperLink);
             tmNmeCell.setCellStyle(linkStyle);
             // 判断并记录驳回日期
-            List<WebElement> regFlows = regFlowsEle.findElements(By.xpath("/html/body/div[@class='xqboxx']/div/ul/li"));
             boolean hasRejection = false;
             for (WebElement flow : regFlows) {
                 WebElement flowText = flow.findElement(By.xpath("/html/body/div[@class='xqboxx']/div/ul/li/table/tbody/tr/td[3]/span"));
@@ -306,24 +318,22 @@ public class RegistrationService {
 
     // 通过窗口标题切换窗口
     private void switchWindows(WebDriver driver, String tarWinTitle) {
-        LOG.warn("[切换窗口] ==> " + tarWinTitle);
+        // LOG.warn("[切换窗口] ==> " + tarWinTitle);
         //获取所有的窗口句柄
         Set<String> handles = driver.getWindowHandles();
         //获取当前窗口的句柄
         String currentHandle = driver.getWindowHandle();
         //获取当前窗口的title
         String currentTitle = driver.getTitle();
-        //要切换窗口为当前窗口则直接返回true
         if (currentTitle.equals(tarWinTitle)) {
             return;
         }
-        //处理要切换到的窗口非当前窗口的情况
         for (String handle : handles) {
             //略过当前窗口
             if (handle.equals(currentHandle)) {
                 continue;
             }
-            //切换并检查其title是否和目标窗口的title是否相同，是则返回true，否则继续
+            //切换并检查其Title是否和目标窗口的Title是否相同
             if ((driver.switchTo().window(handle).getTitle()).equals(tarWinTitle)) {
                 return;
             }
@@ -352,7 +362,7 @@ public class RegistrationService {
         for (String handle : handles) {
             driver.switchTo().window(handle).close();
         }
-        driver.quit();
+        // driver.quit();
     }
 
     // 线程等待
