@@ -7,8 +7,11 @@ import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.xssf.usermodel.*;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.openqa.selenium.*;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.firefox.internal.ProfilesIni;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Service;
@@ -83,22 +86,28 @@ public class RegistrationService {
     private void operation(String fileName, List<XSSFRow> rows, XSSFWorkbook workbook) {
         WebDriver driver = initQueryPage();
 
-        // 循环处理行
-        for (int i = 0; i < rows.size(); i++) {
-            String prefix = "[" + fileName + "]";
-            XSSFRow row = rows.get(i);
-            if (StringUtils.isEmpty(row.getCell(0).getStringCellValue())) {
-                LOG.warn(prefix + "的第" + (i + 1) + "行注册号为空！");
-                continue;
+        try {
+            // 循环处理行
+            for (int i = 0; i < rows.size(); i++) {
+                String prefix = "[" + fileName + "]";
+                XSSFRow row = rows.get(i);
+                if (StringUtils.isEmpty(row.getCell(0).getStringCellValue())) {
+                    LOG.warn(prefix + "的第" + (i + 1) + "行注册号为空！");
+                    continue;
+                }
+                WebElement rejectDateEle = null;
+                rejectDateEle = queryRejectionData(driver, row, workbook);
+                if (rejectDateEle != null) {
+                    LOG.info(prefix + "的第" + (i + 1) + "行查询到驳回，日期为：" + rejectDateEle.getText());
+                } else {
+                    LOG.info(prefix + "的第" + (i + 1) + "行未查询到驳回");
+                }
             }
-            WebElement rejectDateEle = null;
-            rejectDateEle = queryRejectionData(driver, row, workbook);
-            if (rejectDateEle != null) {
-                LOG.info(prefix + "的第" + (i + 1) + "行查询到驳回，日期为：" + rejectDateEle.getText());
-            } else {
-                LOG.info(prefix + "的第" + (i + 1) + "行未查询到驳回");
-            }
+        } catch (StaleElementReferenceException e) {
+            e.printStackTrace();
+            LOG.error("StaleElementReferenceException: " + e.getMessage());
         }
+        driver.quit();
     }
 
     // 初始化查询页面
@@ -106,6 +115,8 @@ public class RegistrationService {
         // Firefox用户文件夹：C:/Users/%USER%/AppData/Local/Mozilla/Firefox/Profiles
         FirefoxOptions options = new FirefoxOptions();
         // options.setProfile(new ProfilesIni().getProfile("default"));
+        options.addArguments("-safe-mode");
+        // options.setHeadless(true);
         FirefoxDriver driver = new FirefoxDriver(options);
 
         int retryTimes = 0;
@@ -125,7 +136,6 @@ public class RegistrationService {
                 });
             } catch (TimeoutException e) {
                 LOG.error("重新打开[http://wsjs.saic.gov.cn]...");
-                // driver.get("http://wsjs.saic.gov.cn");
             }
             if (retryTimes >= 5) {
                 LOG.error("打开检索系统主页超时！");
