@@ -5,6 +5,8 @@ import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.openqa.selenium.*;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.remote.Command;
+import org.openqa.selenium.remote.FileDetector;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.scheduling.annotation.Async;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -141,12 +144,18 @@ public class SeleniumController {
         // driver.manage().timeouts().pageLoadTimeout(15, TimeUnit.SECONDS);
         // driver.manage().timeouts().setScriptTimeout(10, TimeUnit.SECONDS);
 
+        // driver.get("https://www.baidu.com");
+        // wait(1000);
+        // driver.quit();
+        // driver = null;
+        // driver = new FirefoxDriver();
+        // driver.get("https://www.baidu.com");
         driver.get("https://www.baidu.com");
         wait(1000);
+        driver.executeScript("window.open('https://www.sogou.com');");
+        wait(1500);
         driver.quit();
-        // driver = null;
-        driver = new FirefoxDriver();
-        driver.get("https://www.baidu.com");
+
 
         /*// 打开检索系统主页
         int retryTimes = 0;
