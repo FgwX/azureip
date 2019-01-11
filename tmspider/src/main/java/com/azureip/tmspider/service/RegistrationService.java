@@ -1,6 +1,5 @@
 package com.azureip.tmspider.service;
 
-import com.azureip.tmspider.exception.InitStatusQueryPageException;
 import com.azureip.tmspider.exception.RetriedTooManyTimesException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,6 +41,9 @@ public class RegistrationService {
     private static final String FF_DRIVER_DIR = "D:/Project/IDEA/azureip/tmspider/src/main/resources/drivers/geckodriver.exe";
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy年MM月dd日");
 
+    /**
+     * 开始操作
+     */
     public List<String> optRejections(File srcDir, File tarDir) throws IOException {
         LOG.info("开始查询驳回数据...");
         File[] pendingFiles = srcDir.listFiles();
@@ -79,7 +81,8 @@ public class RegistrationService {
     private void queryRejectionAndAddLink(String fileName, XSSFWorkbook workBook) {
         String prefix = "[" + fileName + "] - ";
         XSSFSheet sheet = workBook.getSheetAt(0);
-        WebDriver driver = initQueryPage();
+        WebDriver driver = quitAndRenewBrowser(null);
+
         // 循环处理行（跳过标题行）
         for (int i = 1; i <= sheet.getLastRowNum(); i++) {
             XSSFRow row = sheet.getRow(i);
@@ -93,79 +96,23 @@ public class RegistrationService {
                 try {
                     success = queryRejectionData(driver, row, workBook);
                 } catch (RetriedTooManyTimesException e) {
-                    quitBrowser(driver);
-                    driver = initQueryPage();
-                    LOG.error(prefix + "[" + regNum + "]重试次数过多，重新初始化查询...");
+                    LOG.error(prefix + "[" + regNum + "]重试次数过多，重新初始化...");
+                    driver = quitAndRenewBrowser(driver);
                 } catch (NoSuchElementException e) {
-                    quitBrowser(driver);
-                    driver = initQueryPage();
-                    LOG.error(prefix + "[" + regNum + "]页面切换出错，重新初始化查询...");
+                    LOG.error(prefix + "[" + regNum + "]页面切换出错，重新初始化...");
+                    driver = quitAndRenewBrowser(driver);
                 } catch (StaleElementReferenceException e) {
-                    quitBrowser(driver);
-                    driver = initQueryPage();
-                    LOG.error(prefix + "[" + regNum + "]操作元素已过期，重新初始化查询...");
+                    LOG.error(prefix + "[" + regNum + "]操作元素已过期，重新初始化...");
+                    driver = quitAndRenewBrowser(driver);
                 } catch (Exception e) {
+                    LOG.error(prefix + "[" + regNum + "]未知异常: ");
                     e.printStackTrace();
-                    LOG.error(prefix + "[" + regNum + "]未知异常");
                 }
             }
             // 速度控制
             threadWait(500);
         }
         quitBrowser(driver);
-    }
-
-    // 初始化查询页面
-    private WebDriver initQueryPage() {
-        FirefoxOptions options = new FirefoxOptions();
-        // FirefoxProfile profile = new ProfilesIni().getProfile("default");
-        // profile.setPreference("general.useragent.override", USER_AGENT_IE);
-        // options.setProfile(profile);
-        options.addArguments("-safe-mode");
-        FirefoxDriver driver = new FirefoxDriver(options);
-        // ChromeDriver driver = new ChromeDriver();
-
-        driver.manage().window().setPosition(new Point(0, 0));
-        driver.manage().window().setSize(new Dimension(1100, 700));
-
-        int retryTimes = 0;
-        // 打开检索系统主页
-        WebElement statusQueryEle = null;
-        while (statusQueryEle == null) {
-            retryTimes++;
-            driver.get("http://wsjs.saic.gov.cn");
-            try {
-                statusQueryEle = new WebDriverWait(driver, 5, 500).until(new ExpectedCondition<WebElement>() {
-                    @Override
-                    public WebElement apply(WebDriver driver) {
-                        // 选择商标状态查询
-                        return driver.findElement(By.xpath("//*[@id='txnS03']"));
-                    }
-                });
-            } catch (TimeoutException e) {
-                LOG.error("重新打开[http://wsjs.saic.gov.cn]...");
-            }
-            if (retryTimes >= 5) {
-                LOG.error("打开检索系统主页超时！");
-                quitBrowser(driver);
-                throw new InitStatusQueryPageException();
-            }
-        }
-        statusQueryEle.click();
-        // 等待页面加载完成（通过查询按钮判断页面是否加载完成）
-        try {
-            new WebDriverWait(driver, 15, 500).until(new ExpectedCondition<WebElement>() {
-                @Override
-                public WebElement apply(WebDriver driver) {
-                    return driver.findElement(By.id("_searchButton"));
-                }
-            });
-        } catch (TimeoutException e) {
-            LOG.error("跳转到“状态查询”超时！");
-            quitBrowser(driver);
-            throw new InitStatusQueryPageException();
-        }
-        return driver;
     }
 
     // 查询驳回信息并添加链接
@@ -188,7 +135,7 @@ public class RegistrationService {
             resultQueryTimes++;
             try {
                 // 每隔500毫秒去调用一下until中的函数，默认是0.5秒，如果等待3秒还没有找到元素，则抛出异常。
-                resultEle = new WebDriverWait(driver, (resultQueryTimes > 1 ? 4 : 7), 500)
+                resultEle = new WebDriverWait(driver, (resultQueryTimes > 1 ? 3 : 5), 500)
                         .until(new ExpectedCondition<WebElement>() {
                             @Override
                             public WebElement apply(WebDriver driver) {
@@ -211,7 +158,7 @@ public class RegistrationService {
                 switchWindows(driver, RESULT_WIN);
             }
             // 重试10次后，重新打开浏览器
-            if (resultQueryTimes >= 10) {
+            if (resultQueryTimes >= 8) {
                 throw new RetriedTooManyTimesException();
             }
         }
@@ -225,7 +172,7 @@ public class RegistrationService {
             detailQueryTimes++;
             try {
                 final int returnFlag = detailQueryTimes;
-                regFlowsEle = new WebDriverWait(driver, (detailQueryTimes > 1 ? 4 : 7), 500).until(new ExpectedCondition<WebElement>() {
+                regFlowsEle = new WebDriverWait(driver, (detailQueryTimes > 1 ? 3 : 5), 500).until(new ExpectedCondition<WebElement>() {
                     @NullableDecl
                     @Override
                     public WebElement apply(WebDriver driver) {
@@ -251,7 +198,7 @@ public class RegistrationService {
             } finally {
                 switchWindows(driver, DETAIL_WIN);
             }
-            if (detailQueryTimes >= 10) {
+            if (detailQueryTimes >= 8) {
                 throw new RetriedTooManyTimesException();
             }
         }
@@ -316,6 +263,95 @@ public class RegistrationService {
         return true;
     }
 
+    // 关闭所有窗口
+    private void quitBrowser(WebDriver driver) {
+        if (driver == null) {
+            return;
+        }
+        Set<String> handles = driver.getWindowHandles();
+        for (String handle : handles) {
+            driver.switchTo().window(handle).close();
+        }
+        // driver.quit();
+    }
+
+    // 关闭所有窗口并重新创建
+    private WebDriver quitAndRenewBrowser(WebDriver driver) {
+        if (driver == null) {
+            while (driver == null) {
+                driver = initQueryPage();
+            }
+            return driver;
+        } else {
+            Set<String> handles = driver.getWindowHandles();
+            for (String handle : handles) {
+                driver.switchTo().window(handle).close();
+            }
+            driver = null;
+            while (driver == null) {
+                driver = initQueryPage();
+            }
+            return driver;
+        }
+        // driver.quit();
+    }
+
+    // 初始化查询页面
+    private WebDriver initQueryPage() {
+        LOG.warn("正在初始化浏览器...");
+        FirefoxOptions options = new FirefoxOptions();
+        // FirefoxProfile profile = new ProfilesIni().getProfile("default");
+        // profile.setPreference("general.useragent.override", USER_AGENT_IE);
+        // options.setProfile(profile);
+        options.addArguments("-safe-mode");
+        FirefoxDriver driver = new FirefoxDriver(options);
+        // ChromeDriver driver = new ChromeDriver();
+
+        driver.manage().window().setPosition(new Point(0, 0));
+        driver.manage().window().setSize(new Dimension(1100, 700));
+
+        int retryTimes = 0;
+        // 打开检索系统主页
+        WebElement statusQueryEle = null;
+        while (statusQueryEle == null) {
+            retryTimes++;
+            driver.get("http://wsjs.saic.gov.cn");
+            try {
+                statusQueryEle = new WebDriverWait(driver, 5, 500).until(new ExpectedCondition<WebElement>() {
+                    @Override
+                    public WebElement apply(WebDriver driver) {
+                        // 选择商标状态查询
+                        return driver.findElement(By.xpath("//*[@id='txnS03']"));
+                    }
+                });
+            } catch (TimeoutException e) {
+                LOG.error("重新打开[http://wsjs.saic.gov.cn]...");
+            }
+            if (retryTimes >= 5) {
+                LOG.error("打开检索系统主页超时！");
+                quitBrowser(driver);
+                // throw new InitStatusQueryPageException();
+                return null;
+            }
+        }
+        statusQueryEle.click();
+        // 等待页面加载完成（通过查询按钮判断页面是否加载完成）
+        try {
+            new WebDriverWait(driver, 10, 500).until(new ExpectedCondition<WebElement>() {
+                @Override
+                public WebElement apply(WebDriver driver) {
+                    return driver.findElement(By.id("_searchButton"));
+                }
+            });
+        } catch (TimeoutException e) {
+            LOG.error("跳转到“状态查询”超时！");
+            quitBrowser(driver);
+            // throw new InitStatusQueryPageException();
+            return null;
+        }
+        return driver;
+    }
+
     // 通过窗口标题切换窗口
     private void switchWindows(WebDriver driver, String tarWinTitle) {
         // LOG.warn("[切换窗口] ==> " + tarWinTitle);
@@ -351,18 +387,6 @@ public class RegistrationService {
                 return;
             }
         }
-    }
-
-    // 关闭所有窗口
-    private void quitBrowser(WebDriver driver) {
-        if (driver == null) {
-            return;
-        }
-        Set<String> handles = driver.getWindowHandles();
-        for (String handle : handles) {
-            driver.switchTo().window(handle).close();
-        }
-        // driver.quit();
     }
 
     // 线程等待
