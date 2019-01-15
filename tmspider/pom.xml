@@ -105,6 +105,13 @@
             <version>2.8.7</version>
         </dependency>
 
+        <!-- JSON In Java -->
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20180813</version>
+        </dependency>
+
         <!-- JSoup -->
         <dependency>
             <groupId>org.jsoup</groupId>

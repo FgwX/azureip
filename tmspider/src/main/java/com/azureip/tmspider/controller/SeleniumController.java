@@ -1,5 +1,6 @@
 package com.azureip.tmspider.controller;
 
+import com.azureip.tmspider.service.RegistrationService;
 import com.azureip.tmspider.util.SpringUtils;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.openqa.selenium.*;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -109,23 +111,6 @@ public class SeleniumController {
     }
 
     public static void main(String[] args) {
-        List<String> regNums = new ArrayList<>();
-        regNums.add("32612659");
-        regNums.add("32613004");
-        regNums.add("32613005");
-
-        String chromeDriverDir = "D:\\Project\\IDEA\\azureip\\tmspider\\src\\main\\resources\\drivers\\chromedriver.exe";
-        String chromeBinDir = "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe";
-        String firefoxDriverDir = "D:\\Project\\IDEA\\azureip\\tmspider\\src\\main\\resources\\drivers\\geckodriver.exe";
-        String firefoxBinDir = "C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe";
-        String userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36";
-        String userAgentIE = "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko";
-
-        // 设置系统属性
-        // System.setProperty("webdriver.chrome.driver", chromeDriverDir);
-        System.setProperty("webdriver.firefox.bin", firefoxBinDir);
-        System.setProperty("webdriver.gecko.driver", firefoxDriverDir);
-
         // 创建Chrome驱动
         // ChromeOptions options = new ChromeOptions();
         // options.addArguments("user-agent=" + userAgent);
@@ -136,72 +121,25 @@ public class SeleniumController {
         // GeckoDriverService geckoDriverService = new GeckoDriverService.Builder()
         //         .usingFirefoxBinary(new FirefoxBinary(new File(firefoxBinDir)))
         //         .usingDriverExecutable(new File(firefoxDriverDir)).build();
-        FirefoxDriver driver = new FirefoxDriver();
+        // FirefoxDriver driver = new FirefoxDriver();
         // driver.manage().addCookie(new Cookie("JSESSIONID","8358404E2F0617FBACFD9BD97CA76C34"));
         // 设置等待方式及时间
         // driver.manage().window().setSize(new Dimension(1200, 700));
         // driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
         // driver.manage().timeouts().pageLoadTimeout(15, TimeUnit.SECONDS);
         // driver.manage().timeouts().setScriptTimeout(10, TimeUnit.SECONDS);
-
         // driver.get("https://www.baidu.com");
         // wait(1000);
+        // driver.executeScript("window.open('https://www.sogou.com');");
+        // wait(1500);
         // driver.quit();
-        // driver = null;
-        // driver = new FirefoxDriver();
-        // driver.get("https://www.baidu.com");
-        driver.get("https://www.baidu.com");
-        wait(1000);
-        driver.executeScript("window.open('https://www.sogou.com');");
-        wait(1500);
-        driver.quit();
 
-
-        /*// 打开检索系统主页
-        int retryTimes = 0;
-        WebElement statusQueryEle = null;
-        while (statusQueryEle == null) {
-            retryTimes++;
-            driver.get("http://wsjs.saic.gov.cn");
-            try {
-                WebDriverWait wait = new WebDriverWait(driver, 5, 500);
-                statusQueryEle = wait.until(new ExpectedCondition<WebElement>() {
-                    @Override
-                    public WebElement apply(WebDriver driver) {
-                        // 选择商标状态查询
-                        return ((FirefoxDriver) driver).findElementByCssSelector("body > div.centent > div.left_side > ul > li:nth-child(3) > table");
-                    }
-                });
-            } catch (TimeoutException e) {
-                System.out.println("====> redo getting...");
-                driver.get("http://wsjs.saic.gov.cn");
-            }
-            if (retryTimes >= 5) {
-                System.out.println("Retried too many times, end operation...");
-                return;
-            }
+        RegistrationService service = new RegistrationService();
+        try {
+            service.optRejections(new File("D:/TMSpider/mark_ann"), new File("D:/TMSpider/mark_rej"));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        retryTimes = 0;
-        statusQueryEle.click();
-
-        WebDriverWait wait = new WebDriverWait(driver, 10, 1000);
-        wait.until(new ExpectedCondition<WebElement>() {
-            @NullableDecl
-            @Override
-            public WebElement apply(@NullableDecl WebDriver webDriver) {
-                return driver.findElementByCssSelector("#submitForm>div>div.searchbox>table>tbody>tr>td:nth-child(2)>div>input");
-            }
-        });
-
-        for (String regNum : regNums) {
-            WebElement rejectDateEle = queryRejectDateWithFxDriver(driver, regNum);
-            if (rejectDateEle != null) {
-                System.out.println(regNum + "驳回通知发文日期：" + rejectDateEle.getText());
-            } else {
-                System.out.println(regNum + "未查询到驳回通知");
-            }
-        }*/
-
     }
 
     // 使用FirefoxDriver通过注册号查询驳回信息

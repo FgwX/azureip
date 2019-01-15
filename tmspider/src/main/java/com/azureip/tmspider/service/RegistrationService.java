@@ -7,13 +7,21 @@ import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.xssf.usermodel.*;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
+import org.json.JSONObject;
 import org.openqa.selenium.*;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.firefox.internal.ProfilesIni;
+import org.openqa.selenium.logging.LogEntries;
+import org.openqa.selenium.logging.LogEntry;
+import org.openqa.selenium.logging.LogType;
+import org.openqa.selenium.logging.LoggingPreferences;
+import org.openqa.selenium.remote.CapabilityType;
+import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Service;
@@ -25,10 +33,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
+import java.util.logging.Level;
 
 @Service
 public class RegistrationService {
@@ -308,19 +314,29 @@ public class RegistrationService {
     // 初始化查询页面
     private WebDriver initQueryPage() {
         LOG.warn("正在初始化浏览器...");
-        boolean useChrome = true;
+        boolean useChrome = false;
         WebDriver driver = null;
         if (useChrome) {
             ChromeOptions options = new ChromeOptions();
-            // options
-            driver = new ChromeDriver(options);
+            DesiredCapabilities cap = DesiredCapabilities.chrome();
+            cap.setCapability(ChromeOptions.CAPABILITY, options);
+            LoggingPreferences logPref = new LoggingPreferences();
+            logPref.enable(LogType.PERFORMANCE, Level.ALL);
+            cap.setCapability(CapabilityType.LOGGING_PREFS, logPref);
+            // options.setCapability(ChromeOptions.CAPABILITY, cap);
+            driver = new ChromeDriver(cap);
         } else {
             FirefoxOptions options = new FirefoxOptions();
             FirefoxProfile profile = new ProfilesIni().getProfile("default");
             // profile.setPreference("general.useragent.override", USER_AGENT_IE);
             options.setProfile(profile);
             options.addArguments("-safe-mode");
-            driver = new FirefoxDriver(options);
+            DesiredCapabilities cap = DesiredCapabilities.firefox();
+            cap.setCapability(ChromeOptions.CAPABILITY, options);
+            LoggingPreferences logPref = new LoggingPreferences();
+            logPref.enable(LogType.PERFORMANCE, Level.ALL);
+            cap.setCapability(CapabilityType.LOGGING_PREFS, logPref);
+            driver = new FirefoxDriver(cap);
         }
 
         driver.manage().window().setPosition(new Point(0, 0));
@@ -411,6 +427,20 @@ public class RegistrationService {
             Thread.sleep(ms);
         } catch (InterruptedException e) {
             e.printStackTrace();
+        }
+    }
+
+    // PerformanceLog打印
+    private void printLog(WebDriver driver, String prefix) {
+        LogEntries logEntries = driver.manage().logs().get(LogType.PERFORMANCE);
+        for (LogEntry req : logEntries) {
+            JSONObject message = new JSONObject(req.getMessage()).getJSONObject("message");
+            String method = message.getString("method");
+            if (!StringUtils.isEmpty(method) && "Network.responseReceived".equals(method)) {
+                JSONObject params = message.getJSONObject("params");
+                JSONObject resp = params.getJSONObject("response");
+                LOG.warn(prefix + "Resp: " + resp);
+            }
         }
     }
 }
