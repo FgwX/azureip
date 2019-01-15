@@ -9,7 +9,6 @@ import org.apache.poi.xssf.usermodel.*;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.json.JSONObject;
 import org.openqa.selenium.*;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -33,7 +32,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
 import java.util.logging.Level;
 
 @Service
@@ -122,7 +124,7 @@ public class RegistrationService {
             }
             // 设置随机等待时间，控制速度
             Random random = new Random();
-            threadWait((500 + random.nextInt(2000)));
+            threadWait((500 + random.nextInt(1500)));
         }
         quitBrowser(driver);
     }
@@ -135,6 +137,11 @@ public class RegistrationService {
         XSSFRow row = sheet.getRow(rowIndex);
         String regNum = row.getCell(0).getStringCellValue();
         String prefix = "[" + rowIndex + "/" + totalRows + "]-[" + regNum + "] - ";
+        if (rowIndex > 1
+                && regNum.equals(sheet.getRow(rowIndex - 1).getCell(0).getStringCellValue())) {
+            LOG.warn(prefix + "此行注册号与上一行相同，不再查询。");
+            return true;
+        }
         // 切换到查询页，输入注册号，进行查询
         WebElement inputBox = driver.findElement(By.xpath("//*[@id='submitForm']//input[@name='request:sn']"));
         inputBox.clear();
@@ -150,7 +157,7 @@ public class RegistrationService {
             resultQueryTimes++;
             try {
                 // 每隔500毫秒去调用一下until中的函数，默认是0.5秒，如果等待3秒还没有找到元素，则抛出异常。
-                resultEle = new WebDriverWait(driver, (resultQueryTimes > 1 ? 4 : 7), 500).until(new ExpectedCondition<WebElement>() {
+                resultEle = new WebDriverWait(driver, (resultQueryTimes > 1 ? 4 : 5), 500).until(new ExpectedCondition<WebElement>() {
                     @Override
                     public WebElement apply(WebDriver driver) {
                         try {
@@ -186,7 +193,7 @@ public class RegistrationService {
             detailQueryTimes++;
             try {
                 final int returnFlag = detailQueryTimes;
-                regFlowsEle = new WebDriverWait(driver, (detailQueryTimes > 1 ? 4 : 7), 500).until(new ExpectedCondition<WebElement>() {
+                regFlowsEle = new WebDriverWait(driver, (detailQueryTimes > 1 ? 4 : 5), 500).until(new ExpectedCondition<WebElement>() {
                     @NullableDecl
                     @Override
                     public WebElement apply(WebDriver driver) {
@@ -205,6 +212,7 @@ public class RegistrationService {
                         }
                     }
                 });
+                // printLog(driver, prefix);
             } catch (TimeoutException | ElementNotInteractableException e) {
                 LOG.debug("[248] - TimeoutException | ElementNotInteractableException");
                 switchWindows(driver, RESULT_WIN);
@@ -326,17 +334,16 @@ public class RegistrationService {
             // options.setCapability(ChromeOptions.CAPABILITY, cap);
             driver = new ChromeDriver(cap);
         } else {
+            // DesiredCapabilities cap = DesiredCapabilities.firefox();
+            // LoggingPreferences logPref = new LoggingPreferences();
+            // logPref.enable(LogType.PERFORMANCE, Level.ALL);
+            // cap.setCapability(CapabilityType.LOGGING_PREFS, logPref);
             FirefoxOptions options = new FirefoxOptions();
             FirefoxProfile profile = new ProfilesIni().getProfile("default");
             // profile.setPreference("general.useragent.override", USER_AGENT_IE);
             options.setProfile(profile);
             options.addArguments("-safe-mode");
-            DesiredCapabilities cap = DesiredCapabilities.firefox();
-            cap.setCapability(ChromeOptions.CAPABILITY, options);
-            LoggingPreferences logPref = new LoggingPreferences();
-            logPref.enable(LogType.PERFORMANCE, Level.ALL);
-            cap.setCapability(CapabilityType.LOGGING_PREFS, logPref);
-            driver = new FirefoxDriver(cap);
+            driver = new FirefoxDriver(options);
         }
 
         driver.manage().window().setPosition(new Point(0, 0));
