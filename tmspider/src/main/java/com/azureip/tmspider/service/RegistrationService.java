@@ -45,13 +45,20 @@ public class RegistrationService {
     private static final String RESULT_WIN = "商标检索结果";
     private static final String DETAIL_WIN = "商标详细内容";
     private static final String REJECT_MARK = "驳回通知发文";
-    private static final String CHROME_DRIVER_DIR = "D:/Project/IDEA/azureip/tmspider/src/main/resources/drivers/chromedriver.exe";
+    private static final String CHROME_DRIVER_DIR;
+    private static final String FF_DRIVER_DIR;
     // private static final String CHROME_BIN_DIR = "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe";
+    // private static final String FF_BIN_DIR = "C:/Program Files (x86)/Mozilla Firefox/firefox.exe";
     // private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36";
     // private static final String USER_AGENT_IE = "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko";
-    // private static final String FF_BIN_DIR = "C:/Program Files (x86)/Mozilla Firefox/firefox.exe";
-    private static final String FF_DRIVER_DIR = "D:/Project/IDEA/azureip/tmspider/src/main/resources/drivers/geckodriver.exe";
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy年MM月dd日");
+    private static final SimpleDateFormat dateFormat;
+
+    static {
+        String projectBase = RegistrationService.class.getClassLoader().getResource("").getPath();
+        CHROME_DRIVER_DIR = projectBase + "drivers/chromedriver.exe";
+        FF_DRIVER_DIR = projectBase + "drivers/geckodriver.exe";
+        dateFormat = new SimpleDateFormat("yyyy年MM月dd日");
+    }
 
     /**
      * 开始操作
@@ -326,13 +333,13 @@ public class RegistrationService {
         WebDriver driver = null;
         if (useChrome) {
             ChromeOptions options = new ChromeOptions();
-            DesiredCapabilities cap = DesiredCapabilities.chrome();
-            cap.setCapability(ChromeOptions.CAPABILITY, options);
-            LoggingPreferences logPref = new LoggingPreferences();
-            logPref.enable(LogType.PERFORMANCE, Level.ALL);
-            cap.setCapability(CapabilityType.LOGGING_PREFS, logPref);
+            // DesiredCapabilities cap = DesiredCapabilities.chrome();
+            // cap.setCapability(ChromeOptions.CAPABILITY, options);
+            // LoggingPreferences logPref = new LoggingPreferences();
+            // logPref.enable(LogType.PERFORMANCE, Level.ALL);
+            // cap.setCapability(CapabilityType.LOGGING_PREFS, logPref);
             // options.setCapability(ChromeOptions.CAPABILITY, cap);
-            driver = new ChromeDriver(cap);
+            driver = new ChromeDriver(options);
         } else {
             // DesiredCapabilities cap = DesiredCapabilities.firefox();
             // LoggingPreferences logPref = new LoggingPreferences();
@@ -340,14 +347,16 @@ public class RegistrationService {
             // cap.setCapability(CapabilityType.LOGGING_PREFS, logPref);
             FirefoxOptions options = new FirefoxOptions();
             FirefoxProfile profile = new ProfilesIni().getProfile("default");
-            // profile.setPreference("general.useragent.override", USER_AGENT_IE);
             options.setProfile(profile);
             options.addArguments("-safe-mode");
             driver = new FirefoxDriver(options);
         }
 
         driver.manage().window().setPosition(new Point(0, 0));
-        driver.manage().window().setSize(new Dimension(1100, 700));
+        // for Chrome
+        // driver.manage().window().setSize(new Dimension(1002,538));
+        // for Firefox
+        driver.manage().window().setSize(new Dimension(1014,619));
 
         int retryTimes = 0;
         // 打开检索系统主页
