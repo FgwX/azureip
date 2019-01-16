@@ -14,7 +14,3 @@ Maven项目目录结构：
     pom.xml                 工程描述文件
     LICENSE.txt             license
     README.txt              read me
-
-Release Note
-    2018.07.13
-        给reg_num列增加索引，明显提升查询效率
