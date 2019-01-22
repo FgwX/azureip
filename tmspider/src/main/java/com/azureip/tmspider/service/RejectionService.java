@@ -52,7 +52,7 @@ public class RejectionService {
             FileInputStream in = new FileInputStream(pendingFiles[i]);
             XSSFWorkbook workBook = new XSSFWorkbook(in);
             in.close();
-            LOG.info("[" + (i + 1) + "" + pendingFiles.length + "]开始处理《" + pendingFiles[i].getName() + "》...");
+            LOG.info("[" + (i + 1) + "/" + pendingFiles.length + "]开始处理《" + pendingFiles[i].getName() + "》...");
             try {
                 queryRejections(fileName, workBook);
             } catch (Exception e) {
@@ -81,14 +81,19 @@ public class RejectionService {
             if (!rowIsValid(row, prefix)) {
                 continue;
             }
-            String regNum = row.getCell(0).getStringCellValue();
 
             int retryTimes = 0;
+            String regNum = row.getCell(0).getStringCellValue();
+            XSSFHyperlink hyperlink = row.getCell(4).getHyperlink();
             WebElement regFlowsEle = null;
-            while (retryTimes <= 5) {
-                // 每行最多重试5次
-                retryTimes++;
+
+            while (regFlowsEle == null) {
+                /*if (retryTimes++ > 0 && regFlowsEle == null) {
+                    LOG.info(prefix + "refreshing...");
+                    driver.navigate().refresh();
+                }*/
                 try {
+                    driver.get(hyperlink.getAddress());
                     regFlowsEle = new WebDriverWait(driver, (retryTimes > 1 ? 4 : 5), 500).until(new ExpectedCondition<WebElement>() {
                         @Override
                         public WebElement apply(WebDriver driver) {
@@ -107,13 +112,18 @@ public class RejectionService {
                 } catch (TimeoutException | ElementNotInteractableException e) {
                     LOG.debug(prefix + "TimeoutException | ElementNotInteractableException");
                 }
+                // 每行最多重试5次
+                if (retryTimes >= 5) {
+                    break;
+                }
             }
 
             // 流程判断，标记驳回
             XSSFCell rejDateCell = row.getCell(6) != null ? row.getCell(6) : row.createCell(6);
-            if (regFlowsEle != null) {
+            if (regFlowsEle == null) {
                 // 标记查询超时
-                rejDateCell.setCellValue("");
+                LOG.info(prefix + "查询超时");
+                rejDateCell.setCellValue("查询超时");
             } else {
                 XSSFCreationHelper creationHelper = workBook.getCreationHelper();
                 List<WebElement> regFlows = regFlowsEle.findElements(By.xpath("/html/body/div[@class='xqboxx']/div/ul/li"));

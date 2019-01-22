@@ -10,6 +10,7 @@ import org.openqa.selenium.firefox.internal.ProfilesIni;
 
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 public class SeleniumUtil {
 
@@ -44,6 +45,9 @@ public class SeleniumUtil {
         // driver.manage().window().setSize(new Dimension(1002,538));
         // for Firefox
         driver.manage().window().setSize(new Dimension(1014, 619));
+        // driver.manage().timeouts().implicitlyWait(500, TimeUnit.SECONDS);
+        driver.manage().timeouts().pageLoadTimeout(5000, TimeUnit.MILLISECONDS);
+        // driver.manage().timeouts().setScriptTimeout(500, TimeUnit.MILLISECONDS);
         return driver;
     }
 
