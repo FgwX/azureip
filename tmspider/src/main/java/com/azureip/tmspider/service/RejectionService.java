@@ -85,16 +85,12 @@ public class RejectionService {
                 continue;
             }
 
+            long start = System.currentTimeMillis();
             int retryTimes = 0;
             String regNum = row.getCell(0).getStringCellValue();
             XSSFHyperlink hyperlink = row.getCell(4).getHyperlink();
             WebElement regFlowsEle = null;
-
             while (regFlowsEle == null) {
-                /*if (retryTimes++ > 0 && regFlowsEle == null) {
-                    LOG.info(prefix + "refreshing...");
-                    driver.navigate().refresh();
-                }*/
                 try {
                     driver.get(hyperlink.getAddress());
                     regFlowsEle = new WebDriverWait(driver, 4, 500).until(new ExpectedCondition<WebElement>() {
@@ -115,8 +111,8 @@ public class RejectionService {
                 } catch (TimeoutException | ElementNotInteractableException e) {
                     LOG.debug(prefix + "TimeoutException | ElementNotInteractableException: " + e.getMessage());
                 }
-                // 每行最多重试5次
-                if (retryTimes >= 5) {
+                // 每行最多重试5次，或20秒
+                if (++retryTimes >= 5 || (System.currentTimeMillis() - start) > 20000) {
                     break;
                 }
             }
@@ -159,7 +155,7 @@ public class RejectionService {
             // 设置随机等待时间，控制速度
             // Random random = new Random();
             // threadWait((300 + random.nextInt(1200)));
-            threadWait(300);
+            threadWait(200);
         }
         SeleniumUtil.quitBrowser(driver);
     }
@@ -171,8 +167,10 @@ public class RejectionService {
             return false;
         }
         XSSFCell tmNameCell = row.getCell(4);
-        if (tmNameCell != null && (tmNameCell.getHyperlink() == null
-                || StringUtils.isEmpty(tmNameCell.getHyperlink().getAddress().trim()))) {
+        if (tmNameCell == null) {
+            LOG.warn(prefix + "商标名称为空！");
+            return false;
+        } else if (tmNameCell.getHyperlink() == null || StringUtils.isEmpty(tmNameCell.getHyperlink().getAddress().trim())) {
             LOG.warn(prefix + "未添加链接！");
             return false;
         }

@@ -36,7 +36,7 @@ public class SeleniumUtil {
             FirefoxOptions options = new FirefoxOptions();
             FirefoxProfile profile = new ProfilesIni().getProfile("default");
             options.setProfile(profile);
-            options.addArguments("-safe-mode");
+            // options.addArguments("-safe-mode");
             driver = new FirefoxDriver(options);
         }
 
