@@ -97,7 +97,7 @@ public class RejectionService {
                 }*/
                 try {
                     driver.get(hyperlink.getAddress());
-                    regFlowsEle = new WebDriverWait(driver, (retryTimes++ > 1 ? 4 : 5), 500).until(new ExpectedCondition<WebElement>() {
+                    regFlowsEle = new WebDriverWait(driver, 4, 500).until(new ExpectedCondition<WebElement>() {
                         @Override
                         public WebElement apply(WebDriver driver) {
                             try {
