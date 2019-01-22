@@ -3,6 +3,7 @@ package com.azureip.tmspider.service;
 import com.azureip.tmspider.util.SeleniumUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.xssf.usermodel.*;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedCondition;
@@ -30,6 +31,8 @@ public class RejectionService {
 
     private static final Logger LOG = LogManager.getLogger(RejectionService.class);
     private static final String REJECT_MARK = "驳回通知发文";
+    private static final String FIRST_TRIAL_MARK = "初审公告";
+    private static final String UNTREATED_MARK = "未受理";
     private static final String CHROME_DRIVER_DIR;
     private static final String FF_DRIVER_DIR;
     private static final SimpleDateFormat dateFormat;
@@ -94,7 +97,7 @@ public class RejectionService {
                 }*/
                 try {
                     driver.get(hyperlink.getAddress());
-                    regFlowsEle = new WebDriverWait(driver, (retryTimes > 1 ? 4 : 5), 500).until(new ExpectedCondition<WebElement>() {
+                    regFlowsEle = new WebDriverWait(driver, (retryTimes++ > 1 ? 4 : 5), 500).until(new ExpectedCondition<WebElement>() {
                         @Override
                         public WebElement apply(WebDriver driver) {
                             try {
@@ -110,7 +113,7 @@ public class RejectionService {
                         }
                     });
                 } catch (TimeoutException | ElementNotInteractableException e) {
-                    LOG.debug(prefix + "TimeoutException | ElementNotInteractableException");
+                    LOG.debug(prefix + "TimeoutException | ElementNotInteractableException: " + e.getMessage());
                 }
                 // 每行最多重试5次
                 if (retryTimes >= 5) {
@@ -155,16 +158,36 @@ public class RejectionService {
 
             // 设置随机等待时间，控制速度
             // Random random = new Random();
-            // threadWait((500 + random.nextInt(1500)));
-            threadWait(500);
+            // threadWait((300 + random.nextInt(1200)));
+            threadWait(300);
         }
         SeleniumUtil.quitBrowser(driver);
     }
 
     private boolean rowIsValid(XSSFRow row, String prefix) {
         String regNum = row.getCell(0).getStringCellValue();
-        if (StringUtils.isEmpty(regNum)) {
-            LOG.warn(prefix + "行注册号为空！");
+        if (StringUtils.isEmpty(row.getCell(0).getStringCellValue().trim())) {
+            LOG.warn(prefix + "注册号为空！");
+            return false;
+        }
+        XSSFCell tmNameCell = row.getCell(4);
+        if (tmNameCell != null && (tmNameCell.getHyperlink() == null
+                || StringUtils.isEmpty(tmNameCell.getHyperlink().getAddress().trim()))) {
+            LOG.warn(prefix + "未添加链接！");
+            return false;
+        }
+        XSSFCell rejDateCell = row.getCell(6);
+        if (rejDateCell != null && rejDateCell.getCellTypeEnum() != null) {
+            if ((CellType.STRING.equals(rejDateCell.getCellTypeEnum()) && !StringUtils.isEmpty(rejDateCell.getStringCellValue().trim()))
+                    || (CellType.NUMERIC.equals(rejDateCell.getCellTypeEnum()) && rejDateCell.getNumericCellValue() > 0)) {
+                LOG.warn(prefix + "驳回日期不为空！");
+                return false;
+            }
+        }
+        XSSFCell statusCell = row.getCell(7);
+        if (statusCell != null && statusCell.getCellTypeEnum() != null && CellType.STRING.equals(statusCell.getCellTypeEnum())
+                && (FIRST_TRIAL_MARK.equals(statusCell.getStringCellValue()) || UNTREATED_MARK.equals(statusCell.getStringCellValue()))) {
+            LOG.warn(prefix + "状态为“未受理”或“初审公告”！");
             return false;
         }
         return true;
