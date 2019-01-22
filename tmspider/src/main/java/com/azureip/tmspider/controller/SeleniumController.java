@@ -2,12 +2,12 @@ package com.azureip.tmspider.controller;
 
 import com.azureip.tmspider.service.RegistrationService;
 import com.azureip.tmspider.util.SpringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.openqa.selenium.*;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.remote.Command;
-import org.openqa.selenium.remote.FileDetector;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.scheduling.annotation.Async;
@@ -15,9 +15,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -30,6 +28,22 @@ public class SeleniumController {
     private static String resultWinTitle = "商标检索结果";
     private static String detailWinTitle = "商标详细内容";
     private static String rejectionMark = "驳回通知发文";
+
+    static {
+        String projectBase = RegistrationService.class.getClassLoader().getResource("").getPath();
+        CHROME_DRIVER_DIR = projectBase + "drivers/chromedriver.exe";
+        FF_DRIVER_DIR = projectBase + "drivers/geckodriver.exe";
+        dateFormat = new SimpleDateFormat("yyyy年MM月dd日");
+    }
+
+    private static final Logger LOG = LogManager.getLogger(RegistrationService.class);
+    private static final String SEARCH_WIN = "商标状态检索";
+    private static final String RESULT_WIN = "商标检索结果";
+    private static final String DETAIL_WIN = "商标详细内容";
+    private static final String REJECT_MARK = "驳回通知发文";
+    private static final String CHROME_DRIVER_DIR;
+    private static final String FF_DRIVER_DIR;
+    private static final SimpleDateFormat dateFormat;
 
     private static AtomicBoolean isOperating = new AtomicBoolean(true);
 
@@ -116,30 +130,28 @@ public class SeleniumController {
         // options.addArguments("user-agent=" + userAgent);
         // options.addArguments("--user-data-dir=C:/Users/lewiszhang/AppData/Local/Google/Chrome/User Data");
         // ChromeDriver driver = new ChromeDriver(options);
+        System.setProperty("webdriver.chrome.driver", CHROME_DRIVER_DIR);
+        System.setProperty("webdriver.gecko.driver", FF_DRIVER_DIR);
 
         // 创建FireFox驱动
         // GeckoDriverService geckoDriverService = new GeckoDriverService.Builder()
         //         .usingFirefoxBinary(new FirefoxBinary(new File(firefoxBinDir)))
         //         .usingDriverExecutable(new File(firefoxDriverDir)).build();
-        // FirefoxDriver driver = new FirefoxDriver();
+        FirefoxDriver driver = new FirefoxDriver();
         // driver.manage().addCookie(new Cookie("JSESSIONID","8358404E2F0617FBACFD9BD97CA76C34"));
         // 设置等待方式及时间
         // driver.manage().window().setSize(new Dimension(1200, 700));
         // driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
         // driver.manage().timeouts().pageLoadTimeout(15, TimeUnit.SECONDS);
         // driver.manage().timeouts().setScriptTimeout(10, TimeUnit.SECONDS);
-        // driver.get("https://www.baidu.com");
-        // wait(1000);
+        driver.get("http://wsjs.saic.gov.cn/txnDetail2.do?y7bRbp=qmFRXP.m7QubD_8osxg3LA040kQRsHyF3dTLwnQ.MMYMimxa7OMVeNF83beSqEuHiqolJ8QSfaTGtFLiRt7r.EV4sZTr99hcHO2QSewWVbwdcvFQb5QEjlt7G5uVGuaBLkzPZWDFApiUDri9GgIGCQM6OlkO7aKLuRr_8vIfYME4DVcy&c1K5tw0w6_=2zq343QYCG3JEjHPWaWfPFiLDzglt944MT2B.TcO8b2tFAPLTBxDherUFbLU3nboi8MuWVeQlS9bS4MsQ265B_FT8hXoLGOtiho9kAaPW8QSK2OqZe6UKtHrLdbUmzWkcCOJPU1TlXQnYpnq3.gmEoDo7a_9Um2MuRkY6S7M0RhxbdkxWH1xAX41eieskl3wh2vYxgmNxl3w4usdSPI9i31gs_Xcztjf_UUD.NZK88QqIrJVFgrmvyDjxb.VyHbRG");
+        wait(5000);
+        driver.navigate().refresh();
         // driver.executeScript("window.open('https://www.sogou.com');");
         // wait(1500);
         // driver.quit();
 
-        RegistrationService service = new RegistrationService();
-        try {
-            service.optRejections(new File("D:/TMSpider/mark_ann"), new File("D:/TMSpider/mark_rej"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
     }
 
     // 使用FirefoxDriver通过注册号查询驳回信息

@@ -40,12 +40,15 @@ public class RegistrationController {
         }
     }
 
-    // 测试URL: http://localhost/reg/optRej
+    /**
+     * 处理表格（查询驳回，添加链接）
+     * URL: http://localhost/reg/optRej
+     */
     @GetMapping("optRej")
     public GlobalResponse optRejections() {
         GlobalResponse<String> response = new GlobalResponse<>();
         // 获取待处理的EXCEL文件夹
-        File srcDir = new File("D:/TMSpider/mark_ann");
+        File srcDir = new File("D:/TMSpider/src_file");
         File tarDir = new File("D:/TMSpider/mark_rej");
         try {
             List<String> fileNames = registrationService.optRejections(srcDir, tarDir);

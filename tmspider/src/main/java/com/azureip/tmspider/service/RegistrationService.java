@@ -1,6 +1,7 @@
 package com.azureip.tmspider.service;
 
 import com.azureip.tmspider.exception.RetriedTooManyTimesException;
+import com.azureip.tmspider.util.SeleniumUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.common.usermodel.HyperlinkType;
@@ -18,9 +19,6 @@ import org.openqa.selenium.firefox.internal.ProfilesIni;
 import org.openqa.selenium.logging.LogEntries;
 import org.openqa.selenium.logging.LogEntry;
 import org.openqa.selenium.logging.LogType;
-import org.openqa.selenium.logging.LoggingPreferences;
-import org.openqa.selenium.remote.CapabilityType;
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Service;
@@ -35,12 +33,17 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
 
 @Service
 public class RegistrationService {
-    private static final Logger LOG = LogManager.getLogger(RegistrationService.class);
+    static {
+        String projectBase = RegistrationService.class.getClassLoader().getResource("").getPath();
+        CHROME_DRIVER_DIR = projectBase + "drivers/chromedriver.exe";
+        FF_DRIVER_DIR = projectBase + "drivers/geckodriver.exe";
+        dateFormat = new SimpleDateFormat("yyyy年MM月dd日");
+    }
 
+    private static final Logger LOG = LogManager.getLogger(RegistrationService.class);
     private static final String SEARCH_WIN = "商标状态检索";
     private static final String RESULT_WIN = "商标检索结果";
     private static final String DETAIL_WIN = "商标详细内容";
@@ -53,18 +56,11 @@ public class RegistrationService {
     // private static final String USER_AGENT_IE = "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko";
     private static final SimpleDateFormat dateFormat;
 
-    static {
-        String projectBase = RegistrationService.class.getClassLoader().getResource("").getPath();
-        CHROME_DRIVER_DIR = projectBase + "drivers/chromedriver.exe";
-        FF_DRIVER_DIR = projectBase + "drivers/geckodriver.exe";
-        dateFormat = new SimpleDateFormat("yyyy年MM月dd日");
-    }
-
     /**
-     * 开始操作
+     * 处理表格（查询驳回，添加链接）
      */
     public List<String> optRejections(File srcDir, File tarDir) throws IOException {
-        LOG.info("开始查询驳回数据...");
+        LOG.info("开始处理表格（查询驳回，添加链接）...");
         File[] pendingFiles = srcDir.listFiles();
         List<String> fileNames = new ArrayList<>();
 
@@ -92,7 +88,7 @@ public class RegistrationService {
             fileNames.add(fileName);
             LOG.info("[" + (i + 1) + "" + pendingFiles.length + "]《" + fileName + "》处理完成");
         }
-        LOG.info("驳回数据处理完成！");
+        LOG.info("表格处理（查询驳回，添加链接）完成！");
         return fileNames;
     }
 
@@ -133,12 +129,12 @@ public class RegistrationService {
             // threadWait((500 + random.nextInt(1500)));
             threadWait(500);
         }
-        quitBrowser(driver);
+        SeleniumUtil.quitBrowser(driver);
     }
 
     // 查询驳回信息并添加链接
     private boolean queryRejectionData(WebDriver driver, XSSFWorkbook workbook, int rowIndex) {
-        switchWindows(driver, SEARCH_WIN);
+        SeleniumUtil.switchByTitle(driver, SEARCH_WIN);
         XSSFSheet sheet = workbook.getSheetAt(0);
         int totalRows = sheet.getLastRowNum();
         XSSFRow row = sheet.getRow(rowIndex);
@@ -157,7 +153,7 @@ public class RegistrationService {
         submitBtn.submit();
 
         // 切换到结果页，等待结果加载完成后，点击详情页链接
-        switchWindows(driver, RESULT_WIN);
+        SeleniumUtil.switchByTitle(driver, RESULT_WIN);
         int resultQueryTimes = 0;
         WebElement resultEle = null;
         while (resultEle == null) {
@@ -180,20 +176,20 @@ public class RegistrationService {
                     }
                 });
             } catch (TimeoutException e) {
-                switchWindows(driver, SEARCH_WIN);
+                SeleniumUtil.switchByTitle(driver, SEARCH_WIN);
                 submitBtn.submit();
             } finally {
-                switchWindows(driver, RESULT_WIN);
+                SeleniumUtil.switchByTitle(driver, RESULT_WIN);
             }
-            // 重试10次后，重新打开浏览器
-            if (resultQueryTimes >= 8) {
+            // 重试5次后，重新打开浏览器
+            if (resultQueryTimes >= 5) {
                 throw new RetriedTooManyTimesException();
             }
         }
         resultEle.click();
 
         // 切换到详情页，获取流程列表
-        switchWindows(driver, DETAIL_WIN);
+        SeleniumUtil.switchByTitle(driver, DETAIL_WIN);
         int detailQueryTimes = 0;
         WebElement regFlowsEle = null;
         while (regFlowsEle == null) {
@@ -222,12 +218,12 @@ public class RegistrationService {
                 // printLog(driver, prefix);
             } catch (TimeoutException | ElementNotInteractableException e) {
                 LOG.debug("[248] - TimeoutException | ElementNotInteractableException");
-                switchWindows(driver, RESULT_WIN);
+                SeleniumUtil.switchByTitle(driver, RESULT_WIN);
                 resultEle.click();
             } finally {
-                switchWindows(driver, DETAIL_WIN);
+                SeleniumUtil.switchByTitle(driver, DETAIL_WIN);
             }
-            if (detailQueryTimes >= 8) {
+            if (detailQueryTimes >= 5) {
                 throw new RetriedTooManyTimesException();
             }
         }
@@ -293,25 +289,12 @@ public class RegistrationService {
         return true;
     }
 
-    // 关闭所有窗口
-    private void quitBrowser(WebDriver driver) {
-        if (driver == null) {
-            return;
-        }
-        Set<String> handles = driver.getWindowHandles();
-        for (String handle : handles) {
-            driver.switchTo().window(handle).close();
-        }
-        // driver.quit();
-    }
-
     // 关闭所有窗口并重新创建
     private WebDriver quitAndRenewBrowser(WebDriver driver) {
         if (driver == null) {
             while (driver == null) {
                 driver = initQueryPage();
             }
-            return driver;
         } else {
             Set<String> handles = driver.getWindowHandles();
             for (String handle : handles) {
@@ -321,43 +304,14 @@ public class RegistrationService {
             while (driver == null) {
                 driver = initQueryPage();
             }
-            return driver;
         }
-        // driver.quit();
+        return driver;
     }
 
     // 初始化查询页面
     private WebDriver initQueryPage() {
         LOG.warn("正在初始化浏览器...");
-        boolean useChrome = false;
-        WebDriver driver = null;
-        if (useChrome) {
-            ChromeOptions options = new ChromeOptions();
-            // DesiredCapabilities cap = DesiredCapabilities.chrome();
-            // cap.setCapability(ChromeOptions.CAPABILITY, options);
-            // LoggingPreferences logPref = new LoggingPreferences();
-            // logPref.enable(LogType.PERFORMANCE, Level.ALL);
-            // cap.setCapability(CapabilityType.LOGGING_PREFS, logPref);
-            // options.setCapability(ChromeOptions.CAPABILITY, cap);
-            driver = new ChromeDriver(options);
-        } else {
-            // DesiredCapabilities cap = DesiredCapabilities.firefox();
-            // LoggingPreferences logPref = new LoggingPreferences();
-            // logPref.enable(LogType.PERFORMANCE, Level.ALL);
-            // cap.setCapability(CapabilityType.LOGGING_PREFS, logPref);
-            FirefoxOptions options = new FirefoxOptions();
-            FirefoxProfile profile = new ProfilesIni().getProfile("default");
-            options.setProfile(profile);
-            options.addArguments("-safe-mode");
-            driver = new FirefoxDriver(options);
-        }
-
-        driver.manage().window().setPosition(new Point(0, 0));
-        // for Chrome
-        // driver.manage().window().setSize(new Dimension(1002,538));
-        // for Firefox
-        driver.manage().window().setSize(new Dimension(1014,619));
-
+        WebDriver driver = SeleniumUtil.initDriver(false);
         int retryTimes = 0;
         // 打开检索系统主页
         WebElement statusQueryEle = null;
@@ -377,7 +331,7 @@ public class RegistrationService {
             }
             if (retryTimes >= 3) {
                 LOG.error("打开检索系统主页超时！");
-                quitBrowser(driver);
+                SeleniumUtil.quitBrowser(driver);
                 // throw new InitStatusQueryPageException();
                 return null;
             }
@@ -393,48 +347,11 @@ public class RegistrationService {
             });
         } catch (TimeoutException e) {
             LOG.error("跳转到“状态查询”超时！");
-            quitBrowser(driver);
+            SeleniumUtil.quitBrowser(driver);
             // throw new InitStatusQueryPageException();
             return null;
         }
         return driver;
-    }
-
-    // 通过窗口标题切换窗口
-    private void switchWindows(WebDriver driver, String tarWinTitle) {
-        // LOG.warn("[切换窗口] ==> " + tarWinTitle);
-        //获取所有的窗口句柄
-        Set<String> handles = driver.getWindowHandles();
-        //获取当前窗口的句柄
-        String currentHandle = driver.getWindowHandle();
-        //获取当前窗口的title
-        String currentTitle = driver.getTitle();
-        if (currentTitle.equals(tarWinTitle)) {
-            return;
-        }
-        for (String handle : handles) {
-            //略过当前窗口
-            if (handle.equals(currentHandle)) {
-                continue;
-            }
-            //切换并检查其Title是否和目标窗口的Title是否相同
-            if ((driver.switchTo().window(handle).getTitle()).equals(tarWinTitle)) {
-                return;
-            }
-        }
-    }
-
-    // 通过句柄切换窗口
-    private void switchTo(WebDriver driver, String targetWin) {
-        //获取所有的窗口句柄
-        Set<String> windows = driver.getWindowHandles();
-        for (String window : windows) {
-            //切换并检查其title是否和目标窗口的title是否相同，是则返回true，否则继续
-            if (window.equals(targetWin)) {
-                driver.switchTo().window(window);
-                return;
-            }
-        }
     }
 
     // 线程等待
