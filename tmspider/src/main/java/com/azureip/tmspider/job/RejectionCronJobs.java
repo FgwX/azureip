@@ -9,6 +9,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * 驳回数据相关定时任务
+ */
 @Component
 public class RejectionCronJobs {
 
@@ -19,6 +22,7 @@ public class RejectionCronJobs {
         this.rejectionService = rejectionService;
     }
 
+    // 驳回信息查询任务（第天凌晨1点执行）
     @Scheduled(cron = "0 0 1 * * ?")
     public void cronTest() {
         // 第一位，表示秒，取值0-59
