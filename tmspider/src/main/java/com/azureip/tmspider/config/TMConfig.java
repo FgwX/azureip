@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -16,7 +17,7 @@ import java.util.concurrent.Executor;
 @Configuration
 @EnableAsync
 @EnableWebMvc
-// @EnableScheduling
+@EnableScheduling
 public class TMConfig implements WebMvcConfigurer, AsyncConfigurer {
 
     @Override
@@ -53,9 +54,10 @@ public class TMConfig implements WebMvcConfigurer, AsyncConfigurer {
         viewResolver.setSuffix(".html");
         return viewResolver;
     }
-    //    @Override
-    //    public void addViewControllers(ViewControllerRegistry registry) {
-    //        registry.addViewController("/i").setViewName("/index.html");
-    //        registry.setOrder(Ordered.HIGHEST_PRECEDENCE);
-    //    }
+
+    /*@Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+        registry.addViewController("/i").setViewName("/index.html");
+        registry.setOrder(Ordered.HIGHEST_PRECEDENCE);
+    }*/
 }

@@ -13,7 +13,7 @@ import java.util.List;
 @Controller
 @RequestMapping("rej")
 public class RejectionController {
-    final RejectionService rejectionService;
+    private final RejectionService rejectionService;
 
     @Autowired
     public RejectionController(RejectionService rejectionService) {
