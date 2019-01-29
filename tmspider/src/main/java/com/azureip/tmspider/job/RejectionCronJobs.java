@@ -1,12 +1,15 @@
 package com.azureip.tmspider.job;
 
 import com.azureip.tmspider.service.RejectionService;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
+import javax.swing.text.StyledEditorKit;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -22,6 +25,11 @@ public class RejectionCronJobs {
     @Autowired
     public RejectionCronJobs(RejectionService rejectionService) {
         this.rejectionService = rejectionService;
+    }
+
+    @Scheduled(cron = "0 0 1 * * ?")
+    public void registrationQueryJob(){
+
     }
 
     // 驳回信息查询任务（第天凌晨1点执行）
@@ -46,8 +54,14 @@ public class RejectionCronJobs {
         File tarDir = new File("D:/TMSpider/mark_rej");
         try {
             List<String> fileNames = rejectionService.queryRejections(srcDir, tarDir);
-            for (String fileName : fileNames) {
-                System.out.println(fileName);
+            if (CollectionUtils.isEmpty(fileNames)) {
+                LOG.warn("文件夹为空");
+            } else {
+                StringBuilder files = new StringBuilder();
+                for (String fileName: fileNames) {
+                    files.append(fileName);
+                }
+                LOG.info("已处理的文件有：" + files.toString());
             }
         } catch (IOException e) {
             e.printStackTrace();

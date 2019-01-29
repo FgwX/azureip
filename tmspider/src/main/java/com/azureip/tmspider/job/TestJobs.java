@@ -10,22 +10,22 @@ import org.springframework.stereotype.Component;
 public class TestJobs {
     private static final Logger LOG = LogManager.getLogger(TestJobs.class);
 
-    @Async("tmTaskScheduler")
+    // @Async("tmTaskScheduler")
     // @Scheduled(cron = "0/5 * * * * ?")
     public void job1() {
         LOG.warn(Thread.currentThread().getName() + " -> Job1: started...");
         final long start = System.currentTimeMillis();
-        while ((System.currentTimeMillis() - start) < 4000) {
+        while ((System.currentTimeMillis() - start) < 10000) {
         }
         LOG.warn(Thread.currentThread().getName() + " -> Job1: ended!");
     }
 
-    @Async("tmTaskScheduler")
+    // @Async("tmTaskScheduler")
     // @Scheduled(cron = "2/5 * * * * ?")
     public void job2() {
         LOG.warn(Thread.currentThread().getName() + " -> Job2: started...");
         final long start = System.currentTimeMillis();
-        while ((System.currentTimeMillis() - start) < 4000) {
+        while ((System.currentTimeMillis() - start) < 10000) {
         }
         LOG.warn(Thread.currentThread().getName() + " -> Job2: ended!");
     }

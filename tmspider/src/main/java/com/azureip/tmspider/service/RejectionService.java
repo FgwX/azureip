@@ -41,7 +41,6 @@ public class RejectionService {
      * 处理表格（查询驳回）
      */
     public List<String> queryRejections(File srcDir, File tarDir) throws IOException {
-        LOG.info("开始处理表格（查询驳回）...");
         File[] pendingFiles = srcDir.listFiles();
         List<String> fileNames = new ArrayList<>();
 
@@ -69,7 +68,6 @@ public class RejectionService {
             fileNames.add(fileName);
             LOG.info("[" + (i + 1) + "" + pendingFiles.length + "]《" + fileName + "》处理完成");
         }
-        LOG.info("表格处理（查询驳回）完成！");
         return fileNames;
     }
 
