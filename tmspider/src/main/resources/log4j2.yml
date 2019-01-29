@@ -33,12 +33,16 @@ Configuration:
       - name: ROLLING_FILE
         ignoreExceptions: false
         fileName: ${log.path}/${project.name}.log
-        filePattern: "${log.path}/$${date:yyyy-MM}/${project.name}-%d{yyyy-MM-dd}-%i.log.gz"
+        #filePattern: "${log.path}/$${date:yyyy-MM}/${project.name}-%d{yyyy-MM-dd}-%i.log.gz"
+        filePattern: "${log.path}/${project.name}-%d{yyyy-MM-dd}.log"
         PatternLayout:
           pattern: "[%d{yyyy-MM-dd HH:mm:ss,SSS}|%4p|%F:%L] - %m%n"
         Policies:
-          SizeBasedTriggeringPolicy:
-            size: "128 MB"
+          TimeBasedTriggeringPolicy:
+            modulate: true
+            interval: 1
+          #SizeBasedTriggeringPolicy:
+            #size: "128 MB"
         DefaultRolloverStrategy:
           max: 1000
 ####################################################################################################
