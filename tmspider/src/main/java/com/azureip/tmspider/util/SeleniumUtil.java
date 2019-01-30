@@ -3,6 +3,8 @@ package com.azureip.tmspider.util;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.FirefoxProfile;
@@ -20,23 +22,23 @@ public class SeleniumUtil {
     public static WebDriver initDriver(boolean useChrome) {
         WebDriver driver = null;
         if (useChrome) {
-            // ChromeOptions options = new ChromeOptions();
+            ChromeOptions options = new ChromeOptions();
             // DesiredCapabilities cap = DesiredCapabilities.chrome();
             // cap.setCapability(ChromeOptions.CAPABILITY, options);
             // LoggingPreferences logPref = new LoggingPreferences();
             // logPref.enable(LogType.PERFORMANCE, Level.ALL);
             // cap.setCapability(CapabilityType.LOGGING_PREFS, logPref);
             // options.setCapability(ChromeOptions.CAPABILITY, cap);
-            // driver = new ChromeDriver(options);
+            driver = new ChromeDriver(options);
         } else {
             // DesiredCapabilities cap = DesiredCapabilities.firefox();
             // LoggingPreferences logPref = new LoggingPreferences();
             // logPref.enable(LogType.PERFORMANCE, Level.ALL);
             // cap.setCapability(CapabilityType.LOGGING_PREFS, logPref);
             FirefoxOptions options = new FirefoxOptions();
-            FirefoxProfile profile = new ProfilesIni().getProfile("default");
-            options.setProfile(profile);
-            // options.addArguments("-safe-mode");
+            // FirefoxProfile profile = new ProfilesIni().getProfile("default");
+            // options.setProfile(profile);
+            options.addArguments("-safe-mode");
             driver = new FirefoxDriver(options);
         }
 

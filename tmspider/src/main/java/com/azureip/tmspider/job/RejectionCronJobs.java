@@ -32,7 +32,7 @@ public class RejectionCronJobs {
 
     }
 
-    // 驳回信息查询任务（第天凌晨1点执行）
+    // 驳回信息查询任务（每天凌晨1点执行）
     @Scheduled(cron = "0 0 1 * * ?")
     public void rejectionQueryJob() {
         LOG.info("====> 驳回信息查询任务开始 <====");
@@ -49,7 +49,6 @@ public class RejectionCronJobs {
         // (-)减号：表达一个范围，如在小时字段中使用“10-12”，则表示从10到12点，即10,11,12
         // (,)逗号：表达一个列表值，如在星期字段中使用“1,2,4”，则表示星期一，星期二，星期四
         // (/)斜杠：如：x/y，x是开始值，y是步长，比如在第一位（秒） 0/15就是，从0秒开始，每15秒，最后就是0，15，30，45，60（另：*/y，等同于0/y）。
-
         File srcDir = new File("D:/TMSpider/src_file");
         File tarDir = new File("D:/TMSpider/mark_rej");
         try {
