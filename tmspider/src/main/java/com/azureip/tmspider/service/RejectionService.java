@@ -73,7 +73,7 @@ public class RejectionService {
 
     private void queryRejections(String fileName, XSSFWorkbook workBook) {
         XSSFSheet sheet = workBook.getSheetAt(0);
-        WebDriver driver = SeleniumUtil.initDriver(false);
+        WebDriver driver = SeleniumUtil.initBrowser(false, 5000L);
 
         // 循环处理行（跳过标题行）
         for (int i = 1; i <= sheet.getLastRowNum(); i++) {

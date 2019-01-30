@@ -1,21 +1,17 @@
 package com.azureip.tmspider.service;
 
 import com.azureip.tmspider.exception.RetriedTooManyTimesException;
+import com.azureip.tmspider.util.ExcelUtil;
 import com.azureip.tmspider.util.SeleniumUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.poi.common.usermodel.HyperlinkType;
-import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.xssf.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.json.JSONObject;
 import org.openqa.selenium.*;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxOptions;
-import org.openqa.selenium.firefox.FirefoxProfile;
-import org.openqa.selenium.firefox.internal.ProfilesIni;
 import org.openqa.selenium.logging.LogEntries;
 import org.openqa.selenium.logging.LogEntry;
 import org.openqa.selenium.logging.LogType;
@@ -28,11 +24,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Service
 public class RegistrationService {
@@ -40,7 +33,6 @@ public class RegistrationService {
         String projectBase = RegistrationService.class.getClassLoader().getResource("").getPath();
         CHROME_DRIVER_DIR = projectBase + "drivers/chromedriver.exe";
         FF_DRIVER_DIR = projectBase + "drivers/geckodriver.exe";
-        dateFormat = new SimpleDateFormat("yyyy年MM月dd日");
     }
 
     private static final Logger LOG = LogManager.getLogger(RegistrationService.class);
@@ -54,7 +46,6 @@ public class RegistrationService {
     // private static final String FF_BIN_DIR = "C:/Program Files (x86)/Mozilla Firefox/firefox.exe";
     // private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36";
     // private static final String USER_AGENT_IE = "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko";
-    private static final SimpleDateFormat dateFormat;
 
     /**
      * 处理表格（查询驳回，添加链接）
@@ -96,7 +87,7 @@ public class RegistrationService {
     private void queryRejectionAndAddLink(String fileName, XSSFWorkbook workBook) {
         String prefix = "[" + fileName + "] - ";
         XSSFSheet sheet = workBook.getSheetAt(0);
-        WebDriver driver = quitAndRenewBrowser(null);
+        WebDriver driver = reInitBrowser(null);
 
         // 循环处理行（跳过标题行）
         for (int i = 1; i <= sheet.getLastRowNum(); i++) {
@@ -112,22 +103,22 @@ public class RegistrationService {
                     success = queryRejectionData(driver, workBook, i);
                 } catch (RetriedTooManyTimesException e) {
                     LOG.error(prefix + "[" + regNum + "]重试次数过多，重新初始化...");
-                    driver = quitAndRenewBrowser(driver);
+                    driver = reInitBrowser(driver);
                 } catch (NoSuchElementException e) {
                     LOG.error(prefix + "[" + regNum + "]页面切换出错，重新初始化...");
-                    driver = quitAndRenewBrowser(driver);
+                    driver = reInitBrowser(driver);
                 } catch (StaleElementReferenceException e) {
-                    LOG.error(prefix + "[" + regNum + "]操作元素已过期，重新初始化...");
-                    driver = quitAndRenewBrowser(driver);
+                    LOG.error(prefix + "[" + regNum + "]操作元素过期，重新初始化...");
+                    driver = reInitBrowser(driver);
                 } catch (Exception e) {
-                    LOG.error(prefix + "[" + regNum + "]未知异常: ");
+                    LOG.error(prefix + "[" + regNum + "]未知异常: " + e.getMessage());
                     e.printStackTrace();
                 }
             }
-            // 设置随机等待时间，控制速度
+            // 设置等待时间，控制速度
             // Random random = new Random();
             // threadWait((500 + random.nextInt(1500)));
-            threadWait(500);
+            threadWait(200);
         }
         SeleniumUtil.quitBrowser(driver);
     }
@@ -140,11 +131,10 @@ public class RegistrationService {
         XSSFRow row = sheet.getRow(rowIndex);
         String regNum = row.getCell(0).getStringCellValue();
         String prefix = "[" + rowIndex + "/" + totalRows + "]-[" + regNum + "] - ";
-        if (rowIndex > 1
-                && regNum.equals(sheet.getRow(rowIndex - 1).getCell(0).getStringCellValue())) {
+        /*if (rowIndex > 1 && regNum.equals(sheet.getRow(rowIndex - 1).getCell(0).getStringCellValue())) {
             LOG.warn(prefix + "此行注册号与上一行相同，不再查询。");
             return true;
-        }
+        }*/
         // 切换到查询页，输入注册号，进行查询
         WebElement inputBox = driver.findElement(By.xpath("//*[@id='submitForm']//input[@name='request:sn']"));
         inputBox.clear();
@@ -154,13 +144,13 @@ public class RegistrationService {
 
         // 切换到结果页，等待结果加载完成后，点击详情页链接
         SeleniumUtil.switchByTitle(driver, RESULT_WIN);
-        int resultQueryTimes = 0;
+        int resultRetryTimes = 0;
         WebElement resultEle = null;
         while (resultEle == null) {
-            resultQueryTimes++;
             try {
                 // 每隔500毫秒去调用一下until中的函数，默认是0.5秒，如果等待3秒还没有找到元素，则抛出异常。
-                resultEle = new WebDriverWait(driver, (resultQueryTimes > 1 ? 4 : 5), 500).until(new ExpectedCondition<WebElement>() {
+                resultEle = new WebDriverWait(driver, (resultRetryTimes++ > 0 ? 3 : 5), 250).until(new ExpectedCondition<WebElement>() {
+                    @NullableDecl
                     @Override
                     public WebElement apply(WebDriver driver) {
                         try {
@@ -170,7 +160,7 @@ public class RegistrationService {
                                 return null;
                             }
                         } catch (StaleElementReferenceException e) {
-                            LOG.error("获取查询结果异常: " + e.getMessage());
+                            LOG.error("结果页元素已过期: " + e.getMessage());
                             return null;
                         }
                     }
@@ -182,7 +172,7 @@ public class RegistrationService {
                 SeleniumUtil.switchByTitle(driver, RESULT_WIN);
             }
             // 重试5次后，重新打开浏览器
-            if (resultQueryTimes >= 5) {
+            if (resultRetryTimes >= 5) {
                 throw new RetriedTooManyTimesException();
             }
         }
@@ -190,13 +180,11 @@ public class RegistrationService {
 
         // 切换到详情页，获取流程列表
         SeleniumUtil.switchByTitle(driver, DETAIL_WIN);
-        int detailQueryTimes = 0;
+        int detailRetryTimes = 0;
         WebElement regFlowsEle = null;
         while (regFlowsEle == null) {
-            detailQueryTimes++;
             try {
-                final int returnFlag = detailQueryTimes;
-                regFlowsEle = new WebDriverWait(driver, (detailQueryTimes > 1 ? 4 : 5), 500).until(new ExpectedCondition<WebElement>() {
+                regFlowsEle = new WebDriverWait(driver, (detailRetryTimes++ > 0 ? 3 : 5), 250).until(new ExpectedCondition<WebElement>() {
                     @NullableDecl
                     @Override
                     public WebElement apply(WebDriver driver) {
@@ -205,7 +193,7 @@ public class RegistrationService {
                             WebElement requestID = driver.findElement(By.xpath("//input[@id='request_tid']"));
                             if (regNum.equals(curRegNumEle.getAttribute("value"))) {
                                 return driver.findElement(By.xpath("/html/body/div[@class='xqboxx']/div/ul"));
-                            } else if (returnFlag >= 5 && !StringUtils.isEmpty(requestID.getAttribute("value"))) {
+                            } else if (!StringUtils.isEmpty(requestID.getAttribute("value"))) {
                                 return requestID;
                             }
                             return null;
@@ -215,7 +203,6 @@ public class RegistrationService {
                         }
                     }
                 });
-                // printLog(driver, prefix);
             } catch (TimeoutException | ElementNotInteractableException e) {
                 LOG.debug("[248] - TimeoutException | ElementNotInteractableException");
                 SeleniumUtil.switchByTitle(driver, RESULT_WIN);
@@ -223,61 +210,34 @@ public class RegistrationService {
             } finally {
                 SeleniumUtil.switchByTitle(driver, DETAIL_WIN);
             }
-            if (detailQueryTimes >= 5) {
-                throw new RetriedTooManyTimesException();
+            if (detailRetryTimes >= 5) {
+                break;
             }
         }
 
-        XSSFCreationHelper creationHelper = workbook.getCreationHelper();
-        // 如果返回Input[id=request_tid]，则说明此商标正等待受理，暂无法查询详细信息
-        List<WebElement> regFlows = regFlowsEle.findElements(By.xpath("/html/body/div[@class='xqboxx']/div/ul/li"));
-        if ("request_tid".equals(regFlowsEle.getAttribute("id"))) {
-            // if (regFlows == null || regFlows.size() == 0) {
-            LOG.debug("[264] - 未受理");
-            // 设置链接
-            XSSFCell tmNmeCell = row.getCell(4) != null ? row.getCell(4) : row.createCell(4);
-            XSSFCellStyle linkStyle = workbook.createCellStyle();
-            XSSFFont linkFont = workbook.createFont();
-            linkFont.setUnderline((byte) 1);
-            linkFont.setColor(IndexedColors.BLUE.index);
-            linkStyle.setFont(linkFont);
-            XSSFHyperlink hyperLink = creationHelper.createHyperlink(HyperlinkType.URL);
-            hyperLink.setAddress(driver.getCurrentUrl());
-            tmNmeCell.setHyperlink(hyperLink);
-            tmNmeCell.setCellStyle(linkStyle);
-            // 设置公告状态为“未受理”
-            XSSFCell annStatCell = row.getCell(7) != null ? row.getCell(7) : row.createCell(7);
-            annStatCell.setCellValue("未受理");
-            LOG.info(prefix + "商标未受理，暂无详细信息");
+        XSSFCell tmNmeCell = row.getCell(4) != null ? row.getCell(4) : row.createCell(4);
+        XSSFCell rejDateCell = row.getCell(6) != null ? row.getCell(6) : row.createCell(6);
+        XSSFCell annStatCell = row.getCell(7) != null ? row.getCell(7) : row.createCell(7);
+        if (regFlowsEle == null) {
+            // 查询超时
+            ExcelUtil.setText(workbook, annStatCell, "查询超时");
+            LOG.info(prefix + "查询超时");
+        } else if ("request_tid".equals(regFlowsEle.getAttribute("id"))) {
+            // 未受理（返回Input[id=request_tid]，则说明此商标正等待受理，暂无法查询详细信息）
+            ExcelUtil.setHyperLink(workbook, tmNmeCell, driver.getCurrentUrl());
+            ExcelUtil.setText(workbook, annStatCell, "未受理");
+            LOG.info(prefix + "商标未受理");
         } else {
-            LOG.debug("[281] - 判断是否驳回");
-            // 设置链接
-            XSSFCell tmNmeCell = row.getCell(4) != null ? row.getCell(4) : row.createCell(4);
-            XSSFCellStyle linkStyle = workbook.createCellStyle();
-            XSSFFont linkFont = workbook.createFont();
-            linkFont.setUnderline((byte) 1);
-            linkFont.setColor(IndexedColors.BLUE.index);
-            linkStyle.setFont(linkFont);
-            XSSFHyperlink hyperLink = creationHelper.createHyperlink(HyperlinkType.URL);
-            hyperLink.setAddress(driver.getCurrentUrl());
-            tmNmeCell.setHyperlink(hyperLink);
-            tmNmeCell.setCellStyle(linkStyle);
-            // 判断并记录驳回日期
+            // 判断是否驳回
+            ExcelUtil.setHyperLink(workbook, tmNmeCell, driver.getCurrentUrl());
+            List<WebElement> regFlows = regFlowsEle.findElements(By.xpath("/html/body/div[@class='xqboxx']/div/ul/li"));
             boolean hasRejection = false;
             for (int i = 0; i < regFlows.size(); i++) {
                 WebElement flow = regFlows.get(i);
                 WebElement flowText = flow.findElement(By.xpath("/html/body/div[@class='xqboxx']/div/ul/li[" + (i + 1) + "]/table/tbody/tr/td[3]/span"));
                 if (REJECT_MARK.equals(flowText.getText())) {
                     WebElement rejectDate = flow.findElement(By.xpath("/html/body/div[@class='xqboxx']/div/ul/li[" + (i + 1) + "]/table/tbody/tr/td[5]"));
-                    XSSFCell rejDateCell = row.getCell(6) != null ? row.getCell(6) : row.createCell(6);
-                    try {
-                        XSSFCellStyle dateStyle = workbook.createCellStyle();
-                        dateStyle.setDataFormat(creationHelper.createDataFormat().getFormat("yyyy-mm-dd"));
-                        rejDateCell.setCellValue(dateFormat.parse(rejectDate.getText()));
-                        rejDateCell.setCellStyle(dateStyle);
-                    } catch (ParseException e) {
-                        rejDateCell.setCellValue("日期转换异常");
-                    }
+                    ExcelUtil.setDate(workbook, rejDateCell, rejectDate.getText().trim());
                     hasRejection = true;
                     LOG.info(prefix + "查询到驳回，日期为：" + rejectDate.getText());
                 }
@@ -290,20 +250,13 @@ public class RegistrationService {
     }
 
     // 关闭所有窗口并重新创建
-    private WebDriver quitAndRenewBrowser(WebDriver driver) {
-        if (driver == null) {
-            while (driver == null) {
-                driver = initQueryPage();
-            }
-        } else {
-            Set<String> handles = driver.getWindowHandles();
-            for (String handle : handles) {
-                driver.switchTo().window(handle).close();
-            }
-            driver = null;
-            while (driver == null) {
-                driver = initQueryPage();
-            }
+    private WebDriver reInitBrowser(WebDriver driver) {
+        if (driver != null) {
+            SeleniumUtil.quitBrowser(driver);
+        }
+        driver = null;
+        while (driver == null) {
+            driver = initQueryPage();
         }
         return driver;
     }
@@ -311,15 +264,15 @@ public class RegistrationService {
     // 初始化查询页面
     private WebDriver initQueryPage() {
         LOG.warn("正在初始化浏览器...");
-        WebDriver driver = SeleniumUtil.initDriver(false);
+        WebDriver driver = SeleniumUtil.initBrowser(false, null);
         int retryTimes = 0;
         // 打开检索系统主页
         WebElement statusQueryEle = null;
         while (statusQueryEle == null) {
-            retryTimes++;
             driver.get("http://wsjs.saic.gov.cn");
             try {
                 statusQueryEle = new WebDriverWait(driver, 6, 500).until(new ExpectedCondition<WebElement>() {
+                    @NullableDecl
                     @Override
                     public WebElement apply(WebDriver driver) {
                         // 选择商标状态查询
@@ -329,10 +282,9 @@ public class RegistrationService {
             } catch (TimeoutException e) {
                 LOG.error("重新打开[http://wsjs.saic.gov.cn]...");
             }
-            if (retryTimes >= 3) {
+            if (retryTimes++ >= 3) {
                 LOG.error("打开检索系统主页超时！");
                 SeleniumUtil.quitBrowser(driver);
-                // throw new InitStatusQueryPageException();
                 return null;
             }
         }
@@ -340,6 +292,7 @@ public class RegistrationService {
         // 等待页面加载完成（通过查询按钮判断页面是否加载完成）
         try {
             new WebDriverWait(driver, 12, 500).until(new ExpectedCondition<WebElement>() {
+                @NullableDecl
                 @Override
                 public WebElement apply(WebDriver driver) {
                     return driver.findElement(By.id("_searchButton"));

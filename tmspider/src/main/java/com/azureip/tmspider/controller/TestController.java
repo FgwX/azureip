@@ -1,19 +1,8 @@
 package com.azureip.tmspider.controller;
 
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.URL;
-import java.text.ParseException;
-import java.util.Random;
 
 @Controller
 @RequestMapping("test")
@@ -25,16 +14,26 @@ public class TestController {
         return "forward:index.html";
     }
 
-    public static void main(String[] args) throws ParseException, IOException {
-        FileInputStream in = new FileInputStream(new File("D:/TMSpider/test.xlsx"));
+    public static void main(String[] args) throws Exception {
+        // 获取EXCEL单元格字体
+        /*FileInputStream in = new FileInputStream(new File("D:/TMSpider/test.xlsx"));
         XSSFWorkbook workBook = new XSSFWorkbook(in);
         in.close();
-        XSSFCell cell = workBook.getSheetAt(0).getRow(1).getCell(6);
-        // System.out.println(cell.getStringCellValue());
+        final XSSFSheet sheet = workBook.getSheetAt(0);
+        final XSSFCreationHelper creationHelper = workBook.getCreationHelper();
+        final XSSFRow row = sheet.getRow(1);
+        final XSSFCell cell = row.getCell(6);
+        final XSSFCell cell1 = row.createCell(6);
+        ExcelUtil.setText(workBook,cell1,"test");
+        final FileOutputStream op = new FileOutputStream(new File("D:/TMSpider/target.xlsx"));
+        workBook.write(op);
+        op.close();*/
 
-        // System.out.println(cell.getNumericCellValue());
-        System.out.println(cell.getCellTypeEnum().toString());
-        // System.out.println(CellType.BOOLEAN.compareTo(cell.getCellTypeEnum()));
+        // 死循环
+        /*int random = 0;
+        while (random<100) {
+            random = random * 10;
+        }*/
 
         // 获取文件绝对路径
         /*final URL url = TestController.class.getClassLoader().getResource("");

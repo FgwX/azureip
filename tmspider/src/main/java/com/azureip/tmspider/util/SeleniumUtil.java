@@ -7,8 +7,6 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
-import org.openqa.selenium.firefox.FirefoxProfile;
-import org.openqa.selenium.firefox.internal.ProfilesIni;
 
 import java.util.Objects;
 import java.util.Set;
@@ -19,8 +17,8 @@ public class SeleniumUtil {
     /**
      * WebDriver初始化
      */
-    public static WebDriver initDriver(boolean useChrome) {
-        WebDriver driver = null;
+    public static WebDriver initBrowser(boolean useChrome, Long loadTimeOut) {
+        WebDriver driver;
         if (useChrome) {
             ChromeOptions options = new ChromeOptions();
             // DesiredCapabilities cap = DesiredCapabilities.chrome();
@@ -48,7 +46,9 @@ public class SeleniumUtil {
         // for Firefox
         driver.manage().window().setSize(new Dimension(1014, 619));
         // driver.manage().timeouts().implicitlyWait(500, TimeUnit.SECONDS);
-        driver.manage().timeouts().pageLoadTimeout(5000, TimeUnit.MILLISECONDS);
+        if (loadTimeOut != null && loadTimeOut > 0) {
+            driver.manage().timeouts().pageLoadTimeout(loadTimeOut, TimeUnit.MILLISECONDS);
+        }
         // driver.manage().timeouts().setScriptTimeout(500, TimeUnit.MILLISECONDS);
         return driver;
     }
