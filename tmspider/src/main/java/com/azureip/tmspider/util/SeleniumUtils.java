@@ -14,7 +14,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-public class SeleniumUtil {
+public class SeleniumUtils {
 
     /**
      * WebDriver初始化

@@ -19,7 +19,7 @@ import org.apache.http.util.EntityUtils;
 import java.io.IOException;
 import java.util.*;
 
-public class HttpPoolUtil {
+public class HttpPoolUtils {
 
     private static PoolingHttpClientConnectionManager connectionManager = null;
     private static HttpClientBuilder httpBuilder = null;

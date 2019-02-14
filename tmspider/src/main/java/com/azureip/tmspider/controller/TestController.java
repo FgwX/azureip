@@ -1,7 +1,7 @@
 package com.azureip.tmspider.controller;
 
 import com.azureip.tmspider.service.RegistrationService;
-import com.azureip.tmspider.util.ExcelUtil;
+import com.azureip.tmspider.util.ExcelUtils;
 import org.apache.poi.xssf.usermodel.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -38,13 +38,33 @@ public class TestController {
     }
 
     public static void main(String[] args) {
-        javaMailTest();
+        dynamicLoadConfig();
+        // javaMailTest();
         // seleniumTest();
         // getExcelUnitFont();
         // deadLoop();
         // getAbsoluteFilePath();
         // getFirstDayOfMonth();
         // getRandomNum();
+    }
+
+    private static void dynamicLoadConfig() {
+        try {
+            Properties prop = new Properties();
+            String path = Thread.currentThread().getContextClassLoader().getResource("test.properties").getPath();
+            System.out.println(path);
+            FileInputStream in = new FileInputStream(path);
+            prop.load(in);
+            for (int i = 0; i < 100; i++) {
+                System.err.println(prop.getProperty("a"));
+                Thread.sleep(1000);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     // JavaMail测试
@@ -140,7 +160,7 @@ public class TestController {
             final XSSFRow row = sheet.getRow(1);
             final XSSFCell cell = row.getCell(6);
             final XSSFCell cell1 = row.createCell(6);
-            ExcelUtil.setText(workBook, cell1, "test");
+            ExcelUtils.setText(workBook, cell1, "test");
             final FileOutputStream op = new FileOutputStream(new File("D:/TMSpider/target.xlsx"));
             workBook.write(op);
             op.close();

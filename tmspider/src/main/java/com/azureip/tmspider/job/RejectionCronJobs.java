@@ -1,7 +1,6 @@
 package com.azureip.tmspider.job;
 
 import com.azureip.tmspider.service.RejectionService;
-import org.apache.commons.collections4.ListUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +8,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import javax.swing.text.StyledEditorKit;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -28,13 +26,13 @@ public class RejectionCronJobs {
     }
 
     @Scheduled(cron = "0 0 1 * * ?")
-    public void registrationQueryJob(){
+    public synchronized void registrationQueryJob() {
 
     }
 
     // 驳回信息查询任务（每天凌晨1点执行）
-    @Scheduled(cron = "0 0 3 * * ?")
-    public void rejectionQueryJob() {
+    @Scheduled(cron = "0 0 1 * * ?")
+    public synchronized void rejectionQueryJob() {
         LOG.info("====> 驳回信息查询任务开始 <====");
         // 第一位，表示秒，取值0-59
         // 第二位，表示分，取值0-59
@@ -57,7 +55,7 @@ public class RejectionCronJobs {
                 LOG.warn("文件夹为空");
             } else {
                 StringBuilder files = new StringBuilder();
-                for (String fileName: fileNames) {
+                for (String fileName : fileNames) {
                     files.append(fileName);
                 }
                 LOG.info("已处理的文件有：" + files.toString());

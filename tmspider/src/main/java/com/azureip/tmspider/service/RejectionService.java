@@ -1,6 +1,6 @@
 package com.azureip.tmspider.service;
 
-import com.azureip.tmspider.util.SeleniumUtil;
+import com.azureip.tmspider.util.SeleniumUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.CellType;
@@ -73,7 +73,7 @@ public class RejectionService {
 
     private void queryRejections(String fileName, XSSFWorkbook workBook) {
         XSSFSheet sheet = workBook.getSheetAt(0);
-        WebDriver driver = SeleniumUtil.initBrowser(false, 5000L);
+        WebDriver driver = SeleniumUtils.initBrowser(false, 5000L);
 
         // 循环处理行（跳过标题行）
         for (int i = 1; i <= sheet.getLastRowNum(); i++) {
@@ -155,7 +155,7 @@ public class RejectionService {
             // threadWait((300 + random.nextInt(1200)));
             threadWait(200);
         }
-        SeleniumUtil.quitBrowser(driver);
+        SeleniumUtils.quitBrowser(driver);
     }
 
     private boolean rowIsValid(XSSFRow row, String prefix) {

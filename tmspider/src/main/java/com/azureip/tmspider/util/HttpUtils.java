@@ -33,7 +33,7 @@ import java.net.UnknownHostException;
  * http://www.cnblogs.com/whatlonelytear/articles/4835538.html
  * 20170601
  */
-public class HttpUtil {
+public class HttpUtils {
 
     private static CloseableHttpClient client = null;
 
@@ -55,7 +55,7 @@ public class HttpUtil {
 
     public static CloseableHttpClient getHttpClient() {
         if (null == client) {
-            synchronized (HttpUtil.class) {
+            synchronized (HttpUtils.class) {
                 if (null == client) {
                     client = init();
                 }

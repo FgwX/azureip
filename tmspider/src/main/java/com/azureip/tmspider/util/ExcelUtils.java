@@ -7,7 +7,7 @@ import org.apache.poi.xssf.usermodel.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
-public class ExcelUtil {
+public class ExcelUtils {
 
     private static final String DATE_REGEX = "yyyy-mm-dd";
     private static final String FONT_NAME = "等线";
