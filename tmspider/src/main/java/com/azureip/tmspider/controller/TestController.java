@@ -1,23 +1,92 @@
 package com.azureip.tmspider.controller;
 
 import com.azureip.tmspider.service.RegistrationService;
+import com.azureip.tmspider.util.ExcelUtil;
+import org.apache.poi.xssf.usermodel.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Properties;
+import java.util.Random;
+
 @Controller
-@RequestMapping("test")
+@RequestMapping("")
 public class TestController {
 
     @GetMapping("test")
     public String test() {
-        System.out.println("Hello Test!");
+        System.err.println(">>>> Entering test method... <<<<");
         return "forward:index.html";
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
+        javaMailTest();
+        // seleniumTest();
+        // getExcelUnitFont();
+        // deadLoop();
+        // getAbsoluteFilePath();
+        // getFirstDayOfMonth();
+        // getRandomNum();
+    }
+
+    // JavaMail测试
+    private static void javaMailTest() {
+        try {
+            // 设置连接邮件服务器的参数
+            Properties properties = new Properties();
+            properties.setProperty("mail.smtp.auth", "true");
+            properties.setProperty("mail.transport.protocol", "smtp");
+            properties.setProperty("mail.smtp.host", "smtp.163.com");
+            // 创建定义整个应用程序所需的环境信息的Session对象
+            Session session = Session.getInstance(properties);
+            session.setDebug(true);
+            Message msg = new MimeMessage(session);
+            // 设置发件人地址
+            msg.setFrom(new InternetAddress("lewiszhang@azure-ip.com"));
+            // 设置收件人地址（可以增加多个收件人、抄送、密送），即下面这一行代码书写多行
+            // MimeMessage.RecipientType.TO：发送；CC：抄送；BCC：密送
+            msg.setRecipient(MimeMessage.RecipientType.TO, new InternetAddress("service@azure-ip.com"));
+            // 设置邮件主题
+            msg.setSubject("测试邮件主题");
+            // 设置邮件正文
+            msg.setContent("简单的纯文本邮件！", "text/html;charset=UTF-8");
+            // 设置邮件的发送时间,默认立即发送
+            msg.setSentDate(new Date());
+            // 根据session对象获取邮件传输对象Transport
+            Transport transport = session.getTransport();
+            // 设置发件人的账户名和密码
+            transport.connect("lewiszhang@azure-ip.com", "Cqwy860328");
+            // 发送邮件，并发送到所有收件人地址，message.getAllRecipients() 获取到的是在创建邮件对象时添加的所有收件人, 抄送人, 密送人
+            transport.sendMessage(msg, msg.getAllRecipients());
+            // 如果只想发送给指定的人，可以如下写法
+            // transport.sendMessage(msg, new Address[]{new InternetAddress("xxx@qq.com")});
+            // 关闭邮件连接
+            transport.close();
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Selenium测试 - Chrome启动参数
+    private static void seleniumTest() {
         String CHROME_DRIVER_DIR;
         String FF_DRIVER_DIR;
         String projectBase = RegistrationService.class.getClassLoader().getResource("").getPath();
@@ -49,7 +118,6 @@ public class TestController {
                 "--user-data-dir=C:/Users/fgwx/AppData/Local/Google/Chrome/User Data",
                 "--flag-switches-begin",
                 "--flag-switches-end data:");
-
         // options.addArguments("--no-sandbox","--user-data-dir=C:/Users/fgwx/AppData/Local/Google/Chrome/User Data","blink-settings=imagesEnabled=false");
         // DesiredCapabilities cap = DesiredCapabilities.chrome();
         // cap.setCapability(ChromeOptions.CAPABILITY, options);
@@ -58,44 +126,62 @@ public class TestController {
         // cap.setCapability(CapabilityType.LOGGING_PREFS, logPref);
         // options.setCapability(ChromeOptions.CAPABILITY, cap);
         ChromeDriver driver = new ChromeDriver(options);
-
         driver.get("chrome://version");
+    }
 
-        // 获取EXCEL单元格字体
-        /*FileInputStream in = new FileInputStream(new File("D:/TMSpider/test.xlsx"));
-        XSSFWorkbook workBook = new XSSFWorkbook(in);
-        in.close();
-        final XSSFSheet sheet = workBook.getSheetAt(0);
-        final XSSFCreationHelper creationHelper = workBook.getCreationHelper();
-        final XSSFRow row = sheet.getRow(1);
-        final XSSFCell cell = row.getCell(6);
-        final XSSFCell cell1 = row.createCell(6);
-        ExcelUtil.setText(workBook,cell1,"test");
-        final FileOutputStream op = new FileOutputStream(new File("D:/TMSpider/target.xlsx"));
-        workBook.write(op);
-        op.close();*/
+    // 获取EXCEL单元格字体
+    private static void getExcelUnitFont() {
+        try {
+            FileInputStream in = new FileInputStream(new File("D:/TMSpider/test.xlsx"));
+            XSSFWorkbook workBook = new XSSFWorkbook(in);
+            in.close();
+            final XSSFSheet sheet = workBook.getSheetAt(0);
+            final XSSFCreationHelper creationHelper = workBook.getCreationHelper();
+            final XSSFRow row = sheet.getRow(1);
+            final XSSFCell cell = row.getCell(6);
+            final XSSFCell cell1 = row.createCell(6);
+            ExcelUtil.setText(workBook, cell1, "test");
+            final FileOutputStream op = new FileOutputStream(new File("D:/TMSpider/target.xlsx"));
+            workBook.write(op);
+            op.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-        // 死循环
-        /*int random = 0;
-        while (random<100) {
+    // 死循环
+    private static void deadLoop() {
+        int random = 0;
+        while (random < 100) {
             random = random * 10;
-        }*/
+        }
+    }
 
-        // 获取文件绝对路径
-        /*final URL url = TestController.class.getClassLoader().getResource("");
-        System.out.println(url.getPath());*/
+    // 获取文件绝对路径
+    private static void getAbsoluteFilePath() {
+        final URL url = TestController.class.getClassLoader().getResource("");
+        System.out.println(url.getPath());
+    }
 
-        // 获取当月第一天
-        /*SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.DAY_OF_MONTH, 1);
-        Date firstDayOfCurrentMonth = sdf.parse(sdf.format(calendar.getTime()));
-        System.out.println(sdf2.format(firstDayOfCurrentMonth));*/
-        // 获取随机数
-        /*Random random = new Random();
+    // 获取当月第一天
+    private static void getFirstDayOfMonth() {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.DAY_OF_MONTH, 1);
+            Date firstDayOfCurrentMonth = sdf.parse(sdf.format(calendar.getTime()));
+            System.out.println(sdf2.format(firstDayOfCurrentMonth));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // 获取随机数
+    private static void getRandomNum() {
+        Random random = new Random();
         for (int i = 0; i < 10; i++) {
             System.out.println(random.nextInt(10));
-        }*/
+        }
     }
 }
