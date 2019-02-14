@@ -10,6 +10,8 @@ import java.text.SimpleDateFormat;
 public class ExcelUtil {
 
     private static final String DATE_REGEX = "yyyy-mm-dd";
+    private static final String FONT_NAME = "等线";
+    private static final double FONT_SIZE = 10;
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy年MM月dd日");
 
     /**
@@ -20,8 +22,8 @@ public class ExcelUtil {
         XSSFCellStyle cellStyle = workbook.createCellStyle();
         XSSFFont font = workbook.createFont();
         font.setFamily(FontFamily.MODERN);
-        font.setFontName("等线");
-        font.setFontHeight(10);
+        font.setFontName(FONT_NAME);
+        font.setFontHeight(FONT_SIZE);
         cellStyle.setFont(font);
         cell.setCellStyle(cellStyle);
         // 设置文本
@@ -36,8 +38,8 @@ public class ExcelUtil {
         XSSFCellStyle cellStyle = workbook.createCellStyle();
         XSSFFont tarFont = workbook.createFont();
         tarFont.setFamily(FontFamily.MODERN);
-        tarFont.setFontName("等线");
-        tarFont.setFontHeight(10);
+        tarFont.setFontName(FONT_NAME);
+        tarFont.setFontHeight(FONT_SIZE);
         tarFont.setThemeColor((short) 10);
         tarFont.setUnderline((byte) 1);
         cellStyle.setFont(tarFont);
@@ -58,8 +60,8 @@ public class ExcelUtil {
         XSSFCellStyle cellStyle = workbook.createCellStyle();
         XSSFFont font = workbook.createFont();
         font.setFamily(FontFamily.MODERN);
-        font.setFontName("等线");
-        font.setFontHeight(10);
+        font.setFontName(FONT_NAME);
+        font.setFontHeight(FONT_SIZE);
         cellStyle.setFont(font);
         cellStyle.setDataFormat(creationHelper.createDataFormat().getFormat(DATE_REGEX));
         cell.setCellStyle(cellStyle);

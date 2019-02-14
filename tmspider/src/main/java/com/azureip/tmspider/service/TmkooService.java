@@ -160,7 +160,7 @@ public class TmkooService {
                 System.out.println("Page[" + pageNo + "]: " + record.getRegNum() + "|" + record.getTmName() + "|" + record.getTmType() + "|" + record.getAppName() + "|"
                         + record.getAppDate().toString() + "|" + record.getAppAddress());
                 records.add(record);
-            // } catch (IOException | ParseException e) {
+                // } catch (IOException | ParseException e) {
             } catch (ParseException e) {
                 System.out.println(e.getMessage());
                 System.err.println("Page[" + pageNo + "]: Line[" + (i + 1) + "], RegNum["
