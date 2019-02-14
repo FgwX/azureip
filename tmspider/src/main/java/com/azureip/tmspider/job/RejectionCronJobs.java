@@ -33,7 +33,7 @@ public class RejectionCronJobs {
     }
 
     // 驳回信息查询任务（每天凌晨1点执行）
-    @Scheduled(cron = "0 0 1 * * ?")
+    @Scheduled(cron = "0 0 3 * * ?")
     public void rejectionQueryJob() {
         LOG.info("====> 驳回信息查询任务开始 <====");
         // 第一位，表示秒，取值0-59

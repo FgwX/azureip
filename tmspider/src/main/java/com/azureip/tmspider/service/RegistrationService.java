@@ -65,7 +65,7 @@ public class RegistrationService {
             FileInputStream in = new FileInputStream(pendingFiles[i]);
             XSSFWorkbook workBook = new XSSFWorkbook(in);
             in.close();
-            LOG.info("[" + (i + 1) + "" + pendingFiles.length + "]开始处理《" + pendingFiles[i].getName() + "》...");
+            LOG.info("[" + (i + 1) + "/" + pendingFiles.length + "]开始处理《" + pendingFiles[i].getName() + "》...");
             try {
                 queryRejectionAndAddLink(fileName, workBook);
             } catch (Exception e) {
@@ -105,8 +105,9 @@ public class RegistrationService {
                     LOG.error(prefix + "[" + regNum + "]重试次数过多，重新初始化...");
                     driver = reInitBrowser(driver);
                 } catch (NoSuchElementException e) {
-                    LOG.error(prefix + "[" + regNum + "]页面切换出错，重新初始化...");
-                    driver = reInitBrowser(driver);
+                    LOG.error(prefix + "[" + regNum + "]页面切换出错，结束查询...");
+                    // LOG.error(prefix + "[" + regNum + "]页面切换出错，重新初始化...");
+                    // driver = reInitBrowser(driver);
                 } catch (StaleElementReferenceException e) {
                     LOG.error(prefix + "[" + regNum + "]操作元素过期，重新初始化...");
                     driver = reInitBrowser(driver);
@@ -183,8 +184,9 @@ public class RegistrationService {
         int detailRetryTimes = 0;
         WebElement regFlowsEle = null;
         while (regFlowsEle == null) {
+            final int retryTimes = ++detailRetryTimes;
             try {
-                regFlowsEle = new WebDriverWait(driver, (detailRetryTimes++ > 0 ? 3 : 5), 250).until(new ExpectedCondition<WebElement>() {
+                regFlowsEle = new WebDriverWait(driver, (detailRetryTimes > 1 ? 3 : 5), 250).until(new ExpectedCondition<WebElement>() {
                     @NullableDecl
                     @Override
                     public WebElement apply(WebDriver driver) {
@@ -193,7 +195,7 @@ public class RegistrationService {
                             WebElement requestID = driver.findElement(By.xpath("//input[@id='request_tid']"));
                             if (regNum.equals(curRegNumEle.getAttribute("value"))) {
                                 return driver.findElement(By.xpath("/html/body/div[@class='xqboxx']/div/ul"));
-                            } else if (!StringUtils.isEmpty(requestID.getAttribute("value"))) {
+                            } else if (retryTimes >= 5 && !StringUtils.isEmpty(requestID.getAttribute("value"))) {
                                 return requestID;
                             }
                             return null;
@@ -210,9 +212,9 @@ public class RegistrationService {
             } finally {
                 SeleniumUtil.switchByTitle(driver, DETAIL_WIN);
             }
-            if (detailRetryTimes >= 5) {
+            /*if (detailRetryTimes >= 5) {
                 break;
-            }
+            }*/
         }
 
         XSSFCell tmNmeCell = row.getCell(4) != null ? row.getCell(4) : row.createCell(4);
@@ -264,13 +266,14 @@ public class RegistrationService {
     // 初始化查询页面
     private WebDriver initQueryPage() {
         LOG.warn("正在初始化浏览器...");
+        // WebDriver driver = SeleniumUtil.initBrowser(true, 10000L);
         WebDriver driver = SeleniumUtil.initBrowser(false, null);
         int retryTimes = 0;
         // 打开检索系统主页
         WebElement statusQueryEle = null;
         while (statusQueryEle == null) {
-            driver.get("http://wsjs.saic.gov.cn");
             try {
+                driver.get("http://wsjs.saic.gov.cn");
                 statusQueryEle = new WebDriverWait(driver, 6, 500).until(new ExpectedCondition<WebElement>() {
                     @NullableDecl
                     @Override

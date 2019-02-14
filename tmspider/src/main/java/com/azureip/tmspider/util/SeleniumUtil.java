@@ -7,6 +7,8 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.firefox.FirefoxProfile;
+import org.openqa.selenium.firefox.internal.ProfilesIni;
 
 import java.util.Objects;
 import java.util.Set;
@@ -21,6 +23,7 @@ public class SeleniumUtil {
         WebDriver driver;
         if (useChrome) {
             ChromeOptions options = new ChromeOptions();
+            options.addArguments("--user-data-dir=C:/Users/fgwx/AppData/Local/Google/Chrome/User Data");
             // DesiredCapabilities cap = DesiredCapabilities.chrome();
             // cap.setCapability(ChromeOptions.CAPABILITY, options);
             // LoggingPreferences logPref = new LoggingPreferences();
@@ -34,8 +37,8 @@ public class SeleniumUtil {
             // logPref.enable(LogType.PERFORMANCE, Level.ALL);
             // cap.setCapability(CapabilityType.LOGGING_PREFS, logPref);
             FirefoxOptions options = new FirefoxOptions();
-            // FirefoxProfile profile = new ProfilesIni().getProfile("default");
-            // options.setProfile(profile);
+            FirefoxProfile profile = new ProfilesIni().getProfile("default");
+            options.setProfile(profile);
             options.addArguments("-safe-mode");
             driver = new FirefoxDriver(options);
         }
