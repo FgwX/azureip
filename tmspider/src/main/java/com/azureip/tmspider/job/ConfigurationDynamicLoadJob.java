@@ -17,7 +17,7 @@ public class ConfigurationDynamicLoadJob {
     private static final String configFileName = "test.properties";
     private static long lastModified = 0L;
 
-    @Scheduled(cron = "0/5 * * * * ?")
+    // @Scheduled(cron = "0/5 * * * * ?")
     public void execute() {
 
         // 判断文件是否被修改
