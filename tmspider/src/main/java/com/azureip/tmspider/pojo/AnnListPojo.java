@@ -6,6 +6,8 @@ import java.io.Serializable;
 import java.util.List;
 
 public class AnnListPojo implements Serializable {
+    public AnnListPojo() {
+    }
 
     public AnnListPojo(int total, List<Announcement> rows) {
         this.total = total;

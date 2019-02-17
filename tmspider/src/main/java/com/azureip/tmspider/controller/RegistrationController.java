@@ -44,12 +44,12 @@ public class RegistrationController {
      * 处理表格（查询驳回，添加链接）
      * URL: http://localhost/reg/optRej
      */
-    @GetMapping("optRej")
-    public GlobalResponse optRejections() {
+    @GetMapping("addLink")
+    public GlobalResponse addLink() {
         GlobalResponse<String> response = new GlobalResponse<>();
         // 获取待处理的EXCEL文件夹
-        File srcDir = new File("D:/TMSpider/tmp");
-        File tarDir = new File("D:/TMSpider/mark_rej");
+        File srcDir = new File("D:/TMSpider/link_src");
+        File tarDir = new File("D:/TMSpider/link_tar");
         try {
             List<String> fileNames = registrationService.optRejections(srcDir, tarDir);
             response.setStatus(GlobalResponse.SUCCESS);

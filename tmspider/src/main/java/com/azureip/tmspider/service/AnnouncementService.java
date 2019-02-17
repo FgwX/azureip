@@ -1,6 +1,7 @@
 package com.azureip.tmspider.service;
 
 import com.alibaba.druid.util.StringUtils;
+import com.alibaba.fastjson.JSON;
 import com.azureip.tmspider.mapper.AnnouncementMapper;
 import com.azureip.tmspider.mapper.ExcelOptRecordMapper;
 import com.azureip.tmspider.model.Announcement;
@@ -93,7 +94,8 @@ public class AnnouncementService {
         countPost.setHeader("User-Agent", AGENT);
         countPost.setConfig(config);
         CloseableHttpResponse countResp = client.execute(countPost);
-        AnnListPojo countPojo = gson.fromJson(EntityUtils.toString(countResp.getEntity()), AnnListPojo.class);
+        // AnnListPojo countPojo = gson.fromJson(EntityUtils.toString(countResp.getEntity()), AnnListPojo.class);
+        AnnListPojo countPojo = JSON.parseObject(EntityUtils.toString(countResp.getEntity()), AnnListPojo.class);
         client.close();
 
         resultList.add(countPojo.getTotal());

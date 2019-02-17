@@ -138,8 +138,8 @@ public class AnnouncementController {
     public GlobalResponse<String> optExcel() {
         GlobalResponse<String> response = new GlobalResponse<>();
         // 获取待处理的EXCEL文件集合
-        File srcDir = new File("D:/TMSpider/src_file");
-        File tarDir = new File("D:/TMSpider/mark_ann");
+        File srcDir = new File("D:/TMSpider/ann_src");
+        File tarDir = new File("D:/TMSpider/ann_tar");
         try {
             List<String> fileNames = announcementService.optExcel(srcDir, tarDir);
             response.setStatus(GlobalResponse.SUCCESS);

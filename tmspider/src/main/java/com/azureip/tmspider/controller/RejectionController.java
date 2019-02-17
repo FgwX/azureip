@@ -28,8 +28,8 @@ public class RejectionController {
     public GlobalResponse queryRejections() {
         GlobalResponse<String> response = new GlobalResponse<>();
         // 获取待处理的EXCEL文件夹
-        File srcDir = new File("D:/TMSpider/src_file");
-        File tarDir = new File("D:/TMSpider/mark_rej");
+        File srcDir = new File("D:/TMSpider/rej_src");
+        File tarDir = new File("D:/TMSpider/rej_tar");
         try {
             List<String> fileNames = rejectionService.queryRejections(srcDir, tarDir);
             response.setStatus(GlobalResponse.SUCCESS);

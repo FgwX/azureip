@@ -1,7 +1,9 @@
 package com.azureip.tmspider.controller;
 
+import com.azureip.tmspider.pojo.AnnListPojo;
 import com.azureip.tmspider.service.RegistrationService;
 import com.azureip.tmspider.util.ExcelUtils;
+import com.google.gson.Gson;
 import org.apache.poi.xssf.usermodel.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -38,7 +40,8 @@ public class TestController {
     }
 
     public static void main(String[] args) {
-        dynamicLoadConfig();
+        gsonTest();
+        // dynamicLoadConfig();
         // javaMailTest();
         // seleniumTest();
         // getExcelUnitFont();
@@ -46,6 +49,13 @@ public class TestController {
         // getAbsoluteFilePath();
         // getFirstDayOfMonth();
         // getRandomNum();
+    }
+
+    private static void gsonTest() {
+        Gson gson = new Gson();
+        AnnListPojo pojo = gson.fromJson("{\"total\":101200,\"rows\":[]}", AnnListPojo.class);
+        System.out.println(pojo.getTotal());
+        System.out.println(pojo.getRows());
     }
 
     private static void dynamicLoadConfig() {
