@@ -42,7 +42,7 @@ public class RejectionJobs {
     // (/)斜杠：如：x/y，x是开始值，y是步长，比如在第一位（秒） 0/15就是，从0秒开始，每15秒，最后就是0，15，30，45，60（另：*/y，等同于0/y）。
 
     // 商标状态链接添加任务（每天凌晨1点执行）
-    @Scheduled(cron = "0 0 1 * * ?")
+    @Scheduled(cron = "0 30 0 * * ?")
     public synchronized void registrationQueryJob() {
         LOG.info("====> 商标状态链接添加任务开始 <====");
         File srcDir = new File("D:/TMSpider/link_src");
@@ -65,7 +65,7 @@ public class RejectionJobs {
     }
 
     // 驳回信息查询任务（每天凌晨2点执行）
-    @Scheduled(cron = "0 0 2 * * ?")
+    @Scheduled(cron = "0 0 1 * * ?")
     public synchronized void rejectionQueryJob() {
         LOG.info("====> 驳回信息查询任务开始 <====");
         File srcDir = new File("D:/TMSpider/rej_src");
