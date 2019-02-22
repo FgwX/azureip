@@ -17,13 +17,13 @@ import java.util.List;
  * 驳回数据相关定时任务
  */
 @Component
-public class RejectionCronJobs {
-    private static final Logger LOG = LogManager.getLogger(RejectionCronJobs.class);
+public class RejectionJobs {
+    private static final Logger LOG = LogManager.getLogger(RejectionJobs.class);
     private final RejectionService rejectionService;
     private final RegistrationService registrationService;
 
     @Autowired
-    public RejectionCronJobs(RejectionService rejectionService, RegistrationService registrationService) {
+    public RejectionJobs(RejectionService rejectionService, RegistrationService registrationService) {
         this.rejectionService = rejectionService;
         this.registrationService = registrationService;
     }
@@ -65,7 +65,7 @@ public class RejectionCronJobs {
     }
 
     // 驳回信息查询任务（每天凌晨2点执行）
-    @Scheduled(cron = "0 0 2 * * ?")
+    @Scheduled(cron = "0 0 1 * * ?")
     public synchronized void rejectionQueryJob() {
         LOG.info("====> 驳回信息查询任务开始 <====");
         File srcDir = new File("D:/TMSpider/rej_src");
