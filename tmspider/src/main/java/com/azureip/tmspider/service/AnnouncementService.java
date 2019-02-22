@@ -94,8 +94,9 @@ public class AnnouncementService {
         countPost.setHeader("User-Agent", AGENT);
         countPost.setConfig(config);
         CloseableHttpResponse countResp = client.execute(countPost);
-        // AnnListPojo countPojo = gson.fromJson(EntityUtils.toString(countResp.getEntity()), AnnListPojo.class);
-        AnnListPojo countPojo = JSON.parseObject(EntityUtils.toString(countResp.getEntity()), AnnListPojo.class);
+        System.out.println("总量查询响应：" + EntityUtils.toString(countResp.getEntity()));
+        AnnListPojo countPojo = gson.fromJson(EntityUtils.toString(countResp.getEntity()), AnnListPojo.class);
+        // AnnListPojo countPojo = JSON.parseObject(EntityUtils.toString(countResp.getEntity()), AnnListPojo.class);
         client.close();
 
         resultList.add(countPojo.getTotal());
