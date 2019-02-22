@@ -26,9 +26,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
@@ -60,24 +58,10 @@ public class AnnouncementService {
     /**
      * 多条件查询公告总数
      */
-    public List<Integer> queryAnnCountTest(AnnQueryPojo pojo) {
-        List<Integer> resultList = new ArrayList<>();
-        System.out.println(pojo.getAnnNum());
-        int i = announcementMapper.queryAnnCountByAnnNum(pojo.getAnnNum());
-        System.out.println(i);
-        resultList.add(i);
-        resultList.add(99999);
-        return resultList;
-    }
-
-    /**
-     * 多条件查询公告总数
-     */
-    public List<Integer> queryAnnCount(AnnQueryPojo pojo) throws IOException {
-        List<Integer> resultList = new ArrayList<>();
-
+    public Map<String, Integer> queryAnnCount(AnnQueryPojo pojo) throws IOException {
+        Map<String, Integer> resultMap = new HashMap<>();
         // 查询本地公告数量
-        resultList.add(announcementMapper.queryAnnCountByAnnNum(pojo.getAnnNum()));
+        resultMap.put("localCount", announcementMapper.queryAnnCountByAnnNum(pojo.getAnnNum()));
 
         // 查询商标网公告数量
         CloseableHttpClient client = HttpClients.createDefault();
@@ -98,8 +82,8 @@ public class AnnouncementService {
         // AnnListPojo countPojo = JSON.parseObject(EntityUtils.toString(countResp.getEntity()), AnnListPojo.class);
         client.close();
 
-        resultList.add(countPojo.getTotal());
-        return resultList;
+        resultMap.put("remoteCount", countPojo.getTotal());
+        return resultMap;
     }
 
     /**

@@ -47,11 +47,11 @@
         </dependency>
 
         <!-- MyBatis -->
-        <!--<dependency>-->
-        <!--<groupId>org.mybatis</groupId>-->
-        <!--<artifactId>mybatis</artifactId>-->
-        <!--<version>3.4.6</version>-->
-        <!--</dependency>-->
+        <!--<dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis</artifactId>
+            <version>3.4.6</version>
+        </dependency>-->
 
         <!-- HttpClient -->
         <dependency>
@@ -127,16 +127,22 @@
         </dependency>
 
         <!-- Google J2V8 -->
-        <dependency>
+        <!--<dependency>
             <groupId>com.eclipsesource.j2v8</groupId>
             <artifactId>j2v8_win32_x86_64</artifactId>
             <version>4.6.0</version>
-        </dependency>
+        </dependency>-->
         <dependency>
+            <groupId>com.eclipsesource.j2v8</groupId>
+            <artifactId>j2v8_win32_x86_64</artifactId>
+            <version>2.2.1</version>
+            <scope>compile</scope>
+        </dependency>
+        <!--<dependency>
             <groupId>com.eclipsesource.j2v8</groupId>
             <artifactId>j2v8_linux_x86_64</artifactId>
             <version>4.8.0</version>
-        </dependency>
+        </dependency>-->
 
         <!-- Apache Commons-IO -->
         <dependency>
@@ -163,25 +169,25 @@
             </plugin>
         </plugins>
 
-        <!--<resources>-->
-        <!--&lt;!&ndash; Build config files in path: resources &ndash;&gt;-->
-        <!--<resource>-->
-        <!--<directory>src/main/java</directory>-->
-        <!--<includes>-->
-        <!--<include>**/*.properties</include>-->
-        <!--<include>**/*.xml</include>-->
-        <!--</includes>-->
-        <!--<filtering>false</filtering>-->
-        <!--</resource>-->
-        <!--<resource>-->
-        <!--<directory>src/main/resources</directory>-->
-        <!--<includes>-->
-        <!--<include>**/*.properties</include>-->
-        <!--<include>**/*.xml</include>-->
-        <!--</includes>-->
-        <!--<filtering>false</filtering>-->
-        <!--</resource>-->
-        <!--</resources>-->
+        <!--<resources>
+            &lt;!&ndash; Build config files in path: resources &ndash;&gt;
+            <resource>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.properties</include>
+                    <include>**/*.xml</include>
+                </includes>
+                <filtering>false</filtering>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/*.properties</include>
+                    <include>**/*.xml</include>
+                </includes>
+                <filtering>false</filtering>
+            </resource>
+        </resources>-->
 
     </build>
 </project>

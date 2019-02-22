@@ -1,9 +1,17 @@
 package com.azureip.tmspider.controller;
 
+import com.alibaba.druid.util.StringUtils;
 import com.azureip.tmspider.pojo.AnnListPojo;
 import com.azureip.tmspider.service.RegistrationService;
 import com.azureip.tmspider.util.ExcelUtils;
+import com.azureip.tmspider.util.JSUtils;
 import com.google.gson.Gson;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.apache.poi.xssf.usermodel.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -39,8 +47,20 @@ public class TestController {
         return "forward:index.html";
     }
 
-    public static void main(String[] args) {
-        gsonTest();
+    public static void main(String[] args) throws IOException {
+
+
+
+        CloseableHttpClient client = HttpClients.createDefault();
+        RequestConfig config = RequestConfig.custom().setConnectionRequestTimeout(2000).setConnectTimeout(3000).setSocketTimeout(30000).build();
+        String countUrl = "http://sbgg.saic.gov.cn:9080/tmann/annInfoView/annSearchDG.html?page=1&rows=0&annNum=1636&annType=TMZCSQ&totalYOrN=true&agentName=";
+        HttpPost countPost = new HttpPost(countUrl);
+        countPost.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36");
+        countPost.setConfig(config);
+        HttpResponse response = JSUtils.crackAnnPost(client, countPost);
+        System.out.println(EntityUtils.toString(response.getEntity()));
+
+        // gsonTest();
         // dynamicLoadConfig();
         // javaMailTest();
         // seleniumTest();

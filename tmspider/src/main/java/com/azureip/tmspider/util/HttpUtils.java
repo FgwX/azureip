@@ -1,11 +1,10 @@
 package com.azureip.tmspider.util;
 
-import org.apache.http.HttpEntityEnclosingRequest;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpRequest;
-import org.apache.http.NoHttpResponseException;
+import org.apache.http.*;
 import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
@@ -28,10 +27,7 @@ import java.net.UnknownHostException;
 
 /**
  * CloseableHttpClient链接池生成工具
- *
- * @author King
  * http://www.cnblogs.com/whatlonelytear/articles/4835538.html
- * 20170601
  */
 public class HttpUtils {
 
@@ -130,5 +126,10 @@ public class HttpUtils {
         RequestConfig requestConfig = RequestConfig.custom().setConnectionRequestTimeout(CON_REQ_TIMEOUT).setConnectTimeout(CON_TIMEOUT).setSocketTimeout(SOCKET_TIMEOUT).build();
         newHttpclient = HttpClients.custom().setConnectionManager(connectionManager).setDefaultRequestConfig(requestConfig).setRetryHandler(httpRequestRetryHandler).build();
         return newHttpclient;
+    }
+
+    public static CloseableHttpResponse post (CloseableHttpClient client, HttpPost post){
+
+        return null;
     }
 }

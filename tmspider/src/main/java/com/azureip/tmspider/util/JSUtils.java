@@ -3,97 +3,83 @@ package com.azureip.tmspider.util;
 import com.eclipsesource.v8.V8;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.util.EntityUtils;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 
 public class JSUtils {
-    private static final Logger LOG = LogManager.getLogger(JSUtils.class);
 
     /**
-     * 传入pdf文件的URL, 返回下载好的PDF文件
+     * 执行POST请求
      */
-    public static File getPDFFile(String pdfUrl) {
-        File file = new File("D:/test.pdf");
-        try {
-            HttpClient client = HttpClients.createDefault();
-            HttpGet get = new HttpGet(pdfUrl);
-            setHeader(get);
-            HttpResponse response = client.execute(get);
+    public static HttpResponse crackAnnPost(CloseableHttpClient client, HttpPost post) throws IOException {
+        // 第一次请求
+        HttpResponse firstResp = client.execute(post);
+        System.out.println("第一次请求响应状态码：" + firstResp.getStatusLine().getStatusCode());
 
-            String __jsluid = getJsluid(response);
-            String body = getResponseBodyAsString(response);
-            String __jsl_clearance = getJslClearance(body);
-            get = new HttpGet(pdfUrl);
-            get.setHeader("cookie", __jsluid + "; " + __jsl_clearance);
-            setHeader(get);
-            response = client.execute(get);
-            output(response, file);
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+        // 获取“__jsluid”
+        String jslUid = getJslUid(firstResp);
+        // 获取“__jsl_clearance”
+        // globalAlias=window，表示window为全局别名，告诉V8在运行JavaScript代码时，不要从代码里找window的定义
+        V8 runtime = V8.createV8Runtime();
+        String jslClearance = getJslClearance(firstResp, runtime);
+
+        post.setHeader("Upgrade-Insecure-Requests", "1");
+        post.setHeader("cookie", jslUid + "; " + jslClearance);
+        // 再次请求，获取数据
+        CloseableHttpResponse finalResp = client.execute(post);
+        System.out.println("第二次请求响应状态码：" + finalResp.getStatusLine().getStatusCode());
+
+        return finalResp;
+    }
+
+    // 通过响应头的set-cookie获取名称为“__jsluid”的Cookie
+    private static String getJslUid(HttpResponse response) {
+        Header header = response.getFirstHeader("set-cookie");
+        if (header == null) {
+            return "";
         }
-        return file;
+        String[] cookies = header.getValue().split(";");
+        for (String cookie : cookies) {
+            if (cookie.contains("__jsluid")) {
+                return cookie.trim();
+            }
+        }
+        return "";
     }
 
-    /**
-     * 给HttpGet设置一些必要的header
-     */
-    private static void setHeader(HttpGet get) {
-        get.setHeader("Upgrade-Insecure-Requests", "1");
-        get.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36");
-    }
+    // 通过响应体获取名称为“__jsl_clearance”的Cookie
+    private static String getJslClearance(HttpResponse response, V8 runtime) throws IOException {
+        String entity = EntityUtils.toString(response.getEntity());
+        String evalFrag = "eval(y.replace(/\\b\\w+\\b/g, function(y){return x[f(y,z)-1]||(\"_\"+y)}))";
+        String execFrag = "y.replace(/\\b\\w+\\b/g, function(y){return x[f(y,z)-1]||(\"_\"+y)})";
+        String orgJS = entity.substring("<script>".length(), entity.indexOf("</script>")).replace(evalFrag, execFrag);
+        System.err.println("原始JS：" + orgJS);
+        String realJS = runtime.executeStringScript(orgJS);
+        System.err.println("实际JS：" + realJS);
+        // 获取jslClearance的前半段
+        int aStart = realJS.indexOf("__jsl_clearance");
+        int aEnd = realJS.indexOf("|0|") + "|0|".length();
+        String jslClrA = realJS.substring(aStart, aEnd);
 
-    /**
-     * 将HttpResponse输出到文件, 即将pdf输入流写到硬盘.
-     */
-    private static void output(HttpResponse response, File file) throws IOException {
-        FileOutputStream fileOutputStream = new FileOutputStream(file);
-        fileOutputStream.write(getResponseBodyAsBytes(response));
-        fileOutputStream.flush();
-        fileOutputStream.close();
-    }
+        // 获取jslClearance的后半段
+        int bStart = realJS.indexOf("|0|'+(function(){") + "|0|'+(function(){".length();
+        int bEnd = realJS.indexOf("})()+';Expires");
+        String tmpStr = realJS.substring(bStart, bEnd);
+        String unUsedFn = tmpStr.substring(tmpStr.indexOf(",(function(){"), (tmpStr.indexOf("join('')}})()") + "join('')}})()".length()));
+        String unUsedStr = tmpStr.substring(tmpStr.indexOf("]](") + 2, tmpStr.indexOf("};return", tmpStr.indexOf("reverse")));
+        System.err.println("unUsedFn: " + unUsedFn + "\r\nunUsedStr: " + unUsedStr);
+        String finalJS = tmpStr.replace(unUsedFn, "").replace(unUsedStr, "")
+                .replace("window.headless", "0")
+                .replace(";return", ";")
+                .replace("; function", ";function tmp");
+        System.err.println("最终JS：" + finalJS);
+        String jslClrB = runtime.executeStringScript(finalJS);
 
-    /**
-     * 通过破解动态JavaScript脚本, 获取cookie名为 __jsl_clearance的值
-     */
-    private static String getJslClearance(String body) {
-        //V8:谷歌开源的运行JavaScript脚本的库. 参数:globalAlias=window, 表示window为全局别名,
-        // 告诉V8在运行JavaScript代码时, 不要从代码里找window的定义.
-        V8 runtime = V8.createV8Runtime("window");
-        //将第一次请求pdf资源时获取到的字符串提取成V8可执行的JavaScript代码
-        body = body.trim()
-                .replace("<script>", "")
-                .replace("</script>", "")
-                .replace("eval(y.replace(/\\b\\w+\\b/g, function(y){return x[f(y,z)-1]||(\"_\"+y)}))",
-                        "y.replace(/\\b\\w+\\b/g, function(y){return x[f(y,z)-1]||(\"_\"+y)})");
-        //用V8执行该段代码获取新的动态JavaScript脚本
-        String result = runtime.executeStringScript(body);
-
-        //获取 jsl_clearance 的第一段, 格式形如: 1543915851.312|0|
-        String startStr = "document.cookie='";
-        int i1 = result.indexOf(startStr) + startStr.length();
-        int i2 = result.indexOf("|0|");
-        String cookie1 = result.substring(i1, i2 + 3);
-
-        /* 获取 jsl_clearance 的第二段,格式形如: DW2jqgJO5Bo45yYRKLlFbnqQuD0%3D。
-        主要原理是: 新的动态JavaScript脚本是为浏览器设置cookie, 且cookie名为__jsl_clearance
-        其中第一段值(格式形如:1543915851.312|0|)已经明文写好, 用字符串处理方法即可获取.
-        第二段则是一段JavaScript函数, 需要有V8运行返回,
-        该函数代码需要通过一些字符串定位, 提取出来, 交给V8运行.*/
-        startStr = "|0|'+(function(){";
-        int i3 = result.indexOf(startStr) + startStr.length();
-        int i4 = result.indexOf("})()+';Expires");
-        String code = result.substring(i3, i4).replace(";return", ";");
-        String cookie2 = runtime.executeStringScript(code);
-
-        // 拼接两段字符串，返回jsl_clearance的完整的值。如: 1543915851.312|0|DW2jqgJO5Bo45yYRKLlFbnqQuD0%3D
-        return cookie1 + cookie2;
+        return jslClrA + jslClrB;
     }
 
     /**
@@ -114,17 +100,4 @@ public class JSUtils {
         return null;
     }
 
-    /**
-     * 通过响应头的set-cookie获取cookie名称为__jsluid的值
-     */
-    private static String getJsluid(HttpResponse response) {
-        Header header = response.getFirstHeader("set-cookie");
-        String[] split = header.getValue().split(";");
-        for (String s : split) {
-            if (s.contains("__jsluid")) {
-                return s.trim();
-            }
-        }
-        return "";
-    }
 }

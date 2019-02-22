@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("ann")
@@ -50,40 +51,18 @@ public class AnnouncementController {
     }
 
     /**
-     * 查询公告总数 - 前端测试方法
-     */
-    @PostMapping("queryAnnCountTest")
-    @ResponseBody
-    public GlobalResponse<Integer> queryAnnCountTest(AnnQueryPojo pojo) {
-        try {
-            System.out.println("queryAnnCountTest begins...");
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        GlobalResponse<Integer> response = new GlobalResponse<>();
-        response.setStatus(GlobalResponse.SUCCESS);
-        List<Integer> list = new ArrayList<>();
-        list.add(1234);
-        list.add(2345);
-        response.setResultList(list);
-        return response;
-    }
-
-    /**
      * 查询公告总数
      */
     @PostMapping("queryAnnCount")
     @ResponseBody
-    public GlobalResponse<Integer> queryAnnCount(AnnQueryPojo pojo) {
-        System.out.println(pojo);
+    public GlobalResponse<Map> queryAnnCount(AnnQueryPojo pojo) {
         LOG.info("QueryPojo: " + pojo);
-        GlobalResponse<Integer> response = new GlobalResponse<>();
+        GlobalResponse<Map> response = new GlobalResponse<>();
         try {
             response.setStatus(GlobalResponse.SUCCESS);
-            response.setResultList(announcementService.queryAnnCount(pojo));
+            response.setResult(announcementService.queryAnnCount(pojo));
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.error("查询公告总数异常：" + e.getMessage());
             response.setStatus(GlobalResponse.ERROR);
             response.setMessage(e.getMessage());
         }

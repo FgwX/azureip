@@ -78,8 +78,8 @@ function submitAnnForm() {
             data: $("#annImportForm").serializeArray(),
             success: function (resp) {
                 if (resp.status === "S") {
-                    var localCount = resp.resultList[0];
-                    var remoteCount = resp.resultList[1];
+                    var localCount = resp.result.localCount;
+                    var remoteCount = resp.result.remoteCount;
                     $("#localAnnCount").val(localCount);
                     $("#remoteAnnCount").val(remoteCount);
                     if (localCount === remoteCount) {
