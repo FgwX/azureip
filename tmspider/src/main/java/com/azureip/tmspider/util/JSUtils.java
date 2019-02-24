@@ -7,31 +7,40 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 
 public class JSUtils {
+    private static final Logger LOG = LogManager.getLogger(JSUtils.class);
 
     /**
      * 执行POST请求
      */
-    public static HttpResponse crackAnnPost(CloseableHttpClient client, HttpPost post) throws IOException {
+    public static CloseableHttpResponse crackAnnPost(CloseableHttpClient client,V8 runtime,  HttpPost post) throws IOException {
+        long startMilli = System.currentTimeMillis();
         // 第一次请求
-        HttpResponse firstResp = client.execute(post);
-        System.out.println("第一次请求响应状态码：" + firstResp.getStatusLine().getStatusCode());
+        CloseableHttpResponse firstResp = client.execute(post);
+        LOG.info("第一次请求响应状态码：" + firstResp.getStatusLine().getStatusCode());
 
         // 获取“__jsluid”
         String jslUid = getJslUid(firstResp);
+        LOG.info("获取到的[__jsluid]：" + jslUid);
         // 获取“__jsl_clearance”
-        // globalAlias=window，表示window为全局别名，告诉V8在运行JavaScript代码时，不要从代码里找window的定义
-        V8 runtime = V8.createV8Runtime();
+
         String jslClearance = getJslClearance(firstResp, runtime);
 
         post.setHeader("Upgrade-Insecure-Requests", "1");
         post.setHeader("cookie", jslUid + "; " + jslClearance);
         // 再次请求，获取数据
+        while (true) {
+            if (System.currentTimeMillis() - startMilli >= 1500) {
+                break;
+            }
+        }
         CloseableHttpResponse finalResp = client.execute(post);
-        System.out.println("第二次请求响应状态码：" + finalResp.getStatusLine().getStatusCode());
+        LOG.info("第二次请求响应状态码：" + finalResp.getStatusLine().getStatusCode());
 
         return finalResp;
     }
@@ -54,31 +63,48 @@ public class JSUtils {
     // 通过响应体获取名称为“__jsl_clearance”的Cookie
     private static String getJslClearance(HttpResponse response, V8 runtime) throws IOException {
         String entity = EntityUtils.toString(response.getEntity());
-        String evalFrag = "eval(y.replace(/\\b\\w+\\b/g, function(y){return x[f(y,z)-1]||(\"_\"+y)}))";
-        String execFrag = "y.replace(/\\b\\w+\\b/g, function(y){return x[f(y,z)-1]||(\"_\"+y)})";
-        String orgJS = entity.substring("<script>".length(), entity.indexOf("</script>")).replace(evalFrag, execFrag);
-        System.err.println("原始JS：" + orgJS);
-        String realJS = runtime.executeStringScript(orgJS);
-        System.err.println("实际JS：" + realJS);
+        String[] orgArr = entity.substring("<script>".length(), entity.indexOf("</script>")).split("eval");
+        StringBuilder orgJS = new StringBuilder(orgArr[0]);
+        for (int i = 1; i < orgArr.length; i++) {
+            if (i == orgArr.length - 1) {
+                orgJS.append(orgArr[i]);
+            } else {
+                orgJS.append("eval").append(orgArr[i]);
+            }
+        }
+        String realJS = runtime.executeStringScript(orgJS.toString());
         // 获取jslClearance的前半段
         int aStart = realJS.indexOf("__jsl_clearance");
         int aEnd = realJS.indexOf("|0|") + "|0|".length();
         String jslClrA = realJS.substring(aStart, aEnd);
-
+        LOG.info("获取到的[__jsl_clearance]前半段：" + jslClrA);
         // 获取jslClearance的后半段
-        int bStart = realJS.indexOf("|0|'+(function(){") + "|0|'+(function(){".length();
-        int bEnd = realJS.indexOf("})()+';Expires");
-        String tmpStr = realJS.substring(bStart, bEnd);
-        String unUsedFn = tmpStr.substring(tmpStr.indexOf(",(function(){"), (tmpStr.indexOf("join('')}})()") + "join('')}})()".length()));
-        String unUsedStr = tmpStr.substring(tmpStr.indexOf("]](") + 2, tmpStr.indexOf("};return", tmpStr.indexOf("reverse")));
-        System.err.println("unUsedFn: " + unUsedFn + "\r\nunUsedStr: " + unUsedStr);
-        String finalJS = tmpStr.replace(unUsedFn, "").replace(unUsedStr, "")
-                .replace("window.headless", "0")
-                .replace(";return", ";")
-                .replace("; function", ";function tmp");
-        System.err.println("最终JS：" + finalJS);
-        String jslClrB = runtime.executeStringScript(finalJS);
 
+        int tmpStart = realJS.indexOf("function(){", aEnd) + "function(){".length();
+        int tmpEnd = realJS.indexOf("})()+';Expires");
+        String tmpFinalJS = realJS.substring(tmpStart, tmpEnd);
+        String[] finalArr = tmpFinalJS.split("return");
+        StringBuilder finalJSSB = new StringBuilder(finalArr[0]);
+        for (int i = 1; i < finalArr.length; i++) {
+            if (i == finalArr.length - 1) {
+                finalJSSB.append(finalArr[i]);
+            } else {
+                finalJSSB.append("return").append(finalArr[i]);
+            }
+        }
+        String finalJS = finalJSSB.toString();
+        int start = finalJS.indexOf("document");
+        int end = finalJS.indexOf("toLowerCase()") + "toLowerCase()".length();
+        String nonJS = finalJS.substring(start, end);
+        finalJS = finalJS.replace(nonJS, "'sbgg.saic.gov.cn:9080/'")
+                .replace("window.headless", "0")
+                .replace("window['__p'+'hantom'+'as']", "undefined")
+                .replace("window['callP'+'hantom']", "undefined")
+                .replace("window['_p'+'hantom']", "undefined");
+        LOG.info("获取[__jsl_clearance]后半段JS：" + finalJS);
+        String jslClrB = runtime.executeStringScript(finalJS);
+        LOG.info("获取到的[__jsl_clearance]后半段：" + jslClrB);
+        runtime.release();
         return jslClrA + jslClrB;
     }
 

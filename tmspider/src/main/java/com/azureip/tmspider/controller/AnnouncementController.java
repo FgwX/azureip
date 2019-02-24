@@ -22,7 +22,6 @@ import java.util.Map;
 @Controller
 @RequestMapping("ann")
 public class AnnouncementController {
-    // private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(AnnouncementController.class);
     private static final Logger LOG = LogManager.getLogger(AnnouncementController.class);
 
     private final AnnouncementService announcementService;
@@ -62,6 +61,7 @@ public class AnnouncementController {
             response.setStatus(GlobalResponse.SUCCESS);
             response.setResult(announcementService.queryAnnCount(pojo));
         } catch (IOException e) {
+            e.printStackTrace();
             LOG.error("查询公告总数异常：" + e.getMessage());
             response.setStatus(GlobalResponse.ERROR);
             response.setMessage(e.getMessage());

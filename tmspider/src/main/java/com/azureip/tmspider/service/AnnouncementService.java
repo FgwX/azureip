@@ -7,6 +7,8 @@ import com.azureip.tmspider.model.Announcement;
 import com.azureip.tmspider.model.ExcelOptRecord;
 import com.azureip.tmspider.pojo.AnnListPojo;
 import com.azureip.tmspider.pojo.AnnQueryPojo;
+import com.azureip.tmspider.util.JSUtils;
+import com.eclipsesource.v8.V8;
 import com.google.gson.Gson;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -76,8 +78,11 @@ public class AnnouncementService {
         HttpPost countPost = new HttpPost(countUrl.toString());
         countPost.setHeader("User-Agent", AGENT);
         countPost.setConfig(config);
-        CloseableHttpResponse countResp = client.execute(countPost);
-        System.out.println("总量查询响应：" + EntityUtils.toString(countResp.getEntity()));
+        CloseableHttpResponse countResp;
+        do {
+            countResp = JSUtils.crackAnnPost(client, V8.createV8Runtime(), countPost);
+        } while (countResp.getStatusLine().getStatusCode() != 200);
+        // System.out.println("总量查询响应：" + EntityUtils.toString(countResp.getEntity()));
         AnnListPojo countPojo = gson.fromJson(EntityUtils.toString(countResp.getEntity()), AnnListPojo.class);
         // AnnListPojo countPojo = JSON.parseObject(EntityUtils.toString(countResp.getEntity()), AnnListPojo.class);
         client.close();
@@ -105,7 +110,10 @@ public class AnnouncementService {
             HttpPost countPost = new HttpPost(countUrl.toString());
             countPost.setHeader("User-Agent", AGENT);
             countPost.setConfig(config);
-            CloseableHttpResponse countResp = client.execute(countPost);
+            CloseableHttpResponse countResp;
+            do {
+                countResp = JSUtils.crackAnnPost(client, V8.createV8Runtime(), countPost);
+            } while (countResp.getStatusLine().getStatusCode() != 200);
             AnnListPojo countPojo = gson.fromJson(EntityUtils.toString(countResp.getEntity()), AnnListPojo.class);
             queryPojo.setTotal(countPojo.getTotal());
         }
@@ -126,7 +134,10 @@ public class AnnouncementService {
             post.setHeader("Connection", "keep-alive");
             post.setConfig(config);
             long listQureyStart = System.currentTimeMillis();
-            CloseableHttpResponse resp = client.execute(post);
+            CloseableHttpResponse resp;
+            do {
+                resp = JSUtils.crackAnnPost(client, V8.createV8Runtime(), post);
+            } while (resp.getStatusLine().getStatusCode() != 200);
             long listQueryEnd = System.currentTimeMillis();
             System.out.println(prefix + "请求响应耗时: " + (listQueryEnd - listQureyStart) + "毫秒");
             AnnListPojo annList = gson.fromJson(EntityUtils.toString(resp.getEntity()), AnnListPojo.class);
