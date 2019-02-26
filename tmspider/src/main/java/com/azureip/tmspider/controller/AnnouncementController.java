@@ -1,6 +1,5 @@
 package com.azureip.tmspider.controller;
 
-import com.alibaba.druid.util.StringUtils;
 import com.azureip.tmspider.pojo.AnnQueryPojo;
 import com.azureip.tmspider.pojo.GlobalResponse;
 import com.azureip.tmspider.service.AnnouncementService;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -38,11 +36,12 @@ public class AnnouncementController {
     @ResponseBody
     public GlobalResponse<String> queryLocalLatestAnnNum() {
         GlobalResponse<String> response = new GlobalResponse<>();
-        String annNum = announcementService.queryLocalLatestAnnNum();
-        if (!StringUtils.isEmpty(annNum)) {
+        String annNum;
+        try {
+            annNum = announcementService.queryLocalLatestAnnNum();
             response.setStatus(GlobalResponse.SUCCESS);
             response.setResult(annNum);
-        } else {
+        } catch (Exception e) {
             response.setStatus(GlobalResponse.ERROR);
             response.setMessage("没有查询到公告！");
         }

@@ -42,7 +42,7 @@ public class RegistrationController {
 
     /**
      * 处理表格（查询驳回，添加链接）
-     * URL: http://localhost/reg/optRej
+     * URL: http://localhost/reg/addLink
      */
     @GetMapping("addLink")
     public GlobalResponse addLink() {

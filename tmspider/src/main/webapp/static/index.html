@@ -199,17 +199,18 @@
         </div>
     </section>
     <hr>
+    <!-- 本地接口 -->
     <section class="container pb-5" style="margin-top: 40px;">
         <div id="tmkooDiv"></div>
-        <h4>标库数据处理</h4>
+        <h4>本地接口测试</h4>
         <hr/>
         <div class="d-flex">
             <div class="jumbotron w-100 py-2 mx-auto">
-                <h5>标库网数据导入、导出</h5>
+                <h5>说明</h5>
                 <span class="text-muted" style="font-size: smaller;">
-                    1、页面载入后自动查询本地最新公告期号，确定本次所需查询的期号；<br>
-                    2、查询往期公告时，如果出现本地公告数量与官网公告数量不一致的情况，需要清除本地公告并重新导入；<br>
-                    3、仅在本地公告数量为0时，才可导入官网公告数据。
+                    1、<br>
+                    2、<br>
+                    3、
                 </span>
             </div>
         </div>
@@ -238,7 +239,7 @@
                     <input type="hidden" id="sqrmcZw" name="sqrmcZw" value=""/>
                     <input type="hidden" id="dlrmc" name="dlrmc" value=""/>
                     <input type="hidden" id="sqrdzZw" name="sqrdzZw" value="台湾"/>
-                    <div class="form-group row">
+                    <!--<div class="form-group row">
                         <label class="col-md-2 col-form-label text-muted text-right">日期范围</label>
                         <div class="col-md-4">
                             <input type="text" id="sqrqStart" name="sqrqStart" class="form-control" title="申请日期范围">
@@ -262,7 +263,7 @@
                         <div class="col-md-4">
                             <select name="annType" title="公告类型" class="form-control">
                                 <option value="TMZCSQ" selected>商标初审公告</option>
-                                <!--<option label="无效选项" value="XXXXXX"></option>-->
+                                &lt;!&ndash;<option label="无效选项" value="XXXXXX"></option>&ndash;&gt;
                             </select>
                         </div>
                         <div class="col-md-6"></div>
@@ -278,37 +279,37 @@
                             <input name="appDateEnd" title="结束时间" class="form-control" type="date" disabled
                                    value="2111-11-11">
                         </div>
-                    </div>
+                    </div>-->
                     <hr/>
                     <div class="form-group row">
                         <label class="col-md-2 col-form-label form-control-label"></label>
                         <div class="col-md-4">
                             <button id="4" type="button" class="btn btn-primary ladda-button"
                                     data-style="zoom-out"
-                                    onclick="submitAnnForm()">
-                                <span class="ladda-label">提交查询</span><span class="ladda-spinner"></span>
+                                    onclick="addLink()">
+                                <span class="ladda-label">添加链接</span><span class="ladda-spinner"></span>
                             </button>
                         </div>
                         <div class="col-md-3">
                             <button id="5" type="button" class="btn btn-secondary ladda-button"
                                     data-style="zoom-out"
-                                    onclick="importRemoteAnn()" disabled>
-                                <span class="ladda-label">导入官网公告</span><span class="ladda-spinner"></span>
+                                    onclick="queryRejection()" disabled>
+                                <span class="ladda-label">查询驳回</span><span class="ladda-spinner"></span>
                             </button>
                         </div>
-                        <div class="col-md-3">
+                        <!--<div class="col-md-3">
                             <button id="6" type="button" class="btn btn-danger  ladda-button"
                                     data-style="zoom-out"
                                     onclick="delLocalAnnByAnnNum()" disabled>
                                 <span class="ladda-label">清除本地冲突公告</span><span class="ladda-spinner"></span>
                             </button>
-                        </div>
+                        </div>-->
                     </div>
                 </form>
             </div>
         </div>
-
     </section>
+
     <div class="modal fade" id="maskLayer" role="dialog" aria-labelledby="maskTitle" aria-hidden="true"
          data-backdrop="static">
         <div class="modal-dialog">

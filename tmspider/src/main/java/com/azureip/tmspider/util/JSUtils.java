@@ -18,7 +18,7 @@ public class JSUtils {
     /**
      * 执行POST请求
      */
-    public static CloseableHttpResponse crackAnnPost(CloseableHttpClient client,V8 runtime,  HttpPost post) throws IOException {
+    public static CloseableHttpResponse crackAnnPost(CloseableHttpClient client, V8 runtime, HttpPost post) throws IOException {
         long startMilli = System.currentTimeMillis();
         // 第一次请求
         CloseableHttpResponse firstResp = client.execute(post);
@@ -48,6 +48,10 @@ public class JSUtils {
     // 通过响应头的set-cookie获取名称为“__jsluid”的Cookie
     private static String getJslUid(HttpResponse response) {
         Header header = response.getFirstHeader("set-cookie");
+        Header[] headers = response.getAllHeaders();
+        for (Header h : headers) {
+            LOG.info(h.getName() + "::::"+h.getValue());
+        }
         if (header == null) {
             return "";
         }
@@ -93,11 +97,13 @@ public class JSUtils {
             }
         }
         String finalJS = finalJSSB.toString();
-        int start = finalJS.indexOf("document");
-        int end = finalJS.indexOf("toLowerCase()") + "toLowerCase()".length();
-        String nonJS = finalJS.substring(start, end);
-        finalJS = finalJS.replace(nonJS, "'sbgg.saic.gov.cn:9080/'")
-                .replace("window.headless", "0")
+        if (finalJS.indexOf("document") > 0 && finalJS.indexOf("toLowerCase()") > 0) {
+            int start = finalJS.indexOf("document");
+            int end = finalJS.indexOf("toLowerCase()") + "toLowerCase()".length();
+            String nonJS = finalJS.substring(start, end);
+            finalJS = finalJS.replace(nonJS, "'sbgg.saic.gov.cn:9080/'");
+        }
+        finalJS = finalJS.replace("window.headless", "0")
                 .replace("window['__p'+'hantom'+'as']", "undefined")
                 .replace("window['callP'+'hantom']", "undefined")
                 .replace("window['_p'+'hantom']", "undefined");

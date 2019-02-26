@@ -206,3 +206,11 @@ function notify(title, body) {
 
     }
 }
+
+function addLink(){
+
+}
+
+function queryRejection(){
+
+}
