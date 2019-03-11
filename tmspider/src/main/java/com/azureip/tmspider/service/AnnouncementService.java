@@ -13,6 +13,7 @@ import com.google.gson.Gson;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ConnectionPoolTimeoutException;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
@@ -66,8 +67,7 @@ public class AnnouncementService {
         resultMap.put("localCount", announcementMapper.queryAnnCountByAnnNum(pojo.getAnnNum()));
 
         // 查询商标网公告数量
-        CloseableHttpClient client = HttpClients.createDefault();
-        RequestConfig config = RequestConfig.custom().setConnectionRequestTimeout(2000).setConnectTimeout(3000).setSocketTimeout(30000).build();
+        RequestConfig config = RequestConfig.custom().setConnectionRequestTimeout(3000).setConnectTimeout(3000).setSocketTimeout(10000).build();
         StringBuilder countUrl = new StringBuilder("http://sbgg.saic.gov.cn:9080/tmann/annInfoView/annSearchDG.html");
         countUrl.append("?page=1&rows=0").append("&annNum=").append(pojo.getAnnNum()).append("&annType=").append(pojo.getAnnType()).append("&totalYOrN=true");
         if (!StringUtils.isEmpty(pojo.getAppDateBegin()) && !StringUtils.isEmpty(pojo.getAppDateEnd())) {
@@ -78,14 +78,8 @@ public class AnnouncementService {
         HttpPost countPost = new HttpPost(countUrl.toString());
         countPost.setHeader("User-Agent", AGENT);
         countPost.setConfig(config);
-        CloseableHttpResponse countResp;
-        do {
-            countResp = JSUtils.crackAnnPost(client, V8.createV8Runtime(), countPost);
-        } while (countResp.getStatusLine().getStatusCode() != 200);
-        // System.out.println("总量查询响应：" + EntityUtils.toString(countResp.getEntity()));
+        CloseableHttpResponse countResp = executePost(countPost);
         AnnListPojo countPojo = gson.fromJson(EntityUtils.toString(countResp.getEntity()), AnnListPojo.class);
-        // AnnListPojo countPojo = JSON.parseObject(EntityUtils.toString(countResp.getEntity()), AnnListPojo.class);
-        client.close();
 
         resultMap.put("remoteCount", countPojo.getTotal());
         return resultMap;
@@ -96,8 +90,7 @@ public class AnnouncementService {
      */
     @Transactional
     public int importAnns(AnnQueryPojo queryPojo) throws IOException {
-        CloseableHttpClient client = HttpClients.createDefault();
-        RequestConfig config = RequestConfig.custom().setConnectionRequestTimeout(3000).setConnectTimeout(3000).setSocketTimeout(30000).build();
+        RequestConfig config = RequestConfig.custom().setConnectionRequestTimeout(3000).setConnectTimeout(3000).setSocketTimeout(10000).build();
         if (queryPojo.getTotal() < 1) {
             StringBuilder countUrl = new StringBuilder("http://sbgg.saic.gov.cn:9080/tmann/annInfoView/annSearchDG.html");
             countUrl.append("?page=1&rows=0").append("&annNum=").append(queryPojo.getAnnNum()).append("&annType=").append(queryPojo.getAnnType())
@@ -110,10 +103,7 @@ public class AnnouncementService {
             HttpPost countPost = new HttpPost(countUrl.toString());
             countPost.setHeader("User-Agent", AGENT);
             countPost.setConfig(config);
-            CloseableHttpResponse countResp;
-            do {
-                countResp = JSUtils.crackAnnPost(client, V8.createV8Runtime(), countPost);
-            } while (countResp.getStatusLine().getStatusCode() != 200);
+            CloseableHttpResponse countResp = executePost(countPost);
             AnnListPojo countPojo = gson.fromJson(EntityUtils.toString(countResp.getEntity()), AnnListPojo.class);
             queryPojo.setTotal(countPojo.getTotal());
         }
@@ -131,16 +121,13 @@ public class AnnouncementService {
             System.out.println(prefix + "URL: " + listUrl.toString());
             HttpPost post = new HttpPost(listUrl.toString());
             post.setHeader("User-Agent", AGENT);
-            post.setHeader("Connection", "keep-alive");
+            // post.setHeader("Connection", "keep-alive");
             post.setConfig(config);
             long listQureyStart = System.currentTimeMillis();
-            CloseableHttpResponse resp;
-            do {
-                resp = JSUtils.crackAnnPost(client, V8.createV8Runtime(), post);
-            } while (resp.getStatusLine().getStatusCode() != 200);
+            CloseableHttpResponse response = executePost(post);
             long listQueryEnd = System.currentTimeMillis();
             System.out.println(prefix + "请求响应耗时: " + (listQueryEnd - listQureyStart) + "毫秒");
-            AnnListPojo annList = gson.fromJson(EntityUtils.toString(resp.getEntity()), AnnListPojo.class);
+            AnnListPojo annList = gson.fromJson(EntityUtils.toString(response.getEntity()), AnnListPojo.class);
             long assembleEnd = System.currentTimeMillis();
             System.out.println(prefix + "拼装数据耗时: " + (assembleEnd - listQueryEnd) + "毫秒");
             int result;
@@ -154,9 +141,28 @@ public class AnnouncementService {
             System.out.println(prefix + "插入数据耗时: " + (insertEnd - assembleEnd) + "毫秒");
             successCount += result;
         }
-        client.close();
         System.out.println("插入成功！共计: " + successCount + "条公告。");
         return successCount;
+    }
+
+    private CloseableHttpResponse executePost(HttpPost post) {
+        CloseableHttpResponse response = null;
+        CloseableHttpClient client = HttpClients.createDefault();
+        while (response == null || response.getStatusLine().getStatusCode() != 200) {
+            long reqStart = System.currentTimeMillis();
+            try {
+                response = JSUtils.crackAnnPost(client, V8.createV8Runtime(), post);
+            } catch (Exception e) {
+                System.err.println("==>Exception in " + (System.currentTimeMillis() - reqStart) + " ms: " + e.getMessage());
+                try {
+                    client.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+                client = HttpClients.createDefault();
+            }
+        }
+        return response;
     }
 
     /**

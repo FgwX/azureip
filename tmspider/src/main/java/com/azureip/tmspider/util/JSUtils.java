@@ -9,6 +9,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 
@@ -24,15 +25,19 @@ public class JSUtils {
         CloseableHttpResponse firstResp = client.execute(post);
         LOG.info("第一次请求响应状态码：" + firstResp.getStatusLine().getStatusCode());
 
-        // 获取“__jsluid”
-        String jslUid = getJslUid(firstResp);
-        LOG.info("获取到的[__jsluid]：" + jslUid);
-        // 获取“__jsl_clearance”
+        // 获取tmas_cookie、__jsluid和JSESSIONID
+        String respCookies = getResponsedCookies(firstResp);
+        LOG.info("获取到的[respCookies]：" + respCookies);
 
+        // 获取“__jsl_clearance”
         String jslClearance = getJslClearance(firstResp, runtime);
 
         post.setHeader("Upgrade-Insecure-Requests", "1");
-        post.setHeader("cookie", jslUid + "; " + jslClearance);
+        if (!StringUtils.isEmpty(respCookies)) {
+            post.setHeader("cookie", respCookies + jslClearance);
+        } else {
+            post.setHeader("cookie", jslClearance);
+        }
         // 再次请求，获取数据
         while (true) {
             if (System.currentTimeMillis() - startMilli >= 1500) {
@@ -45,28 +50,26 @@ public class JSUtils {
         return finalResp;
     }
 
-    // 通过响应头的set-cookie获取名称为“__jsluid”的Cookie
-    private static String getJslUid(HttpResponse response) {
-        Header header = response.getFirstHeader("set-cookie");
-        Header[] headers = response.getAllHeaders();
-        for (Header h : headers) {
-            LOG.info(h.getName() + "::::"+h.getValue());
-        }
-        if (header == null) {
-            return "";
-        }
-        String[] cookies = header.getValue().split(";");
-        for (String cookie : cookies) {
-            if (cookie.contains("__jsluid")) {
-                return cookie.trim();
+    // 通过响应头的set-cookie获取名称为tmas_cookie、__jsluid和JSESSIONID的Cookie
+    private static String getResponsedCookies(HttpResponse response) {
+        StringBuilder cookies = new StringBuilder();
+        Header[] headers = response.getHeaders("set-cookie");
+        for (Header header : headers) {
+            String value = header.getValue();
+            String[] cookieArr = value.split(";");
+            for (String cookie : cookieArr) {
+                if (cookie.contains("tmas_cookie") || cookie.contains("__jsluid") || cookie.contains("JSESSIONID")) {
+                    cookies.append(cookie.trim()).append(";");
+                }
             }
         }
-        return "";
+        return cookies.toString();
     }
 
     // 通过响应体获取名称为“__jsl_clearance”的Cookie
     private static String getJslClearance(HttpResponse response, V8 runtime) throws IOException {
         String entity = EntityUtils.toString(response.getEntity());
+        System.out.println("响应体为：" + entity);
         String[] orgArr = entity.substring("<script>".length(), entity.indexOf("</script>")).split("eval");
         StringBuilder orgJS = new StringBuilder(orgArr[0]);
         for (int i = 1; i < orgArr.length; i++) {
@@ -76,7 +79,9 @@ public class JSUtils {
                 orgJS.append("eval").append(orgArr[i]);
             }
         }
+        LOG.info("原始JS为：" + orgJS);
         String realJS = runtime.executeStringScript(orgJS.toString());
+        LOG.info("实际JS为：" + realJS);
         // 获取jslClearance的前半段
         int aStart = realJS.indexOf("__jsl_clearance");
         int aEnd = realJS.indexOf("|0|") + "|0|".length();

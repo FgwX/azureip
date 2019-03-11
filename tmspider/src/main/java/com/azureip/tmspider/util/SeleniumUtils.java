@@ -6,18 +6,26 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxDriverLogLevel;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.firefox.internal.ProfilesIni;
+import org.openqa.selenium.htmlunit.HtmlUnitDriver;
+import org.openqa.selenium.logging.LogType;
+import org.openqa.selenium.logging.LoggingPreferences;
+import org.openqa.selenium.remote.CapabilityType;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.springframework.boot.logging.LogLevel;
 
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 public class SeleniumUtils {
 
     /**
-     * WebDriver初始化
+     * 初始化浏览器
      */
     public static WebDriver initBrowser(boolean useChrome, Long loadTimeOut) {
         WebDriver driver;
@@ -36,11 +44,17 @@ public class SeleniumUtils {
             // LoggingPreferences logPref = new LoggingPreferences();
             // logPref.enable(LogType.PERFORMANCE, Level.ALL);
             // cap.setCapability(CapabilityType.LOGGING_PREFS, logPref);
-            FirefoxOptions options = new FirefoxOptions();
-            FirefoxProfile profile = new ProfilesIni().getProfile("default");
-            options.setProfile(profile);
+            DesiredCapabilities cap = DesiredCapabilities.firefox();
+            FirefoxOptions options = new FirefoxOptions(cap);
             options.addArguments("-safe-mode");
-            driver = new FirefoxDriver(options);
+            // options.addArguments("-headless");
+            cap.setCapability(FirefoxOptions.FIREFOX_OPTIONS,options);
+            LoggingPreferences logPrefs = new LoggingPreferences();
+            logPrefs.enable(LogType.PERFORMANCE,Level.ALL);
+            cap.setCapability(CapabilityType.LOGGING_PREFS, logPrefs);
+            // FirefoxProfile profile = new ProfilesIni().getProfile("default");
+            // options.setProfile(profile);
+            driver = new FirefoxDriver(cap);
         }
 
         Objects.requireNonNull(driver).manage().window().setPosition(new Point(0, 0));
@@ -53,6 +67,19 @@ public class SeleniumUtils {
             driver.manage().timeouts().pageLoadTimeout(loadTimeOut, TimeUnit.MILLISECONDS);
         }
         // driver.manage().timeouts().setScriptTimeout(500, TimeUnit.MILLISECONDS);
+        return driver;
+    }
+
+    /**
+     * 初始化无窗口浏览器（HtmlUnitDriver）
+     */
+    public static HtmlUnitDriver initHeadlessBrowser(Long loadTimeOut) {
+        HtmlUnitDriver driver = new HtmlUnitDriver();
+        driver.setJavascriptEnabled(true);
+        Objects.requireNonNull(driver).manage().window().setPosition(new Point(0, 0));
+        if (loadTimeOut != null && loadTimeOut > 0) {
+            driver.manage().timeouts().pageLoadTimeout(loadTimeOut, TimeUnit.MILLISECONDS);
+        }
         return driver;
     }
 

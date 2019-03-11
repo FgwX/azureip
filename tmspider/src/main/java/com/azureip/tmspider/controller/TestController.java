@@ -1,12 +1,14 @@
 package com.azureip.tmspider.controller;
 
-import com.alibaba.druid.util.StringUtils;
 import com.azureip.tmspider.pojo.AnnListPojo;
 import com.azureip.tmspider.service.RegistrationService;
 import com.azureip.tmspider.util.ExcelUtils;
 import com.azureip.tmspider.util.JSUtils;
+import com.azureip.tmspider.util.SeleniumUtils;
 import com.eclipsesource.v8.V8;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpPost;
@@ -14,9 +16,17 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.apache.poi.xssf.usermodel.*;
+import org.json.JSONObject;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.logging.LogEntries;
+import org.openqa.selenium.logging.LogEntry;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -33,14 +43,19 @@ import java.io.IOException;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Properties;
-import java.util.Random;
+import java.util.*;
 
 @Controller
 @RequestMapping("")
 public class TestController {
+    static {
+        String projectBase = TestController.class.getClassLoader().getResource("").getPath();
+        CHROME_DRIVER_DIR = projectBase + "drivers/chromedriver.exe";
+        FF_DRIVER_DIR = projectBase + "drivers/geckodriver.exe";
+    }
+
+    private static final String CHROME_DRIVER_DIR;
+    private static final String FF_DRIVER_DIR;
 
     @GetMapping("test")
     public String test() {
@@ -49,16 +64,9 @@ public class TestController {
     }
 
     public static void main(String[] args) throws IOException {
-
-        CloseableHttpClient client = HttpClients.createDefault();
-        RequestConfig config = RequestConfig.custom().setConnectionRequestTimeout(2000).setConnectTimeout(3000).setSocketTimeout(30000).build();
-        String countUrl = "http://sbgg.saic.gov.cn:9080/tmann/annInfoView/annSearchDG.html?page=1&rows=1&annNum=1636&annType=TMZCSQ&totalYOrN=true&agentName=";
-        HttpPost countPost = new HttpPost(countUrl);
-        countPost.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36");
-        countPost.setConfig(config);
-        HttpResponse response = JSUtils.crackAnnPost(client, V8.createV8Runtime(), countPost);
-        System.out.println(EntityUtils.toString(response.getEntity()));
-
+        // jsReadyStateTest();
+        // System.out.println("Body:::: " + body.getText());
+        // crackAnnPost();
         // gsonTest();
         // dynamicLoadConfig();
         // javaMailTest();
@@ -68,6 +76,51 @@ public class TestController {
         // getAbsoluteFilePath();
         // getFirstDayOfMonth();
         // getRandomNum();
+    }
+
+    private static void jsReadyStateTest() {
+        // 初始化Selenium功能参数
+        System.setProperty("webdriver.chrome.driver", CHROME_DRIVER_DIR);
+        System.setProperty("webdriver.gecko.driver", FF_DRIVER_DIR);
+        WebDriver driver = SeleniumUtils.initBrowser(false, null);
+
+        driver.get("http://sbgg.saic.gov.cn:9080/tmann/annInfoView/annSearchDG.html?page=3&rows=100&annNum=1638&annType=TMZCSQ&totalYOrN=true&agentName=");
+        String source = driver.getPageSource();
+        String orgJS = source.substring(source.indexOf("<script>") + "<script>".length(), source.indexOf("</script>"));
+        System.out.println(orgJS);
+
+        JavascriptExecutor jsExecutor = (JavascriptExecutor) driver;
+
+        while (true) {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            LogEntries logEntries = driver.manage().logs().get("performance");
+            Iterator<LogEntry> iterator = logEntries.iterator();
+            while (iterator.hasNext()) {
+                LogEntry log = iterator.next();
+                JSONObject message = new JSONObject(log.getMessage()).getJSONObject("message");
+                JSONObject params = message.getJSONObject("params");
+                System.out.println(params);
+            }
+            Object readyState = jsExecutor.executeScript("return document.readyState");
+            Object status = jsExecutor.executeScript("return document.visibilityState");
+            System.out.println("readyState: " +readyState);
+            System.out.println("status: " +status);
+        }
+    }
+
+    private static void crackAnnPost() throws IOException {
+        CloseableHttpClient client = HttpClients.createDefault();
+        RequestConfig config = RequestConfig.custom().setConnectionRequestTimeout(2000).setConnectTimeout(3000).setSocketTimeout(30000).build();
+        String countUrl = "http://sbgg.saic.gov.cn:9080/tmann/annInfoView/annSearchDG.html?page=1&rows=1&annNum=1636&annType=TMZCSQ&totalYOrN=true&agentName=";
+        HttpPost countPost = new HttpPost(countUrl);
+        countPost.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36");
+        countPost.setConfig(config);
+        HttpResponse response = JSUtils.crackAnnPost(client, V8.createV8Runtime(), countPost);
+        System.out.println(EntityUtils.toString(response.getEntity()));
     }
 
     private static void gsonTest() {
