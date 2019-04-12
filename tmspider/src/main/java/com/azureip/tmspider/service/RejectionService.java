@@ -59,7 +59,7 @@ public class RejectionService {
                 queryRejections(fileName, workBook);
             } catch (Exception e) {
                 e.printStackTrace();
-                LOG.error("处理《" + fileName + "》时发生异常：" + e.getMessage());
+                LOG.error("处理《" + fileName + "》时发生异常（" + e.getClass() + "）：" + e.getMessage());
             }
             // 输出目标文件
             FileOutputStream out = new FileOutputStream(tarDir + File.separator + fileName);
@@ -77,15 +77,15 @@ public class RejectionService {
 
         // 循环处理行（跳过标题行）
         for (int i = 1; i <= sheet.getLastRowNum(); i++) {
-            String prefix = "[" + fileName + "]第" + (i + 1) + "行 - ";
             XSSFRow row = sheet.getRow(i);
+            String regNum = row.getCell(0).getStringCellValue();
+            String prefix = "[" + fileName + "]第" + (i + 1) + "行[" + regNum + "] - ";
             if (!rowIsValid(row, prefix)) {
                 continue;
             }
 
             long start = System.currentTimeMillis();
             int retryTimes = 0;
-            String regNum = row.getCell(0).getStringCellValue();
             XSSFHyperlink hyperlink = row.getCell(4).getHyperlink();
             WebElement regFlowsEle = null;
             while (regFlowsEle == null) {
@@ -159,7 +159,6 @@ public class RejectionService {
     }
 
     private boolean rowIsValid(XSSFRow row, String prefix) {
-        String regNum = row.getCell(0).getStringCellValue();
         if (StringUtils.isEmpty(row.getCell(0).getStringCellValue().trim())) {
             LOG.warn(prefix + "注册号为空！");
             return false;
@@ -183,7 +182,7 @@ public class RejectionService {
         XSSFCell statusCell = row.getCell(7);
         if (statusCell != null && statusCell.getCellTypeEnum() != null && CellType.STRING.equals(statusCell.getCellTypeEnum())
                 && (FIRST_TRIAL_MARK.equals(statusCell.getStringCellValue()) || UNTREATED_MARK.equals(statusCell.getStringCellValue()))) {
-            LOG.warn(prefix + "状态为“未受理”或“初审公告”！");
+            LOG.warn(prefix + "状态为" + statusCell.getStringCellValue() + "！");
             return false;
         }
         return true;

@@ -33,8 +33,14 @@ public class RegistrationService {
         String projectBase = RegistrationService.class.getClassLoader().getResource("").getPath();
         CHROME_DRIVER_DIR = projectBase + "drivers/chromedriver.exe";
         FF_DRIVER_DIR = projectBase + "drivers/geckodriver.exe";
+        // 请求中断操作标志
+        interruptRequired = false;
+        // 操作停止标志
+        stopped = true;
     }
 
+    private static boolean interruptRequired;
+    private static boolean stopped;
     private static final Logger LOG = LogManager.getLogger(RegistrationService.class);
     private static final String SEARCH_WIN = "商标状态检索";
     private static final String RESULT_WIN = "商标检索结果";
@@ -52,6 +58,7 @@ public class RegistrationService {
      */
     public List<String> optRejections(File srcDir, File tarDir) throws IOException {
         LOG.info("开始处理表格（查询驳回，添加链接）...");
+        stopped = false;
         File[] pendingFiles = srcDir.listFiles();
         List<String> fileNames = new ArrayList<>();
 
@@ -81,6 +88,24 @@ public class RegistrationService {
         }
         LOG.info("表格处理（查询驳回，添加链接）完成！");
         return fileNames;
+    }
+
+    /**
+     * 中断操作，保存文件
+     */
+    public boolean interruptOpt() {
+        interruptRequired = true;
+        long start = System.currentTimeMillis();
+        while (true) {
+            threadWait(500);
+            if (System.currentTimeMillis() - start > 300000) {
+                interruptRequired = false;
+                return false;
+            } else if (stopped) {
+                interruptRequired = false;
+                return true;
+            }
+        }
     }
 
     // 操作查询表格注册数据，标记驳回并添加链接
@@ -226,7 +251,7 @@ public class RegistrationService {
             LOG.info(prefix + "查询超时");
         } else if ("request_tid".equals(regFlowsEle.getAttribute("id"))) {
             // 未受理（返回Input[id=request_tid]，则说明此商标正等待受理，暂无法查询详细信息）
-            ExcelUtils.setHyperLink(workbook, tmNmeCell, driver.getCurrentUrl());
+            // ExcelUtils.setHyperLink(workbook, tmNmeCell, driver.getCurrentUrl());
             ExcelUtils.setText(workbook, annStatCell, "未受理");
             LOG.info(prefix + "商标未受理");
         } else {
