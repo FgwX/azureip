@@ -69,7 +69,7 @@ public class TestController {
         // crackAnnPost();
         // gsonTest();
         // dynamicLoadConfig();
-        // javaMailTest();
+        javaMailTest();
         // seleniumTest();
         // getExcelUnitFont();
         // deadLoop();
