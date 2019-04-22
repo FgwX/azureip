@@ -69,7 +69,6 @@ public class JSUtils {
     // 通过响应体获取名称为“__jsl_clearance”的Cookie
     private static String getJslClearance(HttpResponse response, V8 runtime) throws IOException {
         String entity = EntityUtils.toString(response.getEntity());
-        // System.out.println("响应体为：" + entity);
         String[] orgArr = entity.substring("<script>".length(), entity.indexOf("</script>")).split("eval");
         StringBuilder orgJS = new StringBuilder(orgArr[0]);
         for (int i = 1; i < orgArr.length; i++) {
@@ -79,29 +78,33 @@ public class JSUtils {
                 orgJS.append("eval").append(orgArr[i]);
             }
         }
-        LOG.info("原始JS为：" + orgJS);
+        // LOG.info("原始JS为：" + orgJS);
         String realJS = runtime.executeStringScript(orgJS.toString());
-        LOG.info("实际JS为：" + realJS);
+        // LOG.info("实际JS为：" + realJS);
         // 获取jslClearance的前半段
         int aStart = realJS.indexOf("__jsl_clearance");
         int aEnd = realJS.indexOf("|0|") + "|0|".length();
         String jslClrA = realJS.substring(aStart, aEnd);
         LOG.info("获取到的[__jsl_clearance]前半段：" + jslClrA);
-        // 获取jslClearance的后半段
 
-        int tmpStart = realJS.indexOf("function(){", aEnd) + "function(){".length();
-        int tmpEnd = realJS.indexOf("})()+';Expires");
-        String tmpFinalJS = realJS.substring(tmpStart, tmpEnd);
-        String[] finalArr = tmpFinalJS.split("return");
-        StringBuilder finalJSSB = new StringBuilder(finalArr[0]);
-        for (int i = 1; i < finalArr.length; i++) {
-            if (i == finalArr.length - 1) {
-                finalJSSB.append(finalArr[i]);
-            } else {
-                finalJSSB.append("return").append(finalArr[i]);
-            }
-        }
-        String finalJS = finalJSSB.toString();
+        // 获取jslClearance的后半段
+        // int tmpStart = realJS.indexOf("function(){", aEnd) + "function(){".length();
+        int tmpStart = realJS.indexOf("(function(){");
+        // int tmpEnd = realJS.indexOf("})()+';Expires");
+        int tmpEnd = realJS.indexOf("+';Expires");
+        // String tmpFinalJS = realJS.substring(tmpStart, tmpEnd);
+        // LOG.info("获取[__jsl_clearance]后半段临时JS：" + tmpFinalJS);
+        // String[] finalArr = tmpFinalJS.split("return");
+        // StringBuilder finalJSSB = new StringBuilder(finalArr[0]);
+        // for (int i = 1; i < finalArr.length; i++) {
+        //     if (i == finalArr.length - 1) {
+        //         finalJSSB.append(finalArr[i]);
+        //     } else {
+        //         finalJSSB.append("return").append(finalArr[i]);
+        //     }
+        // }
+        // String finalJS = finalJSSB.toString();
+        String finalJS = realJS.substring(tmpStart, tmpEnd);
         if (finalJS.indexOf("document") > 0 && finalJS.indexOf("toLowerCase()") > 0) {
             int start = finalJS.indexOf("document");
             int end = finalJS.indexOf("toLowerCase()") + "toLowerCase()".length();
@@ -112,7 +115,7 @@ public class JSUtils {
                 .replace("window['__p'+'hantom'+'as']", "undefined")
                 .replace("window['callP'+'hantom']", "undefined")
                 .replace("window['_p'+'hantom']", "undefined");
-        LOG.info("获取[__jsl_clearance]后半段JS：" + finalJS);
+        // LOG.info("获取[__jsl_clearance]后半段JS：" + finalJS);
         String jslClrB = runtime.executeStringScript(finalJS);
         LOG.info("获取到的[__jsl_clearance]后半段：" + jslClrB);
         runtime.release();
