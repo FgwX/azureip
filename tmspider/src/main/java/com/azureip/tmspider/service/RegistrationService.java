@@ -136,6 +136,9 @@ public class RegistrationService {
                 } catch (StaleElementReferenceException e) {
                     LOG.error(prefix + "[" + regNum + "]操作元素过期，重新初始化...");
                     driver = reInitBrowser(driver);
+                } catch (NoSuchSessionException e) {
+                    LOG.error(prefix + "[" + regNum + "]页面已被关闭！结束查询，保存表格...");
+                    return;
                 } catch (Exception e) {
                     LOG.error(prefix + "[" + regNum + "]未知异常: " + e.getMessage());
                     e.printStackTrace();
