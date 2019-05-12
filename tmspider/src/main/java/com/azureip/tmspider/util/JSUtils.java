@@ -69,6 +69,7 @@ public class JSUtils {
     // 通过响应体获取名称为“__jsl_clearance”的Cookie
     private static String getJslClearance(HttpResponse response, V8 runtime) throws IOException {
         String entity = EntityUtils.toString(response.getEntity());
+        // LOG.info("原始JS为：" + entity.substring("<script>".length(), entity.indexOf("</script>")));
         String[] orgArr = entity.substring("<script>".length(), entity.indexOf("</script>")).split("eval");
         StringBuilder orgJS = new StringBuilder(orgArr[0]);
         for (int i = 1; i < orgArr.length; i++) {
@@ -78,7 +79,6 @@ public class JSUtils {
                 orgJS.append("eval").append(orgArr[i]);
             }
         }
-        // LOG.info("原始JS为：" + orgJS);
         String realJS = runtime.executeStringScript(orgJS.toString());
         // LOG.info("实际JS为：" + realJS);
         // 获取jslClearance的前半段

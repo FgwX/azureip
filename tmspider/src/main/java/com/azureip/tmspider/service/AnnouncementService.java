@@ -154,6 +154,7 @@ public class AnnouncementService {
                 response = JSUtils.crackAnnPost(client, V8.createV8Runtime(), post);
             } catch (Exception e) {
                 System.err.println("==>Exception in " + (System.currentTimeMillis() - reqStart) + " ms: " + e.getMessage());
+                e.printStackTrace();
                 try {
                     client.close();
                 } catch (IOException e1) {
