@@ -5,6 +5,7 @@ import com.azureip.tmspider.util.ExcelUtils;
 import com.azureip.tmspider.util.SeleniumUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -110,7 +111,6 @@ public class RegistrationService {
 
     // 操作查询表格注册数据，标记驳回并添加链接
     private void queryRejectionAndAddLink(String fileName, XSSFWorkbook workBook) {
-        String prefix = "[" + fileName + "] - ";
         XSSFSheet sheet = workBook.getSheetAt(0);
         WebDriver driver = reInitBrowser(null);
 
@@ -119,7 +119,11 @@ public class RegistrationService {
             XSSFRow row = sheet.getRow(i);
             String regNum = row.getCell(0).getStringCellValue();
             if (StringUtils.isEmpty(regNum)) {
-                LOG.error(prefix + "的第" + (i + 1) + "行注册号为空！");
+                LOG.error("[" + fileName + "]第" + (i + 1) + "行注册号为空！");
+                continue;
+            }
+            String prefix = "[" + fileName + "]第" + (i + 1) + "行[" + regNum + "] - ";
+            if (existsLinkOrUntreated(row, prefix)) {
                 continue;
             }
             boolean success = false;
@@ -150,6 +154,21 @@ public class RegistrationService {
             threadWait(200);
         }
         SeleniumUtils.quitBrowser(driver);
+    }
+
+    private boolean existsLinkOrUntreated(XSSFRow row, String prefix) {
+        XSSFCell tmNameCell = row.getCell(4);
+        if (tmNameCell != null && tmNameCell.getHyperlink() != null && !StringUtils.isEmpty(tmNameCell.getHyperlink().getAddress().trim())) {
+            LOG.warn(prefix + "已添加链接！");
+            return true;
+        }
+        XSSFCell statusCell = row.getCell(7);
+        if (statusCell != null && statusCell.getCellTypeEnum() != null && CellType.STRING.equals(statusCell.getCellTypeEnum())
+                && ("未受理".equals(statusCell.getStringCellValue()))) {
+            LOG.warn(prefix + "状态为" + statusCell.getStringCellValue() + "！");
+            return true;
+        }
+        return false;
     }
 
     // 查询驳回信息并添加链接
