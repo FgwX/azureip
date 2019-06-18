@@ -6,21 +6,14 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxDriverLogLevel;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.firefox.internal.ProfilesIni;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
-import org.openqa.selenium.logging.LogType;
-import org.openqa.selenium.logging.LoggingPreferences;
-import org.openqa.selenium.remote.CapabilityType;
-import org.openqa.selenium.remote.DesiredCapabilities;
-import org.springframework.boot.logging.LogLevel;
 
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 
 public class SeleniumUtils {
 
@@ -31,37 +24,20 @@ public class SeleniumUtils {
         WebDriver driver;
         if (useChrome) {
             ChromeOptions options = new ChromeOptions();
-            options.addArguments("--user-data-dir=C:/Users/fgwx/AppData/Local/Google/Chrome/User Data");
-            // DesiredCapabilities cap = DesiredCapabilities.chrome();
-            // cap.setCapability(ChromeOptions.CAPABILITY, options);
-            // LoggingPreferences logPref = new LoggingPreferences();
-            // logPref.enable(LogType.PERFORMANCE, Level.ALL);
-            // cap.setCapability(CapabilityType.LOGGING_PREFS, logPref);
-            // options.setCapability(ChromeOptions.CAPABILITY, cap);
+            options.addArguments("--user-data-dir=C:/Users/LewisZhang/AppData/Local/Google/Chrome/User Data");
             driver = new ChromeDriver(options);
+            driver.manage().window().setSize(new Dimension(1002, 538));
         } else {
-            // DesiredCapabilities cap = DesiredCapabilities.firefox();
-            // LoggingPreferences logPref = new LoggingPreferences();
-            // logPref.enable(LogType.PERFORMANCE, Level.ALL);
-            // cap.setCapability(CapabilityType.LOGGING_PREFS, logPref);
-            DesiredCapabilities cap = DesiredCapabilities.firefox();
-            FirefoxOptions options = new FirefoxOptions(cap);
+            FirefoxOptions options = new FirefoxOptions();
             options.addArguments("-safe-mode");
-            // options.addArguments("-headless");
-            cap.setCapability(FirefoxOptions.FIREFOX_OPTIONS,options);
-            LoggingPreferences logPrefs = new LoggingPreferences();
-            logPrefs.enable(LogType.PERFORMANCE,Level.ALL);
-            cap.setCapability(CapabilityType.LOGGING_PREFS, logPrefs);
-            // FirefoxProfile profile = new ProfilesIni().getProfile("default");
-            // options.setProfile(profile);
-            driver = new FirefoxDriver(cap);
+            options.addArguments("-headless");
+            FirefoxProfile profile = new ProfilesIni().getProfile("default");
+            options.setProfile(profile);
+            driver = new FirefoxDriver(options);
+            driver.manage().window().setSize(new Dimension(1014, 619));
         }
-
         Objects.requireNonNull(driver).manage().window().setPosition(new Point(0, 0));
-        // for Chrome
-        // driver.manage().window().setSize(new Dimension(1002,538));
-        // for Firefox
-        driver.manage().window().setSize(new Dimension(1014, 619));
+
         // driver.manage().timeouts().implicitlyWait(500, TimeUnit.SECONDS);
         if (loadTimeOut != null && loadTimeOut > 0) {
             driver.manage().timeouts().pageLoadTimeout(loadTimeOut, TimeUnit.MILLISECONDS);
@@ -90,11 +66,15 @@ public class SeleniumUtils {
         if (driver == null) {
             return;
         }
-        Set<String> handles = driver.getWindowHandles();
-        for (String handle : handles) {
-            driver.switchTo().window(handle).close();
+        try {
+            Set<String> handles = driver.getWindowHandles();
+            for (String handle : handles) {
+                driver.switchTo().window(handle).close();
+            }
+            driver.quit();
+        } catch (Exception e) {
+            // e.printStackTrace();
         }
-        // driver.quit();
     }
 
     /**
@@ -117,7 +97,8 @@ public class SeleniumUtils {
                 continue;
             }
             //切换并检查其Title是否和目标窗口的Title是否相同
-            if ((driver.switchTo().window(handle).getTitle()).equals(targetTitle)) {
+            driver.switchTo().window(handle);
+            if (targetTitle.equals(driver.getTitle())) {
                 return;
             }
         }

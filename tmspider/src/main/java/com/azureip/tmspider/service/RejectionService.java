@@ -58,8 +58,8 @@ public class RejectionService {
             try {
                 queryRejections(fileName, workBook);
             } catch (Exception e) {
-                e.printStackTrace();
                 LOG.error("处理《" + fileName + "》时发生异常（" + e.getClass() + "）：" + e.getMessage());
+                e.printStackTrace();
             }
             // 输出目标文件
             FileOutputStream out = new FileOutputStream(tarDir + File.separator + fileName);
@@ -139,14 +139,16 @@ public class RejectionService {
                             rejDateCell.setCellValue(dateFormat.parse(rejectDate.getText()));
                             rejDateCell.setCellStyle(dateStyle);
                         } catch (ParseException e) {
-                            rejDateCell.setCellValue("转换异常");
+                            rejDateCell.setCellValue(rejectDate.getText());
                         }
                         hasRejection = true;
-                        LOG.info(prefix + "查询到驳回，日期为：" + rejectDate.getText());
+                        LOG.info(prefix + "驳回日期为：" + rejectDate.getText());
                     }
                 }
                 if (!hasRejection) {
-                    LOG.info(prefix + "未查询到驳回");
+                    // 无驳回时置空
+                    rejDateCell.setCellValue("");
+                    LOG.info(prefix + "无驳回");
                 }
             }
 

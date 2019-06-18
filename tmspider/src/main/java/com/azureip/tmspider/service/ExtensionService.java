@@ -267,7 +267,6 @@ public class ExtensionService {
     // 初始化查询页面
     private WebDriver initQueryPage() {
         LOG.warn("正在初始化浏览器...");
-        // WebDriver driver = SeleniumUtils.initBrowser(true, 10000L);
         WebDriver driver = SeleniumUtils.initBrowser(false, null);
         int retryTimes = 0;
         // 打开检索系统主页
@@ -286,7 +285,7 @@ public class ExtensionService {
             } catch (TimeoutException e) {
                 LOG.error("重新打开[http://wsjs.saic.gov.cn]...");
             }
-            if (retryTimes++ >= 3) {
+            if (retryTimes++ >= 5) {
                 LOG.error("打开检索系统主页超时！");
                 SeleniumUtils.quitBrowser(driver);
                 return null;

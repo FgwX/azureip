@@ -77,8 +77,8 @@ public class RegistrationService {
             try {
                 queryRejectionAndAddLink(fileName, workBook);
             } catch (Exception e) {
+                LOG.error("处理《" + fileName + "》时发生异常（" + e.getClass() + "）：" + e.getMessage());
                 e.printStackTrace();
-                LOG.error("处理《" + fileName + "》时发生异常：" + e.getMessage());
             }
             // 输出目标文件
             FileOutputStream out = new FileOutputStream(tarDir + File.separator + fileName);
@@ -288,11 +288,11 @@ public class RegistrationService {
                     WebElement rejectDate = flow.findElement(By.xpath("/html/body/div[@class='xqboxx']/div/ul/li[" + (i + 1) + "]/table/tbody/tr/td[5]"));
                     ExcelUtils.setDate(workbook, rejDateCell, rejectDate.getText().trim());
                     hasRejection = true;
-                    LOG.info(prefix + "查询到驳回，日期为：" + rejectDate.getText());
+                    LOG.info(prefix + "驳回日期为：" + rejectDate.getText());
                 }
             }
             if (!hasRejection) {
-                LOG.info(prefix + "未查询到驳回");
+                LOG.info(prefix + "无驳回");
             }
         }
         return true;
@@ -313,7 +313,6 @@ public class RegistrationService {
     // 初始化查询页面
     private WebDriver initQueryPage() {
         LOG.warn("正在初始化浏览器...");
-        // WebDriver driver = SeleniumUtils.initBrowser(true, 10000L);
         WebDriver driver = SeleniumUtils.initBrowser(false, null);
         int retryTimes = 0;
         // 打开检索系统主页
@@ -332,7 +331,7 @@ public class RegistrationService {
             } catch (TimeoutException e) {
                 LOG.error("重新打开[http://wsjs.saic.gov.cn]...");
             }
-            if (retryTimes++ >= 3) {
+            if (retryTimes++ >= 5) {
                 LOG.error("打开检索系统主页超时！");
                 SeleniumUtils.quitBrowser(driver);
                 return null;
