@@ -29,8 +29,8 @@ public class SeleniumUtils {
             driver.manage().window().setSize(new Dimension(1002, 538));
         } else {
             FirefoxOptions options = new FirefoxOptions();
-            options.addArguments("-safe-mode");
-            options.addArguments("-headless");
+            // options.addArguments("-safe-mode");
+            // options.addArguments("-headless");
             FirefoxProfile profile = new ProfilesIni().getProfile("default");
             options.setProfile(profile);
             driver = new FirefoxDriver(options);

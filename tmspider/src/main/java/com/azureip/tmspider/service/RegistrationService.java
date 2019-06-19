@@ -27,6 +27,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 @Service
 public class RegistrationService {
@@ -149,9 +150,7 @@ public class RegistrationService {
                 }
             }
             // 设置等待时间，控制速度
-            // Random random = new Random();
-            // threadWait((500 + random.nextInt(1500)));
-            threadWait(200);
+            threadWait((100 + new Random().nextInt(1000)));
         }
         SeleniumUtils.quitBrowser(driver);
     }
