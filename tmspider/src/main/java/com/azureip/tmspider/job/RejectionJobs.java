@@ -28,8 +28,8 @@ public class RejectionJobs {
         this.registrationService = registrationService;
     }
 
-    // 商标状态链接添加任务（每天凌晨0点30分执行）
-    @Scheduled(cron = "0 25 0 * * ?")
+    // 商标状态链接添加任务（每天凌晨0点15分执行）
+    @Scheduled(cron = "0 15 0 * * ?")
     public synchronized void registrationQueryJob() {
         LOG.info("====> 商标状态链接添加任务开始 <====");
         File srcDir = new File("D:/TMSpider/link_src");
@@ -51,7 +51,7 @@ public class RejectionJobs {
         LOG.info("====> 商标状态链接添加任务结束 <====");
     }
 
-    // 驳回信息查询任务（每天凌晨1点执行）ssf
+    // 驳回信息查询任务（每天凌晨0点30分执行）
     @Scheduled(cron = "0 30 0 * * ?")
     public synchronized void rejectionQueryJob() {
         LOG.info("====> 驳回信息查询任务开始 <====");

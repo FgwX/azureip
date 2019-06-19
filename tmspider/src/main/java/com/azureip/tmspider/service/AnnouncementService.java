@@ -7,13 +7,13 @@ import com.azureip.tmspider.model.Announcement;
 import com.azureip.tmspider.model.ExcelOptRecord;
 import com.azureip.tmspider.pojo.AnnListPojo;
 import com.azureip.tmspider.pojo.AnnQueryPojo;
+import com.azureip.tmspider.util.ExcelUtils;
 import com.azureip.tmspider.util.JSUtils;
 import com.eclipsesource.v8.V8;
 import com.google.gson.Gson;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.ConnectionPoolTimeoutException;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
@@ -78,9 +78,10 @@ public class AnnouncementService {
         HttpPost countPost = new HttpPost(countUrl.toString());
         countPost.setHeader("User-Agent", AGENT);
         countPost.setConfig(config);
-        CloseableHttpResponse countResp = executePost(countPost);
+        CloseableHttpResponse countResp = executeJSCrackPost(countPost);
+        // CloseableHttpResponse countResp = executePost(HttpClients.createDefault(), countPost);
+        // System.out.println("响应体：" + EntityUtils.toString(countResp.getEntity()));
         AnnListPojo countPojo = gson.fromJson(EntityUtils.toString(countResp.getEntity()), AnnListPojo.class);
-
         resultMap.put("remoteCount", countPojo.getTotal());
         return resultMap;
     }
@@ -90,7 +91,8 @@ public class AnnouncementService {
      */
     @Transactional
     public int importAnns(AnnQueryPojo queryPojo) throws IOException {
-        RequestConfig config = RequestConfig.custom().setConnectionRequestTimeout(3000).setConnectTimeout(3000).setSocketTimeout(10000).build();
+        RequestConfig config = RequestConfig.custom().setConnectionRequestTimeout(10000).setConnectTimeout(10000).setSocketTimeout(10000).build();
+        // CloseableHttpClient client = HttpClients.createDefault();
         if (queryPojo.getTotal() < 1) {
             StringBuilder countUrl = new StringBuilder("http://sbgg.saic.gov.cn:9080/tmann/annInfoView/annSearchDG.html");
             countUrl.append("?page=1&rows=0").append("&annNum=").append(queryPojo.getAnnNum()).append("&annType=").append(queryPojo.getAnnType())
@@ -103,7 +105,8 @@ public class AnnouncementService {
             HttpPost countPost = new HttpPost(countUrl.toString());
             countPost.setHeader("User-Agent", AGENT);
             countPost.setConfig(config);
-            CloseableHttpResponse countResp = executePost(countPost);
+            CloseableHttpResponse countResp = executeJSCrackPost(countPost);
+            // CloseableHttpResponse countResp = executePost(client, countPost);
             AnnListPojo countPojo = gson.fromJson(EntityUtils.toString(countResp.getEntity()), AnnListPojo.class);
             queryPojo.setTotal(countPojo.getTotal());
         }
@@ -124,7 +127,8 @@ public class AnnouncementService {
             // post.setHeader("Connection", "keep-alive");
             post.setConfig(config);
             long listQureyStart = System.currentTimeMillis();
-            CloseableHttpResponse response = executePost(post);
+            CloseableHttpResponse response = executeJSCrackPost(post);
+            // CloseableHttpResponse response = executePost(client, post);
             long listQueryEnd = System.currentTimeMillis();
             System.out.println(prefix + "请求响应耗时: " + (listQueryEnd - listQureyStart) + "毫秒");
             AnnListPojo annList = gson.fromJson(EntityUtils.toString(response.getEntity()), AnnListPojo.class);
@@ -145,7 +149,21 @@ public class AnnouncementService {
         return successCount;
     }
 
-    private CloseableHttpResponse executePost(HttpPost post) {
+    private CloseableHttpResponse executePost(CloseableHttpClient client, HttpPost post) {
+        CloseableHttpResponse response = null;
+        long reqStart = System.currentTimeMillis();
+        try {
+            response = client.execute(post);
+        } catch (Exception e) {
+            System.err.println("==>Exception in " + (System.currentTimeMillis() - reqStart) + " ms: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+        return response;
+    }
+
+    // 执行破解JS请求
+    private CloseableHttpResponse executeJSCrackPost(HttpPost post) {
         CloseableHttpResponse response = null;
         CloseableHttpClient client = HttpClients.createDefault();
         while (response == null || response.getStatusLine().getStatusCode() != 200) {
@@ -203,7 +221,7 @@ public class AnnouncementService {
                         String regNum = regNumCell.getStringCellValue();
                         int annCount = getCountByRegNum(regNum);
                         if (annCount > 0) {
-                            row.createCell(7).setCellValue(FIRST_TRIAL_ANN);
+                            ExcelUtils.setText(workbook,row.createCell(7),FIRST_TRIAL_ANN);
                             markCount++;
                             System.out.print("!");
                         } else {
