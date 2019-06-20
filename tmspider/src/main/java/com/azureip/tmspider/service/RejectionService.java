@@ -154,29 +154,29 @@ public class RejectionService {
 
     private boolean rowIsValid(XSSFRow row, String prefix) {
         if (StringUtils.isEmpty(row.getCell(0).getStringCellValue().trim())) {
-            LOG.warn(prefix + "注册号为空！");
+            LOG.warn(prefix + "注册号为空");
             return false;
         }
         XSSFCell tmNameCell = row.getCell(4);
         if (tmNameCell == null) {
-            LOG.warn(prefix + "商标名称为空！");
+            LOG.warn(prefix + "商标名称为空");
             return false;
         } else if (tmNameCell.getHyperlink() == null || StringUtils.isEmpty(tmNameCell.getHyperlink().getAddress().trim())) {
-            LOG.warn(prefix + "未添加链接！");
+            LOG.warn(prefix + "未添加链接");
             return false;
         }
         XSSFCell rejDateCell = row.getCell(6);
         if (rejDateCell != null && rejDateCell.getCellTypeEnum() != null) {
             if ((CellType.STRING.equals(rejDateCell.getCellTypeEnum()) && !StringUtils.isEmpty(rejDateCell.getStringCellValue().trim()))
                     || (CellType.NUMERIC.equals(rejDateCell.getCellTypeEnum()) && rejDateCell.getNumericCellValue() > 0)) {
-                LOG.warn(prefix + "驳回日期不为空！");
+                LOG.warn(prefix + "已驳回");
                 return false;
             }
         }
         XSSFCell statusCell = row.getCell(7);
         if (statusCell != null && statusCell.getCellTypeEnum() != null && CellType.STRING.equals(statusCell.getCellTypeEnum())
                 && (FIRST_TRIAL_MARK.equals(statusCell.getStringCellValue()) || UNTREATED_MARK.equals(statusCell.getStringCellValue()))) {
-            LOG.warn(prefix + "状态为" + statusCell.getStringCellValue() + "！");
+            LOG.warn(prefix + "状态为" + statusCell.getStringCellValue() + "");
             return false;
         }
         return true;
