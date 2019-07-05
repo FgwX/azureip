@@ -143,6 +143,7 @@ public class RegistrationService {
                     driver = reInitBrowser(driver);
                 } catch (NoSuchSessionException e) {
                     LOG.error(prefix + "[" + regNum + "]页面已被关闭！结束查询，保存表格...");
+                    SeleniumUtils.quitBrowser(driver);
                     return;
                 } catch (Exception e) {
                     LOG.error(prefix + "[" + regNum + "]未知异常: " + e.getMessage());
