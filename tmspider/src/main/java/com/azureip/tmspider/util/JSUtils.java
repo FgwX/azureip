@@ -23,7 +23,13 @@ public class JSUtils {
         long startMilli = System.currentTimeMillis();
         // 第一次请求
         CloseableHttpResponse firstResp = client.execute(post);
-        LOG.info("第一次请求响应状态码：" + firstResp.getStatusLine().getStatusCode());
+
+        // 如果第一次响应成功，直接返回结果
+        int statusCode = firstResp.getStatusLine().getStatusCode();
+        LOG.info("第一次请求响应状态码：" + statusCode);
+        if (statusCode == 200) {
+            return firstResp;
+        }
 
         // 获取tmas_cookie、__jsluid和JSESSIONID
         String respCookies = getResponsedCookies(firstResp);
@@ -39,11 +45,11 @@ public class JSUtils {
             post.setHeader("cookie", jslClearance);
         }
         // 再次请求，获取数据
-        while (true) {
-            if (System.currentTimeMillis() - startMilli >= 1500) {
-                break;
-            }
-        }
+        /*try {
+            Thread.sleep(1500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }*/
         CloseableHttpResponse finalResp = client.execute(post);
         LOG.info("第二次请求响应状态码：" + finalResp.getStatusLine().getStatusCode());
 

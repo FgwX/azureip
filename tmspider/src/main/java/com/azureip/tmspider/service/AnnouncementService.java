@@ -67,7 +67,7 @@ public class AnnouncementService {
         resultMap.put("localCount", announcementMapper.queryAnnCountByAnnNum(pojo.getAnnNum()));
 
         // 查询商标网公告数量
-        RequestConfig config = RequestConfig.custom().setConnectionRequestTimeout(3000).setConnectTimeout(3000).setSocketTimeout(10000).build();
+        RequestConfig config = RequestConfig.custom().setConnectionRequestTimeout(6000).setConnectTimeout(9000).setSocketTimeout(12000).build();
         StringBuilder countUrl = new StringBuilder("http://sbgg.saic.gov.cn:9080/tmann/annInfoView/annSearchDG.html");
         countUrl.append("?page=1&rows=0").append("&annNum=").append(pojo.getAnnNum()).append("&annType=").append(pojo.getAnnType()).append("&totalYOrN=true");
         if (!StringUtils.isEmpty(pojo.getAppDateBegin()) && !StringUtils.isEmpty(pojo.getAppDateEnd())) {
@@ -91,7 +91,7 @@ public class AnnouncementService {
      */
     @Transactional
     public int importAnns(AnnQueryPojo queryPojo) throws IOException {
-        RequestConfig config = RequestConfig.custom().setConnectionRequestTimeout(10000).setConnectTimeout(10000).setSocketTimeout(10000).build();
+        RequestConfig config = RequestConfig.custom().setConnectionRequestTimeout(10000).setConnectTimeout(20000).setSocketTimeout(30000).build();
         // CloseableHttpClient client = HttpClients.createDefault();
         if (queryPojo.getTotal() < 1) {
             StringBuilder countUrl = new StringBuilder("http://sbgg.saic.gov.cn:9080/tmann/annInfoView/annSearchDG.html");
@@ -171,7 +171,7 @@ public class AnnouncementService {
             try {
                 response = JSUtils.crackAnnPost(client, V8.createV8Runtime(), post);
             } catch (Exception e) {
-                System.err.println("==>Exception in " + (System.currentTimeMillis() - reqStart) + " ms: " + e.getMessage());
+                System.err.println("执行破解JS请求异常（SocketTimeoutException in" + (System.currentTimeMillis() - reqStart) + " ms）: " + e.getMessage());
                 e.printStackTrace();
                 try {
                     client.close();
