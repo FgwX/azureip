@@ -135,9 +135,9 @@ public class RegistrationService {
                     LOG.error(prefix + "[" + regNum + "]重试次数过多，重新初始化...");
                     driver = reInitBrowser(driver);
                 } catch (NoSuchElementException e) {
-                    LOG.error(prefix + "[" + regNum + "]页面切换出错，结束查询...");
-                    // LOG.error(prefix + "[" + regNum + "]页面切换出错，重新初始化...");
-                    // driver = reInitBrowser(driver);
+                    // LOG.error(prefix + "[" + regNum + "]页面切换出错，结束查询...");
+                    LOG.error(prefix + "[" + regNum + "]页面切换出错，重新初始化...");
+                    driver = reInitBrowser(driver);
                 } catch (StaleElementReferenceException e) {
                     LOG.error(prefix + "[" + regNum + "]操作元素过期，重新初始化...");
                     driver = reInitBrowser(driver);
