@@ -1,5 +1,6 @@
 package com.azureip.tmspider.util;
 
+import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebDriver;
@@ -100,7 +101,9 @@ public class SeleniumUtils {
             }
             //切换并检查其Title是否和目标窗口的Title是否相同
             driver.switchTo().window(handle);
-            if (targetTitle.equals(driver.getTitle())) {
+            if (invalidWindow(driver.getTitle())) {
+                driver.close();
+            } else if (targetTitle.equals(driver.getTitle())) {
                 return;
             }
         }
@@ -119,5 +122,9 @@ public class SeleniumUtils {
                 return;
             }
         }
+    }
+
+    private static boolean invalidWindow(String title) {
+        return StringUtils.isBlank(title) || (!"商标状态检索".equals(title) && !"商标检索结果".equals(title) && !"商标详细内容".equals(title));
     }
 }

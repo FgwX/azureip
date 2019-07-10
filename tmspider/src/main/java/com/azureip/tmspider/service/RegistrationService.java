@@ -151,7 +151,7 @@ public class RegistrationService {
                 }
             }
             // 设置等待时间，控制速度
-            threadWait((100 + new Random().nextInt(1000)));
+            threadWait((3000 + new Random().nextInt(7000)));
         }
         SeleniumUtils.quitBrowser(driver);
     }
@@ -197,7 +197,7 @@ public class RegistrationService {
         while (resultEle == null) {
             try {
                 // 每隔500毫秒去调用一下until中的函数，默认是0.5秒，如果等待3秒还没有找到元素，则抛出异常。
-                resultEle = new WebDriverWait(driver, (resultRetryTimes++ > 0 ? 3 : 5), 250).until(new ExpectedCondition<WebElement>() {
+                resultEle = new WebDriverWait(driver, (resultRetryTimes++ > 1 ? 5 : 7), 250).until(new ExpectedCondition<WebElement>() {
                     @NullableDecl
                     @Override
                     public WebElement apply(WebDriver driver) {
@@ -233,7 +233,7 @@ public class RegistrationService {
         while (regFlowsEle == null) {
             final int retryTimes = ++detailRetryTimes;
             try {
-                regFlowsEle = new WebDriverWait(driver, (detailRetryTimes > 1 ? 3 : 5), 250).until(new ExpectedCondition<WebElement>() {
+                regFlowsEle = new WebDriverWait(driver, (detailRetryTimes > 1 ? 5 : 7), 250).until(new ExpectedCondition<WebElement>() {
                     @NullableDecl
                     @Override
                     public WebElement apply(WebDriver driver) {
