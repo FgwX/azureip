@@ -151,7 +151,7 @@ public class RegistrationService {
                 }
             }
             // 设置等待时间，控制速度
-            threadWait((3000 + new Random().nextInt(7000)));
+            threadWait((3000 + new Random().nextInt(5000)));
         }
         SeleniumUtils.quitBrowser(driver);
     }
@@ -295,6 +295,8 @@ public class RegistrationService {
                 LOG.info(prefix + "无驳回");
             }
         }
+        // 关闭无效页面
+        SeleniumUtils.closeInvalidWindow(driver);
         return true;
     }
 

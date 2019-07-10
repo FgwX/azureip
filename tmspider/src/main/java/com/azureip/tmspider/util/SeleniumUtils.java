@@ -31,12 +31,12 @@ public class SeleniumUtils {
             driver.manage().window().setSize(new Dimension(1002, 538));
         } else {
             FirefoxOptions options = new FirefoxOptions();
-            options.addArguments("-safe-mode");
+            // options.addArguments("-safe-mode");
             // options.addArguments("-headless");
-            // FirefoxProfile profile = new ProfilesIni().getProfile("default");
-            // options.setProfile(profile);
-            // driver = new FirefoxDriver(options);
-            driver = new FirefoxDriver();
+            FirefoxProfile profile = new ProfilesIni().getProfile("default");
+            options.setProfile(profile);
+            driver = new FirefoxDriver(options);
+            // driver = new FirefoxDriver();
             driver.manage().window().setSize(new Dimension(1014, 619));
         }
         Objects.requireNonNull(driver).manage().window().setPosition(new Point(0, 0));
@@ -101,9 +101,7 @@ public class SeleniumUtils {
             }
             //切换并检查其Title是否和目标窗口的Title是否相同
             driver.switchTo().window(handle);
-            if (invalidWindow(driver.getTitle())) {
-                driver.close();
-            } else if (targetTitle.equals(driver.getTitle())) {
+            if (targetTitle.equals(driver.getTitle())) {
                 return;
             }
         }
@@ -120,6 +118,20 @@ public class SeleniumUtils {
             if (window.equals(targetHandle)) {
                 driver.switchTo().window(window);
                 return;
+            }
+        }
+    }
+
+    /**
+     * 关闭无效标签页
+     */
+    public static void closeInvalidWindow(WebDriver driver) {
+        // 获取所有标签页的句柄，进行遍历
+        Set<String> handles = driver.getWindowHandles();
+        for (String handle : handles) {
+            driver.switchTo().window(handle);
+            if (invalidWindow(driver.getTitle())) {
+                driver.close();
             }
         }
     }
