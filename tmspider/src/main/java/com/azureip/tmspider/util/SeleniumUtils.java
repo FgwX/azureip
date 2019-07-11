@@ -84,22 +84,20 @@ public class SeleniumUtils {
      * 通过窗口标题切换窗口
      */
     public static void switchByTitle(WebDriver driver, String targetTitle) {
-        // LOG.warn("[切换窗口] ==> " + targetTitle);
-        //获取所有的窗口句柄
-        Set<String> handles = driver.getWindowHandles();
-        //获取当前窗口的句柄
-        String currentHandle = driver.getWindowHandle();
-        //获取当前窗口的title
-        String currentTitle = driver.getTitle();
-        if (currentTitle.equals(targetTitle)) {
+        // 目标窗口如果是当前窗口，直接返回
+        if (targetTitle.equals(driver.getTitle())) {
             return;
         }
+        // 获取所有的窗口句柄
+        Set<String> handles = driver.getWindowHandles();
+        // 获取当前窗口的句柄
+        String currentHandle = driver.getWindowHandle();
         for (String handle : handles) {
-            //略过当前窗口
+            // 略过当前窗口
             if (handle.equals(currentHandle)) {
                 continue;
             }
-            //切换并检查其Title是否和目标窗口的Title是否相同
+            // 切换并检查其Title是否和目标窗口的Title是否相同
             driver.switchTo().window(handle);
             if (targetTitle.equals(driver.getTitle())) {
                 return;
@@ -111,10 +109,10 @@ public class SeleniumUtils {
      * 通过句柄切换窗口
      */
     public static void switchByHandle(WebDriver driver, String targetHandle) {
-        //获取所有的窗口句柄
+        // 获取所有的窗口句柄
         Set<String> windows = driver.getWindowHandles();
         for (String window : windows) {
-            //切换并检查其title是否和目标窗口的title是否相同，是则返回true，否则继续
+            // 切换并检查其title是否和目标窗口的title是否相同，是则返回true，否则继续
             if (window.equals(targetHandle)) {
                 driver.switchTo().window(window);
                 return;
@@ -131,6 +129,7 @@ public class SeleniumUtils {
         for (String handle : handles) {
             driver.switchTo().window(handle);
             if (invalidWindow(driver.getTitle())) {
+                // System.out.println("无效窗口名称：" + driver.getTitle());
                 driver.close();
             }
         }

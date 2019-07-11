@@ -146,12 +146,12 @@ public class RegistrationService {
                     SeleniumUtils.quitBrowser(driver);
                     return;
                 } catch (Exception e) {
-                    LOG.error(prefix + "[" + regNum + "]未知异常: " + e.getMessage());
+                    LOG.error(prefix + "[" + regNum + "]未知异常（" + e.getClass() + "）: " + e.getMessage());
                     e.printStackTrace();
                 }
             }
             // 设置等待时间，控制速度
-            threadWait((3000 + new Random().nextInt(5000)));
+            threadWait((4000 + new Random().nextInt(4000)));
         }
         SeleniumUtils.quitBrowser(driver);
     }
