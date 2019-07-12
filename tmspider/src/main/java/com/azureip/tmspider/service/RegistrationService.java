@@ -173,6 +173,7 @@ public class RegistrationService {
 
     // 查询驳回信息并添加链接
     private boolean queryRejectionData(WebDriver driver, XSSFWorkbook workbook, int rowIndex) {
+        // LOG.debug("当前窗口标题为：" + driver.getTitle());
         SeleniumUtils.switchByTitle(driver, SEARCH_WIN);
         XSSFSheet sheet = workbook.getSheetAt(0);
         int totalRows = sheet.getLastRowNum();
@@ -296,7 +297,7 @@ public class RegistrationService {
             }
         }
         // 关闭无效页面
-        SeleniumUtils.closeAllButQueryPage(driver);
+        // SeleniumUtils.closeAllButQueryPage(driver);
         return true;
     }
 

@@ -119,15 +119,23 @@ public class SeleniumUtils {
 
     /**
      * 关闭所有标签页，只保留商标状态检索页
+     * 已废弃，因为driver.close()方法导致窗口定位切换问题（NoSuchWindowException: Browsing context has been discarded）
      */
+    @Deprecated
     public static void closeAllButQueryPage(WebDriver driver) {
+        String queryHandle = null;
         // 获取所有标签页的句柄，进行遍历
         Set<String> handles = driver.getWindowHandles();
         for (String handle : handles) {
             driver.switchTo().window(handle);
-            if (!isQueryPage(driver.getTitle())) {
+            if (isQueryPage(driver.getTitle())) {
+                queryHandle = driver.getTitle();
+            } else {
                 driver.close();
             }
+        }
+        if (StringUtils.isNotBlank(queryHandle)) {
+            driver.switchTo().window(queryHandle);
         }
     }
 
