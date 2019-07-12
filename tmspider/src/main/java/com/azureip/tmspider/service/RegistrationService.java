@@ -296,7 +296,7 @@ public class RegistrationService {
             }
         }
         // 关闭无效页面
-        SeleniumUtils.closeInvalidWindow(driver);
+        SeleniumUtils.closeAllButQueryPage(driver);
         return true;
     }
 

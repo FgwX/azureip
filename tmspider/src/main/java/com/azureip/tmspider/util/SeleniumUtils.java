@@ -7,9 +7,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxOptions;
-import org.openqa.selenium.firefox.FirefoxProfile;
-import org.openqa.selenium.firefox.internal.ProfilesIni;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
 import java.util.Objects;
@@ -121,21 +118,21 @@ public class SeleniumUtils {
     }
 
     /**
-     * 关闭无效标签页
+     * 关闭所有标签页，只保留商标状态检索页
      */
-    public static void closeInvalidWindow(WebDriver driver) {
+    public static void closeAllButQueryPage(WebDriver driver) {
         // 获取所有标签页的句柄，进行遍历
         Set<String> handles = driver.getWindowHandles();
         for (String handle : handles) {
             driver.switchTo().window(handle);
-            if (invalidWindow(driver.getTitle())) {
-                // System.out.println("无效窗口名称：" + driver.getTitle());
+            if (!isQueryPage(driver.getTitle())) {
                 driver.close();
             }
         }
     }
 
-    private static boolean invalidWindow(String title) {
-        return StringUtils.isBlank(title) || (!"商标状态检索".equals(title) && !"商标检索结果".equals(title) && !"商标详细内容".equals(title));
+    private static boolean isQueryPage(String title) {
+        // return StringUtils.isBlank(title) || (!"商标状态检索".equals(title) && !"商标检索结果".equals(title) && !"商标详细内容".equals(title));
+        return StringUtils.isNotBlank(title) && "商标状态检索".equals(title);
     }
 }
