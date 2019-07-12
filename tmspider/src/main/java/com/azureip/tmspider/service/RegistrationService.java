@@ -151,7 +151,7 @@ public class RegistrationService {
                 }
             }
             // 设置等待时间，控制速度
-            threadWait((4000 + new Random().nextInt(4000)));
+            threadWait((3000 + new Random().nextInt(5000)));
         }
         SeleniumUtils.quitBrowser(driver);
     }
@@ -221,10 +221,11 @@ public class RegistrationService {
                 SeleniumUtils.switchByTitle(driver, RESULT_WIN);
             }
             // 重试5次后，重新打开浏览器
-            if (resultRetryTimes >= 5) {
+            if (resultRetryTimes >= 8) {
                 throw new RetriedTooManyTimesException();
             }
         }
+        threadWait(800);
         resultEle.click();
 
         // 切换到详情页，获取流程列表
@@ -243,7 +244,7 @@ public class RegistrationService {
                             WebElement requestID = driver.findElement(By.xpath("//input[@id='request_tid']"));
                             if (regNum.equals(curRegNumEle.getAttribute("value"))) {
                                 return driver.findElement(By.xpath("/html/body/div[@class='xqboxx']/div/ul"));
-                            } else if (retryTimes >= 5 && !StringUtils.isEmpty(requestID.getAttribute("value"))) {
+                            } else if (retryTimes >= 8 && !StringUtils.isEmpty(requestID.getAttribute("value"))) {
                                 return requestID;
                             }
                             return null;
