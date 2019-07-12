@@ -30,7 +30,7 @@ public class SeleniumUtils {
             // FirefoxOptions options = new FirefoxOptions();
             // options.addArguments("-safe-mode");
             // options.addArguments("-headless");
-            // FirefoxProfile profile = new ProfilesIni().getProfile("default");
+            // FirefoxProfile profile = new ProfilesIni().getProfile("default-release");
             // options.setProfile(profile);
             // driver = new FirefoxDriver(options);
             driver = new FirefoxDriver();
