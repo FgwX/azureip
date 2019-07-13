@@ -7,6 +7,9 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.firefox.FirefoxProfile;
+import org.openqa.selenium.firefox.internal.ProfilesIni;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
 import java.util.Objects;
@@ -23,18 +26,19 @@ public class SeleniumUtils {
         if (useChrome) {
             ChromeOptions options = new ChromeOptions();
             options.addArguments("--user-data-dir=C:/Users/LewisZhang/AppData/Local/Google/Chrome/User Data");
-            // driver = new ChromeDriver(options);
-            driver = new ChromeDriver();
-            driver.manage().window().setSize(new Dimension(1002, 538));
+            options.addArguments("--no-infobars");
+            driver = new ChromeDriver(options);
+            // driver = new ChromeDriver();
+            driver.manage().window().setSize(new Dimension(1000, 600));
         } else {
-            // FirefoxOptions options = new FirefoxOptions();
+            FirefoxOptions options = new FirefoxOptions();
             // options.addArguments("-safe-mode");
             // options.addArguments("-headless");
-            // FirefoxProfile profile = new ProfilesIni().getProfile("default-release");
-            // options.setProfile(profile);
+            FirefoxProfile profile = new ProfilesIni().getProfile("default");
+            options.setProfile(profile);
             // driver = new FirefoxDriver(options);
             driver = new FirefoxDriver();
-            driver.manage().window().setSize(new Dimension(1014, 619));
+            driver.manage().window().setSize(new Dimension(1000, 600));
         }
         Objects.requireNonNull(driver).manage().window().setPosition(new Point(0, 0));
 
