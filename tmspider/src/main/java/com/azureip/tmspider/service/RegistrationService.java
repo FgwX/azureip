@@ -151,7 +151,7 @@ public class RegistrationService {
                 }
             }
             // 设置等待时间，控制速度
-            threadWait((3000 + new Random().nextInt(5000)));
+            threadWait(new Random().nextInt(4000));
         }
         SeleniumUtils.quitBrowser(driver);
     }
