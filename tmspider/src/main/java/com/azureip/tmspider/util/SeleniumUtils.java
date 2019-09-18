@@ -5,18 +5,35 @@ import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
-import org.openqa.selenium.firefox.FirefoxProfile;
-import org.openqa.selenium.firefox.internal.ProfilesIni;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class SeleniumUtils {
+    private static final List<String> UA_LIST;
+    static {
+        UA_LIST = new ArrayList<>();
+        UA_LIST.add("Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36");
+        UA_LIST.add("Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36");
+        UA_LIST.add("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36");
+        UA_LIST.add("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:55.0) Gecko/20100101 Firefox/55.0");
+        UA_LIST.add("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0");
+        UA_LIST.add("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36 OPR/47.0.2631.80");
+        UA_LIST.add("Mozilla/5.0 (iPad; CPU OS 10_3_1 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.0 Mobile/14E304 Safari/602.1");
+        UA_LIST.add("Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.0)");
+        UA_LIST.add("Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)");
+        UA_LIST.add("Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Trident/6.0)");
+        UA_LIST.add("Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko");
+        UA_LIST.add("Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko");
+        UA_LIST.add("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.18362");
+        UA_LIST.add("Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36 SE 2.X MetaSr 1.0");
+    }
 
     /**
      * 初始化浏览器
@@ -24,18 +41,18 @@ public class SeleniumUtils {
     public static WebDriver initBrowser(boolean useChrome, Long loadTimeOut) {
         WebDriver driver;
         if (useChrome) {
-            ChromeOptions options = new ChromeOptions();
-            options.addArguments("--user-data-dir=C:/Users/LewisZhang/AppData/Local/Google/Chrome/User Data");
-            options.addArguments("--no-infobars");
-            driver = new ChromeDriver(options);
-            // driver = new ChromeDriver();
+            // ChromeOptions options = new ChromeOptions();
+            // options.addArguments("--user-data-dir=C:/Users/LewisZhang/AppData/Local/Google/Chrome/User Data");
+            // options.addArguments("--no-infobars");
+            // driver = new ChromeDriver(options);
+            driver = new ChromeDriver();
             driver.manage().window().setSize(new Dimension(1000, 600));
         } else {
             FirefoxOptions options = new FirefoxOptions();
             // options.addArguments("-safe-mode");
             // options.addArguments("-headless");
-            FirefoxProfile profile = new ProfilesIni().getProfile("default");
-            options.setProfile(profile);
+            // FirefoxProfile profile = new ProfilesIni().getProfile("default");
+            // options.setProfile(profile);
             // driver = new FirefoxDriver(options);
             driver = new FirefoxDriver();
             driver.manage().window().setSize(new Dimension(1000, 600));
