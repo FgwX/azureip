@@ -23,6 +23,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.logging.LogEntries;
 import org.openqa.selenium.logging.LogEntry;
 import org.springframework.stereotype.Controller;
@@ -69,8 +70,8 @@ public class TestController {
         // crackAnnPost();
         // gsonTest();
         // dynamicLoadConfig();
-        javaMailTest();
-        // seleniumTest();
+        // javaMailTest();
+        seleniumTest();
         // getExcelUnitFont();
         // deadLoop();
         // getAbsoluteFilePath();
@@ -227,8 +228,9 @@ public class TestController {
         // logPref.enable(LogType.PERFORMANCE, Level.ALL);
         // cap.setCapability(CapabilityType.LOGGING_PREFS, logPref);
         // options.setCapability(ChromeOptions.CAPABILITY, cap);
-        ChromeDriver driver = new ChromeDriver(options);
-        driver.get("chrome://version");
+        // ChromeDriver driver = new ChromeDriver();
+        FirefoxDriver driver = new FirefoxDriver();
+        driver.get("http://service.spiritsoft.cn/ua.html");
     }
 
     // 获取EXCEL单元格字体

@@ -313,7 +313,6 @@ public class RegistrationService {
         }
         return driver;
     }
-
     // 初始化查询页面
     private WebDriver initQueryPage() {
         LOG.warn("正在初始化浏览器...");
