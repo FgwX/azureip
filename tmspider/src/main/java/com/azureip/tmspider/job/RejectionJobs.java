@@ -66,7 +66,7 @@ public class RejectionJobs {
                 for (String fileName : fileNames) {
                     files.append(fileName);
                 }
-                LOG.info("已查询驳回的文件有：" + files.toString());
+                LOG.info("已查询驳回的文件有：" + files.toString().replace(".xlsx",".xlsx  "));
             }
         } catch (IOException e) {
             e.printStackTrace();
