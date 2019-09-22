@@ -157,15 +157,23 @@ public class RegistrationService {
     }
 
     private boolean existsLinkOrUntreated(XSSFRow row, String prefix) {
-        XSSFCell tmNameCell = row.getCell(4);
+        // 判断是否已添加链接
+        /*XSSFCell tmNameCell = row.getCell(4);
         if (tmNameCell != null && tmNameCell.getHyperlink() != null && !StringUtils.isEmpty(tmNameCell.getHyperlink().getAddress().trim())) {
             LOG.warn(prefix + "已添加链接！");
             return true;
-        }
+        }*/
+        // 判断是否为未受理
         XSSFCell statusCell = row.getCell(7);
         if (statusCell != null && statusCell.getCellTypeEnum() != null && CellType.STRING.equals(statusCell.getCellTypeEnum())
                 && ("未受理".equals(statusCell.getStringCellValue()))) {
             LOG.warn(prefix + "状态为" + statusCell.getStringCellValue() + "！");
+            return true;
+        }
+        // 判断是否已有驳回和驳回日期
+        XSSFCell rejDateCell = row.getCell(6);
+        if (rejDateCell != null && rejDateCell.getCellTypeEnum() != null && CellType.NUMERIC.equals(rejDateCell.getCellTypeEnum()) && rejDateCell.getDateCellValue() != null) {
+            LOG.warn(prefix + "已有驳回，日期为：" + rejDateCell.getDateCellValue());
             return true;
         }
         return false;
@@ -194,6 +202,9 @@ public class RegistrationService {
         // 切换到结果页，等待结果加载完成后，点击详情页链接
         SeleniumUtils.switchByTitle(driver, RESULT_WIN);
         int resultRetryTimes = 0;
+        XSSFCell tmNmeCell = row.getCell(4) != null ? row.getCell(4) : row.createCell(4);
+        XSSFCell rejDateCell = row.getCell(6) != null ? row.getCell(6) : row.createCell(6);
+        XSSFCell annStatCell = row.getCell(7) != null ? row.getCell(7) : row.createCell(7);
         WebElement resultEle = null;
         while (resultEle == null) {
             try {
@@ -222,10 +233,12 @@ public class RegistrationService {
             }
             // 重试5次后，重新打开浏览器
             if (resultRetryTimes >= 8) {
-                throw new RetriedTooManyTimesException();
+                // throw new RetriedTooManyTimesException();
+                ExcelUtils.setText(workbook, annStatCell, "查询超时");
+                return true;
             }
         }
-        threadWait(800);
+        threadWait(400);
         resultEle.click();
 
         // 切换到详情页，获取流程列表
@@ -266,9 +279,6 @@ public class RegistrationService {
             }*/
         }
 
-        XSSFCell tmNmeCell = row.getCell(4) != null ? row.getCell(4) : row.createCell(4);
-        XSSFCell rejDateCell = row.getCell(6) != null ? row.getCell(6) : row.createCell(6);
-        XSSFCell annStatCell = row.getCell(7) != null ? row.getCell(7) : row.createCell(7);
         if (regFlowsEle == null) {
             // 查询超时
             ExcelUtils.setText(workbook, annStatCell, "查询超时");
@@ -280,7 +290,7 @@ public class RegistrationService {
             LOG.info(prefix + "商标未受理");
         } else {
             // 判断是否驳回
-            ExcelUtils.setHyperLink(workbook, tmNmeCell, driver.getCurrentUrl());
+            // ExcelUtils.setHyperLink(workbook, tmNmeCell, driver.getCurrentUrl());
             List<WebElement> regFlows = regFlowsEle.findElements(By.xpath("/html/body/div[@class='xqboxx']/div/ul/li"));
             boolean hasRejection = false;
             for (int i = 0; i < regFlows.size(); i++) {
@@ -313,6 +323,7 @@ public class RegistrationService {
         }
         return driver;
     }
+
     // 初始化查询页面
     private WebDriver initQueryPage() {
         LOG.warn("正在初始化浏览器...");

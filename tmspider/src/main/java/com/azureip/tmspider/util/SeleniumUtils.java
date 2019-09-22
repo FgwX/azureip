@@ -7,6 +7,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.firefox.FirefoxProfile;
+import org.openqa.selenium.firefox.internal.ProfilesIni;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
 import java.util.ArrayList;
@@ -17,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 
 public class SeleniumUtils {
     private static final List<String> UA_LIST;
+
     static {
         UA_LIST = new ArrayList<>();
         UA_LIST.add("Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36");
@@ -51,10 +54,10 @@ public class SeleniumUtils {
             FirefoxOptions options = new FirefoxOptions();
             // options.addArguments("-safe-mode");
             // options.addArguments("-headless");
-            // FirefoxProfile profile = new ProfilesIni().getProfile("default");
-            // options.setProfile(profile);
-            // driver = new FirefoxDriver(options);
-            driver = new FirefoxDriver();
+            FirefoxProfile profile = new ProfilesIni().getProfile("default");
+            options.setProfile(profile);
+            driver = new FirefoxDriver(options);
+            // driver = new FirefoxDriver();
             driver.manage().window().setSize(new Dimension(1000, 600));
         }
         Objects.requireNonNull(driver).manage().window().setPosition(new Point(0, 0));
