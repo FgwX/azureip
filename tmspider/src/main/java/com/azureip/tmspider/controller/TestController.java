@@ -7,27 +7,22 @@ import com.azureip.tmspider.util.JSUtils;
 import com.azureip.tmspider.util.SeleniumUtils;
 import com.eclipsesource.v8.V8;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.xssf.usermodel.*;
 import org.json.JSONObject;
-import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.logging.LogEntries;
 import org.openqa.selenium.logging.LogEntry;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -65,13 +60,31 @@ public class TestController {
     }
 
     public static void main(String[] args) throws IOException {
+        try {
+            FileInputStream in = new FileInputStream(new File("D:/TMSpider/test.xlsx"));
+            XSSFWorkbook workBook = new XSSFWorkbook(in);
+            in.close();
+            final XSSFSheet sheet = workBook.getSheetAt(0);
+            final XSSFCreationHelper creationHelper = workBook.getCreationHelper();
+
+            for (int i = 0; i < sheet.getLastRowNum(); i++) {
+                final XSSFRow row = sheet.getRow(i);
+                XSSFCell rejDateCell = row.getCell(6);
+
+                if (rejDateCell != null && rejDateCell.getCellTypeEnum() != null && CellType.NUMERIC.equals(rejDateCell.getCellTypeEnum()) && rejDateCell.getDateCellValue() != null) {
+                    System.out.println(rejDateCell.getCellTypeEnum());
+                    System.out.println(rejDateCell.getDateCellValue());
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         // jsReadyStateTest();
-        // System.out.println("Body:::: " + body.getText());
         // crackAnnPost();
         // gsonTest();
         // dynamicLoadConfig();
         // javaMailTest();
-        seleniumTest();
+        // seleniumTest();
         // getExcelUnitFont();
         // deadLoop();
         // getAbsoluteFilePath();
@@ -108,8 +121,8 @@ public class TestController {
             }
             Object readyState = jsExecutor.executeScript("return document.readyState");
             Object status = jsExecutor.executeScript("return document.visibilityState");
-            System.out.println("readyState: " +readyState);
-            System.out.println("status: " +status);
+            System.out.println("readyState: " + readyState);
+            System.out.println("status: " + status);
         }
     }
 
