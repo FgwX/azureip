@@ -54,10 +54,10 @@ public class SeleniumUtils {
             FirefoxOptions options = new FirefoxOptions();
             // options.addArguments("-safe-mode");
             // options.addArguments("-headless");
-            FirefoxProfile profile = new ProfilesIni().getProfile("default");
-            options.setProfile(profile);
-            driver = new FirefoxDriver(options);
-            // driver = new FirefoxDriver();
+            // FirefoxProfile profile = new ProfilesIni().getProfile("default");
+            // options.setProfile(profile);
+            // driver = new FirefoxDriver(options);
+            driver = new FirefoxDriver();
             driver.manage().window().setSize(new Dimension(1000, 600));
         }
         Objects.requireNonNull(driver).manage().window().setPosition(new Point(0, 0));
