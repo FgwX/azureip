@@ -234,6 +234,7 @@ public class RegistrationService {
             // 重试5次后，重新打开浏览器
             if (resultRetryTimes >= 8) {
                 // throw new RetriedTooManyTimesException();
+                LOG.info(prefix + "查询超时");
                 ExcelUtils.setText(workbook, annStatCell, "查询超时");
                 return true;
             }
