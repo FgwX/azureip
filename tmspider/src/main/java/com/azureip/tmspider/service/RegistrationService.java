@@ -202,14 +202,14 @@ public class RegistrationService {
         // 切换到结果页，等待结果加载完成后，点击详情页链接
         SeleniumUtils.switchByTitle(driver, RESULT_WIN);
         int resultRetryTimes = 0;
-        XSSFCell tmNmeCell = row.getCell(4) != null ? row.getCell(4) : row.createCell(4);
+        XSSFCell tmNameCell = row.getCell(4) != null ? row.getCell(4) : row.createCell(4);
         XSSFCell rejDateCell = row.getCell(6) != null ? row.getCell(6) : row.createCell(6);
         XSSFCell annStatCell = row.getCell(7) != null ? row.getCell(7) : row.createCell(7);
         WebElement resultEle = null;
         while (resultEle == null) {
             try {
                 // 每隔500毫秒去调用一下until中的函数，默认是0.5秒，如果等待3秒还没有找到元素，则抛出异常。
-                resultEle = new WebDriverWait(driver, (resultRetryTimes++ > 1 ? 5 : 7), 250).until(new ExpectedCondition<WebElement>() {
+                resultEle = new WebDriverWait(driver, (resultRetryTimes++ > 1 ? 10 : 12), 500).until(new ExpectedCondition<WebElement>() {
                     @NullableDecl
                     @Override
                     public WebElement apply(WebDriver driver) {
@@ -249,7 +249,7 @@ public class RegistrationService {
         while (regFlowsEle == null) {
             final int retryTimes = ++detailRetryTimes;
             try {
-                regFlowsEle = new WebDriverWait(driver, (detailRetryTimes > 1 ? 5 : 7), 250).until(new ExpectedCondition<WebElement>() {
+                regFlowsEle = new WebDriverWait(driver, (detailRetryTimes > 1 ? 10 : 12), 500).until(new ExpectedCondition<WebElement>() {
                     @NullableDecl
                     @Override
                     public WebElement apply(WebDriver driver) {
@@ -335,7 +335,7 @@ public class RegistrationService {
         while (statusQueryEle == null) {
             try {
                 driver.get("http://wsjs.saic.gov.cn");
-                statusQueryEle = new WebDriverWait(driver, 6, 500).until(new ExpectedCondition<WebElement>() {
+                statusQueryEle = new WebDriverWait(driver, 10, 500).until(new ExpectedCondition<WebElement>() {
                     @NullableDecl
                     @Override
                     public WebElement apply(WebDriver driver) {

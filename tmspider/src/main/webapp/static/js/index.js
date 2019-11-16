@@ -15,6 +15,8 @@ $(function () {
     importAnnLoading = Ladda.create(document.getElementById("importRemoteAnnBtn"));
     delLocalLoading = Ladda.create(document.getElementById("delLocalAnnBtn"));
     optExcelLoading = Ladda.create(document.getElementById("optExcelBtn"));
+    addLinkLoading = Ladda.create(document.getElementById("addLinkBtn"));
+    queryRejectionLoading = Ladda.create(document.getElementById("queryRejectionBtn"));
 
     $("#sqrqStart").daterangepicker({
 
@@ -207,10 +209,42 @@ function notify(title, body) {
     }
 }
 
-function addLink(){
-
+function addLink() {
+    if (confirm("即将开始调用【添加链接】接口！\n是否继续？")) {
+        addLinkLoading.start();
+        $.ajax({
+            type: "GET",
+            url: "/reg/addLink",
+            success: function (resp) {
+                if (resp.status === "S") {
+                    notify("提示 - TMSpider", "【添加链接】已完成");
+                } else {
+                    notify("警告 - TMSpider", "【添加链接】失败！原因如下：\n" + resp.message);
+                }
+            },
+            complete: function () {
+                addLinkLoading.stop();
+            }
+        });
+    }
 }
 
-function queryRejection(){
-
+function queryRejection() {
+    if (confirm("即将开始调用【查询驳回】接口！\n是否继续？")) {
+        addLinkLoading.start();
+        $.ajax({
+            type: "GET",
+            url: "/rej/queryRej",
+            success: function (resp) {
+                if (resp.status === "S") {
+                    notify("提示 - TMSpider", "【查询驳回】已完成");
+                } else {
+                    notify("警告 - TMSpider", "【查询驳回】失败！原因如下：\n" + resp.message);
+                }
+            },
+            complete: function () {
+                addLinkLoading.stop();
+            }
+        });
+    }
 }

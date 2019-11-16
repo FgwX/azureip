@@ -91,7 +91,7 @@ public class AnnouncementService {
      */
     @Transactional
     public int importAnns(AnnQueryPojo queryPojo) throws IOException {
-        RequestConfig config = RequestConfig.custom().setConnectionRequestTimeout(10000).setConnectTimeout(20000).setSocketTimeout(30000).build();
+        RequestConfig config = RequestConfig.custom().setConnectionRequestTimeout(10000).setConnectTimeout(20000).setSocketTimeout(60000).build();
         // CloseableHttpClient client = HttpClients.createDefault();
         if (queryPojo.getTotal() < 1) {
             StringBuilder countUrl = new StringBuilder("http://sbgg.saic.gov.cn:9080/tmann/annInfoView/annSearchDG.html");
