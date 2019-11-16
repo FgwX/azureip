@@ -13,13 +13,15 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.xssf.usermodel.*;
 import org.json.JSONObject;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.UnhandledAlertException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.logging.LogEntries;
 import org.openqa.selenium.logging.LogEntry;
 import org.springframework.stereotype.Controller;
@@ -32,10 +34,7 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -60,25 +59,9 @@ public class TestController {
     }
 
     public static void main(String[] args) throws IOException {
-        try {
-            FileInputStream in = new FileInputStream(new File("D:/TMSpider/test.xlsx"));
-            XSSFWorkbook workBook = new XSSFWorkbook(in);
-            in.close();
-            final XSSFSheet sheet = workBook.getSheetAt(0);
-            final XSSFCreationHelper creationHelper = workBook.getCreationHelper();
-
-            for (int i = 0; i < sheet.getLastRowNum(); i++) {
-                final XSSFRow row = sheet.getRow(i);
-                XSSFCell rejDateCell = row.getCell(6);
-
-                if (rejDateCell != null && rejDateCell.getCellTypeEnum() != null && CellType.NUMERIC.equals(rejDateCell.getCellTypeEnum()) && rejDateCell.getDateCellValue() != null) {
-                    System.out.println(rejDateCell.getCellTypeEnum());
-                    System.out.println(rejDateCell.getDateCellValue());
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        // setProxy("218.73.58.18","14551");
+        removeProxy();
+        // firefoxProxyTest();
         // jsReadyStateTest();
         // crackAnnPost();
         // gsonTest();
@@ -90,6 +73,48 @@ public class TestController {
         // getAbsoluteFilePath();
         // getFirstDayOfMonth();
         // getRandomNum();
+    }
+
+    // Firefox代理测试
+    private static void firefoxProxyTest() {
+        // 代理隧道验证信息
+        final String proxyUser = "JRPXXUKF1RN7DMUW";
+        final String proxyPass = "C47H3955V1NG";
+
+        // 代理服务器
+        final String proxyHost = "114.231.241.237";
+        final int proxyPort = 21307;
+        System.setProperty("webdriver.gecko.driver", FF_DRIVER_DIR);
+
+        FirefoxProfile profile = new FirefoxProfile();
+        // FirefoxProfile profile = new ProfilesIni().getProfile("default");
+        // 使用代理
+        profile.setPreference("network.proxy.type", 1);
+        // 代理服务器配置
+        profile.setPreference("network.proxy.http", proxyHost);
+        profile.setPreference("network.proxy.http_port", proxyPort);
+
+        profile.setPreference("network.proxy.ssl", proxyHost);
+        profile.setPreference("network.proxy.ssl_port", proxyPort);
+
+        // profile.setPreference("username", proxyUser);
+        // profile.setPreference("password", proxyPass);
+
+        // 所有协议公用一种代理配置，如果单独配置，这项设置为false
+        profile.setPreference("network.proxy.share_proxy_settings", true);
+
+        // 对于localhost的不用代理，这里必须要配置，否则无法和webdriver通讯
+        profile.setPreference("network.proxy.no_proxies_on", "localhost");
+        FirefoxOptions option = new FirefoxOptions();
+        option.setProfile(profile);
+        // 以代理方式启动firefox
+        FirefoxDriver driver = new FirefoxDriver(option);
+        try {
+            driver.get("https://www.baidu.com/s?ie=UTF-8&wd=%E6%88%91%E7%9A%84IP");
+        } catch (UnhandledAlertException e) {
+            driver.getKeyboard().pressKey("abcdefg2134123412341");
+        }
+
     }
 
     private static void jsReadyStateTest() {
@@ -166,11 +191,12 @@ public class TestController {
     // JavaMail测试
     private static void javaMailTest() {
         try {
+
             // 设置连接邮件服务器的参数
             Properties properties = new Properties();
             properties.setProperty("mail.smtp.auth", "true");
             properties.setProperty("mail.transport.protocol", "smtp");
-            properties.setProperty("mail.smtp.host", "smtp.163.com");
+            properties.setProperty("mail.smtp.host", "smtp.azure-ip.com");
             // 创建定义整个应用程序所需的环境信息的Session对象
             Session session = Session.getInstance(properties);
             session.setDebug(true);
@@ -179,7 +205,7 @@ public class TestController {
             msg.setFrom(new InternetAddress("lewiszhang@azure-ip.com"));
             // 设置收件人地址（可以增加多个收件人、抄送、密送），即下面这一行代码书写多行
             // MimeMessage.RecipientType.TO：发送；CC：抄送；BCC：密送
-            msg.setRecipient(MimeMessage.RecipientType.TO, new InternetAddress("service@azure-ip.com"));
+            msg.setRecipient(MimeMessage.RecipientType.TO, new InternetAddress("azure-cs01@azure-ip.com"));
             // 设置邮件主题
             msg.setSubject("测试邮件主题");
             // 设置邮件正文
@@ -300,5 +326,77 @@ public class TestController {
         for (int i = 0; i < 10; i++) {
             System.out.println(random.nextInt(10));
         }
+    }
+
+    public static boolean setProxy(String ip, String port) {
+        String code = "@echo off\r\n"
+                + "set ip=" + ip + "\r\n"
+                + "set port=" + port + "\r\n"
+                + "REG ADD \"HKCU\\SOFTWARE\\MICROSOFT\\Windows\\CURRENTVERSION\\Internet Settings\\Connections\" /v \"DefaultConnectionSettings\" /t  REG_BINARY /d \"3C000000AA0100000B0000000F000000\" /f\r\n"
+                + "REG ADD \"HKCU\\SOFTWARE\\MICROSOFT\\Windows\\CURRENTVERSION\\Internet Settings\" /v \"ProxyEnable\" /t  REG_DWORD /d \"1\" /f\r\n"
+                + "REG ADD \"HKCU\\SOFTWARE\\MICROSOFT\\Windows\\CURRENTVERSION\\Internet Settings\" /v \"ProxyServer\" /t  REG_SZ /d \"%ip%:%port%\" /f\r\n"
+                + "REG ADD \"HKLM\\System\\CurrentControlSet\\Hardware Profiles\\0001\\SOFTWARE\\MICROSOFT\\Windows\\CURRENTVERSION\\Internet Settings\" /v \"ProxyEnable\" /t  REG_DWORD /d \"1\" /f\r\n"
+                + "REG ADD \"HKCU\\SOFTWARE\\MICROSOFT\\Windows\\CURRENTVERSION\\Internet Settings\\Connections\" /v \"SavedLegacySettings\" /t  REG_BINARY /d \"3C000000AE0100000B0000000F000000\" /f\r\n"
+                + "REG ADD \"HKCU\\SOFTWARE\\MICROSOFT\\Windows\\CURRENTVERSION\\Internet Settings\" /v \"ProxyOverride\" /t  REG_SZ /d \"<local>\" /f\r\n"
+                + "set rp=\"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\"\r\n"
+                + "set rk=\"ProxyServer\"\r\n"
+                + "for /f \"tokens=*\" %%a in ('reg query %rp% /v %rk%^|findstr %rk%') do (\r\n"
+                + "call :doit %%a\r\n"
+                + ")\r\n"
+                + "goto :eof\r\n"
+                + ":doit\r\n"
+                + "echo %3\r\n"
+                + "echo.&echo.\r\n"
+                + "exit";
+        return runBat(code, ip + ":" + port);
+    }
+
+    public static void removeProxy() {
+        String code = "@echo off\r\n"
+                + "REG ADD \"HKCU\\SOFTWARE\\MICROSOFT\\Windows\\CURRENTVERSION\\Internet Settings\\Connections\" /v \"DefaultConnectionSettings\" /t  REG_BINARY /d \"3C000000AA0100000B0000000F000000\" /f\r\n"
+                + "REG ADD \"HKCU\\SOFTWARE\\MICROSOFT\\Windows\\CURRENTVERSION\\Internet Settings\" /v \"ProxyEnable\" /t  REG_DWORD /d \"0\" /f\r\n"
+                + "REG ADD \"HKCU\\SOFTWARE\\MICROSOFT\\Windows\\CURRENTVERSION\\Internet Settings\" /v \"ProxyServer\" /t  REG_SZ /d \"\" /f\r\n"
+                + "REG ADD \"HKLM\\System\\CurrentControlSet\\Hardware Profiles\\0001\\SOFTWARE\\MICROSOFT\\Windows\\CURRENTVERSION\\Internet Settings\" /v \"ProxyEnable\" /t  REG_DWORD /d \"1\" /f\r\n"
+                + "REG ADD \"HKCU\\SOFTWARE\\MICROSOFT\\Windows\\CURRENTVERSION\\Internet Settings\\Connections\" /v \"SavedLegacySettings\" /t  REG_BINARY /d \"3C000000AE0100000B0000000F000000\" /f\r\n"
+                + "REG ADD \"HKCU\\SOFTWARE\\MICROSOFT\\Windows\\CURRENTVERSION\\Internet Settings\" /v \"ProxyOverride\" /t  REG_SZ /d \"<local>\" /f\r\n"
+                + "exit";
+        runBat(code, "");
+    }
+
+    private static boolean runBat(String code, String flag) {
+        File file = new File("temp.bat");
+        String str = "";
+        try {
+            if (!file.exists())
+                file.createNewFile();
+            PrintWriter pw = new PrintWriter(file);
+            pw.write(code);
+            pw.flush();
+            pw.close();
+            Process child = Runtime.getRuntime().exec("cmd /c temp.bat");
+            InputStream in = child.getInputStream();
+            Scanner sc = new Scanner(in, "gbk");
+            while (sc.hasNext()) {
+                str += sc.nextLine();
+            }
+            try {
+                child.waitFor();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            sc.close();
+            Thread.sleep(1000);
+            file.delete();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        if (str.contains(flag))
+            return true;
+        else
+            return false;
     }
 }
