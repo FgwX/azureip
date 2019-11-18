@@ -14,9 +14,11 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.apache.poi.xssf.usermodel.*;
+import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.json.JSONObject;
+import org.openqa.selenium.Alert;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.UnhandledAlertException;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -24,6 +26,9 @@ import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.logging.LogEntries;
 import org.openqa.selenium.logging.LogEntry;
+import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -60,8 +65,8 @@ public class TestController {
 
     public static void main(String[] args) throws IOException {
         // setProxy("218.73.58.18","14551");
-        removeProxy();
-        // firefoxProxyTest();
+        // removeProxy();
+        firefoxProxyTest();
         // jsReadyStateTest();
         // crackAnnPost();
         // gsonTest();
@@ -78,8 +83,8 @@ public class TestController {
     // Firefox代理测试
     private static void firefoxProxyTest() {
         // 代理隧道验证信息
-        final String proxyUser = "JRPXXUKF1RN7DMUW";
-        final String proxyPass = "C47H3955V1NG";
+        StringBuilder authSB = new StringBuilder();
+        authSB.append("JRPXXUKF1RN7DMUW").append(":").append("C47H3955V1NG");
 
         // 代理服务器
         final String proxyHost = "114.231.241.237";
@@ -109,11 +114,13 @@ public class TestController {
         option.setProfile(profile);
         // 以代理方式启动firefox
         FirefoxDriver driver = new FirefoxDriver(option);
-        try {
-            driver.get("https://www.baidu.com/s?ie=UTF-8&wd=%E6%88%91%E7%9A%84IP");
-        } catch (UnhandledAlertException e) {
-            driver.getKeyboard().pressKey("abcdefg2134123412341");
-        }
+
+        String auth = new String(Base64.getEncoder().encode(authSB.toString().getBytes()));
+        System.out.println(auth);
+
+        driver.get("www.baidu.com");
+        Alert alert = driver.switchTo().alert();
+        System.out.println(alert.getText());
 
     }
 
