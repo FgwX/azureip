@@ -5,6 +5,6 @@ import org.springframework.stereotype.Component;
 /**
  * 驳回数据相关定时任务
  */
-@Component
+// @Component
 public class AnnouncementJobs {
 }

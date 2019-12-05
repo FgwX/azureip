@@ -1,6 +1,6 @@
 package com.azureip.tmspider.controller;
 
-import com.azureip.tmspider.pojo.GlobalResponse;
+import com.azureip.common.pojo.GlobalResponse;
 import com.azureip.tmspider.service.RegistrationService;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;

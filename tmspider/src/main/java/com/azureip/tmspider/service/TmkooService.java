@@ -2,9 +2,9 @@ package com.azureip.tmspider.service;
 
 import com.azureip.tmspider.mapper.TMKooRecordMapper;
 import com.azureip.tmspider.model.TMKooRecord;
-import com.azureip.tmspider.pojo.GlobalResponse;
+import com.azureip.common.pojo.GlobalResponse;
 import com.azureip.tmspider.pojo.TmkooQueryPojo;
-import com.azureip.tmspider.util.SpringUtils;
+import com.azureip.common.util.SpringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;

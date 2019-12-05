@@ -1,4 +1,4 @@
-package com.azureip.tmspider.pojo;
+package com.azureip.common.pojo;
 
 import java.io.Serializable;
 import java.util.List;

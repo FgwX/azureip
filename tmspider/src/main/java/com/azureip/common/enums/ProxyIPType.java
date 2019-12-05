@@ -1,4 +1,4 @@
-package com.azureip.tmspider.enums;
+package com.azureip.common.enums;
 
 public enum ProxyIPType {
     GN("高匿"), TM("透明");

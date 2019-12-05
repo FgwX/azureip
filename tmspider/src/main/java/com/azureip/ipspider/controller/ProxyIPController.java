@@ -1,4 +1,4 @@
-package com.azureip.tmspider.controller;
+package com.azureip.ipspider.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

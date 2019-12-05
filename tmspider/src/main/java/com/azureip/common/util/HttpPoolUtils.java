@@ -1,4 +1,4 @@
-package com.azureip.tmspider.util;
+package com.azureip.common.util;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;

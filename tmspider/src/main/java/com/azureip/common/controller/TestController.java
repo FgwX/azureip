@@ -1,12 +1,13 @@
-package com.azureip.tmspider.controller;
+package com.azureip.common.controller;
 
 import com.azureip.tmspider.pojo.AnnListPojo;
-import com.azureip.tmspider.pojo.XiCiProxyIPPojo;
+import com.azureip.ipspider.pojo.XiCiProxyIPPojo;
 import com.azureip.tmspider.service.RegistrationService;
-import com.azureip.tmspider.util.ExcelUtils;
-import com.azureip.tmspider.util.JSUtils;
-import com.azureip.tmspider.util.SeleniumUtils;
+import com.azureip.common.util.ExcelUtils;
+import com.azureip.common.util.JSUtils;
+import com.azureip.common.util.SeleniumUtils;
 import com.eclipsesource.v8.V8;
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
@@ -19,7 +20,6 @@ import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
-import org.openqa.selenium.Alert;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -28,6 +28,7 @@ import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.logging.LogEntries;
 import org.openqa.selenium.logging.LogEntry;
+import org.openqa.selenium.remote.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -67,6 +68,29 @@ public class TestController {
     }
 
     public static void main(String[] args) throws IOException {
+        Boolean b = null;
+        String s = b?"Y":"N";
+        System.out.println(s);
+        // xiciProxyIP();
+        // commandLineTest();
+        // setProxy("218.73.58.18","14551");
+        // removeProxy();
+        // firefoxProxyTest();
+        // jsReadyStateTest();
+        // crackAnnPost();
+        // gsonTest();
+        // dynamicLoadConfig();
+        // javaMailTest();
+        // seleniumTest();
+        // getExcelUnitFont();
+        // deadLoop();
+        // getAbsoluteFilePath();
+        // getFirstDayOfMonth();
+        // getRandomNum();
+    }
+
+    // Xici代理抓取
+    private static void xiciProxyIP() throws IOException {
         // 时间显示格式为：19-11-28 15:20
         SimpleDateFormat format = new SimpleDateFormat("yy-MM-dd HH:mm");
         Calendar calendar = Calendar.getInstance();
@@ -96,7 +120,10 @@ public class TestController {
                         getSurviveMinutes(attrs.get(8).html()),
                         verifyDate
                 );
-                System.out.println(i + "=>" + pojo);
+                /*if (pojo.getPort() != 9999 && pojo.getPort() != 8080 && pojo.getPort() != 80) {
+                    System.out.println(pojo.getIp() + ":" + pojo.getPort());
+                }*/
+                System.out.println(pojo.getIp() + ":" + pojo.getPort());
             }
             if (inOneDay) {
                 try {
@@ -106,20 +133,6 @@ public class TestController {
                 }
             }
         }
-        // setProxy("218.73.58.18","14551");
-        // removeProxy();
-        // firefoxProxyTest();
-        // jsReadyStateTest();
-        // crackAnnPost();
-        // gsonTest();
-        // dynamicLoadConfig();
-        // javaMailTest();
-        // seleniumTest();
-        // getExcelUnitFont();
-        // deadLoop();
-        // getAbsoluteFilePath();
-        // getFirstDayOfMonth();
-        // getRandomNum();
     }
 
     private static Date getVerifyDate(SimpleDateFormat format, String text) {
@@ -141,6 +154,29 @@ public class TestController {
             return Long.parseLong(text.replace("天", "")) * 24 * 60;
         } else {
             return 0L;
+        }
+    }
+
+    private static void commandLineTest() {
+        BufferedReader reader = null;
+        try {
+            Process proc = Runtime.getRuntime().exec("ipconfig");
+            reader = new BufferedReader(new InputStreamReader(proc.getInputStream(), "GBK"));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line);
+            }
+            System.out.println("执行结果：" + proc.exitValue());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -177,14 +213,27 @@ public class TestController {
         FirefoxOptions option = new FirefoxOptions();
         option.setProfile(profile);
         // 以代理方式启动firefox
-        FirefoxDriver driver = new FirefoxDriver(option);
+        RemoteWebDriver driver = new FirefoxDriver(option);
+        Command command = new Command(driver.getSessionId(), DriverCommand.GET,
+                ImmutableMap.of("url", "www.baidu.com"));
 
-        String auth = new String(Base64.getEncoder().encode(authSB.toString().getBytes()));
+        CommandExecutor executor = driver.getCommandExecutor();
+        try {
+            Response resp = executor.execute(command);
+            System.out.println("响应状态：" + resp.getStatus());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        driver.getKeyboard().sendKeys("12341234");
+        // Alert alert = driver.switchTo().alert();
+        // System.out.println(alert.getText());
+
+        /*String auth = new String(Base64.getEncoder().encode(authSB.toString().getBytes()));
         System.out.println(auth);
 
         driver.get("www.baidu.com");
         Alert alert = driver.switchTo().alert();
-        System.out.println(alert.getText());
+        System.out.println(alert.getText());*/
 
     }
 

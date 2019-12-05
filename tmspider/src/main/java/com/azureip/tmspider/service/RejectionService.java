@@ -1,7 +1,7 @@
 package com.azureip.tmspider.service;
 
-import com.azureip.tmspider.util.ExcelUtils;
-import com.azureip.tmspider.util.SeleniumUtils;
+import com.azureip.common.util.ExcelUtils;
+import com.azureip.common.util.SeleniumUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.CellType;

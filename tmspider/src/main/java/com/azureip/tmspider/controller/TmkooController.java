@@ -1,6 +1,6 @@
 package com.azureip.tmspider.controller;
 
-import com.azureip.tmspider.pojo.GlobalResponse;
+import com.azureip.common.pojo.GlobalResponse;
 import com.azureip.tmspider.pojo.TmkooQueryPojo;
 import com.azureip.tmspider.service.TmkooService;
 import org.jsoup.Jsoup;

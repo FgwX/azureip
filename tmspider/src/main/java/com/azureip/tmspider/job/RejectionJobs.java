@@ -14,7 +14,9 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * 驳回数据相关定时任务
+ * 驳回数据相关任务
+ * @author LewisZhang
+ * 23th.Jan.2019
  */
 @Component
 public class RejectionJobs {

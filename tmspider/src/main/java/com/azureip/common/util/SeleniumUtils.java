@@ -1,4 +1,4 @@
-package com.azureip.tmspider.util;
+package com.azureip.common.util;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.Dimension;

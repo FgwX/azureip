@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.azureip.ipspider.mapper.ProxyIPModelMapper">
+    <resultMap id="BaseResultMap" type="com.azureip.ipspider.model.ProxyIPModel">
+        <id column="ip" jdbcType="VARCHAR" property="ip"/>
+        <id column="port" jdbcType="INTEGER" property="port"/>
+        <result column="type" jdbcType="VARCHAR" property="type"/>
+        <result column="available" jdbcType="BIT" property="available"/>
+        <result column="lag" jdbcType="REAL" property="lag"/>
+        <result column="fetch_time" jdbcType="TIMESTAMP" property="fetchTime"/>
+        <result column="verify_time" jdbcType="TIMESTAMP" property="verifyTime"/>
+        <result column="invalid_times" jdbcType="BIT" property="invalidTimes"/>
+        <result column="discarded" jdbcType="BIT" property="discarded"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    ip, port, type, available, lag, fetch_time, verify_time, invalid_times, discarded
+  </sql>
+    <select id="selectByPrimaryKey" parameterType="com.azureip.ipspider.model.ProxyIPModelKey" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from pip_proxy_ip
+        where ip = #{ip,jdbcType=VARCHAR}
+        and port = #{port,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="com.azureip.ipspider.model.ProxyIPModelKey">
+    delete from pip_proxy_ip
+    where ip = #{ip,jdbcType=VARCHAR}
+      and port = #{port,jdbcType=INTEGER}
+  </delete>
+    <insert id="insert" parameterType="com.azureip.ipspider.model.ProxyIPModel">
+    insert into pip_proxy_ip (ip, port, type, 
+      available, lag, fetch_time, 
+      verify_time, invalid_times, discarded
+      )
+    values (#{ip,jdbcType=VARCHAR}, #{port,jdbcType=INTEGER}, #{type,jdbcType=VARCHAR}, 
+      #{available,jdbcType=BIT}, #{lag,jdbcType=REAL}, #{fetchTime,jdbcType=TIMESTAMP}, 
+      #{verifyTime,jdbcType=TIMESTAMP}, #{invalidTimes,jdbcType=BIT}, #{discarded,jdbcType=BIT}
+      )
+  </insert>
+    <insert id="insertSelective" parameterType="com.azureip.ipspider.model.ProxyIPModel">
+        insert into pip_proxy_ip
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ip != null">
+                ip,
+            </if>
+            <if test="port != null">
+                port,
+            </if>
+            <if test="type != null">
+                type,
+            </if>
+            <if test="available != null">
+                available,
+            </if>
+            <if test="lag != null">
+                lag,
+            </if>
+            <if test="fetchTime != null">
+                fetch_time,
+            </if>
+            <if test="verifyTime != null">
+                verify_time,
+            </if>
+            <if test="invalidTimes != null">
+                invalid_times,
+            </if>
+            <if test="discarded != null">
+                discarded,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="ip != null">
+                #{ip,jdbcType=VARCHAR},
+            </if>
+            <if test="port != null">
+                #{port,jdbcType=INTEGER},
+            </if>
+            <if test="type != null">
+                #{type,jdbcType=VARCHAR},
+            </if>
+            <if test="available != null">
+                #{available,jdbcType=BIT},
+            </if>
+            <if test="lag != null">
+                #{lag,jdbcType=REAL},
+            </if>
+            <if test="fetchTime != null">
+                #{fetchTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="verifyTime != null">
+                #{verifyTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="invalidTimes != null">
+                #{invalidTimes,jdbcType=BIT},
+            </if>
+            <if test="discarded != null">
+                #{discarded,jdbcType=BIT},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.azureip.ipspider.model.ProxyIPModel">
+        update pip_proxy_ip
+        <set>
+            <if test="type != null">
+                type = #{type,jdbcType=VARCHAR},
+            </if>
+            <if test="available != null">
+                available = #{available,jdbcType=BIT},
+            </if>
+            <if test="lag != null">
+                lag = #{lag,jdbcType=REAL},
+            </if>
+            <if test="fetchTime != null">
+                fetch_time = #{fetchTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="verifyTime != null">
+                verify_time = #{verifyTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="invalidTimes != null">
+                invalid_times = #{invalidTimes,jdbcType=BIT},
+            </if>
+            <if test="discarded != null">
+                discarded = #{discarded,jdbcType=BIT},
+            </if>
+        </set>
+        where ip = #{ip,jdbcType=VARCHAR}
+        and port = #{port,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.azureip.ipspider.model.ProxyIPModel">
+    update pip_proxy_ip
+    set type = #{type,jdbcType=VARCHAR},
+      available = #{available,jdbcType=BIT},
+      lag = #{lag,jdbcType=REAL},
+      fetch_time = #{fetchTime,jdbcType=TIMESTAMP},
+      verify_time = #{verifyTime,jdbcType=TIMESTAMP},
+      invalid_times = #{invalidTimes,jdbcType=BIT},
+      discarded = #{discarded,jdbcType=BIT}
+    where ip = #{ip,jdbcType=VARCHAR}
+      and port = #{port,jdbcType=INTEGER}
+  </update>
+</mapper>

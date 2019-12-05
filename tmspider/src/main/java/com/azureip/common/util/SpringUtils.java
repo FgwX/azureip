@@ -1,4 +1,4 @@
-package com.azureip.tmspider.util;
+package com.azureip.common.util;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;

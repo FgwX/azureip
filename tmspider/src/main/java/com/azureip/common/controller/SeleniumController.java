@@ -1,7 +1,7 @@
-package com.azureip.tmspider.controller;
+package com.azureip.common.controller;
 
 import com.azureip.tmspider.service.RegistrationService;
-import com.azureip.tmspider.util.SpringUtils;
+import com.azureip.common.util.SpringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;

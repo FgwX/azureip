@@ -1,4 +1,4 @@
-package com.azureip.tmspider.util;
+package com.azureip.common.util;
 
 import com.eclipsesource.v8.V8;
 import org.apache.http.Header;

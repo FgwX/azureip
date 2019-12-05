@@ -1,4 +1,4 @@
-package com.azureip.tmspider.pojo;
+package com.azureip.ipspider.pojo;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

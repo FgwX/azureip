@@ -1,9 +1,8 @@
 package com.azureip.tmspider.controller;
 
-import com.azureip.tmspider.pojo.GlobalResponse;
+import com.azureip.common.pojo.GlobalResponse;
 import com.azureip.tmspider.service.RejectionService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

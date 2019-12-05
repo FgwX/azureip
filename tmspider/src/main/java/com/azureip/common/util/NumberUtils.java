@@ -1,4 +1,4 @@
-package com.azureip.tmspider.util;
+package com.azureip.common.util;
 
 import java.math.BigDecimal;
 

@@ -1,7 +1,7 @@
 package com.azureip.tmspider.controller;
 
 import com.azureip.tmspider.pojo.AnnQueryPojo;
-import com.azureip.tmspider.pojo.GlobalResponse;
+import com.azureip.common.pojo.GlobalResponse;
 import com.azureip.tmspider.service.AnnouncementService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
