@@ -16,9 +16,14 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * 代理IP抓取相关服务类
+ * @author LewisZhang
+ * 5th.Dec.2019
+ */
 @Service
-public class ProxyIPService {
-    private static final Logger LOG = LoggerFactory.getLogger(ProxyIPService.class);
+public class ProxyIPFetchService {
+    private static final Logger LOG = LoggerFactory.getLogger(ProxyIPFetchService.class);
 
     public void fetchXiCiProxyIP() throws IOException, ParseException {
         // 时间显示格式为：19-11-11 11:11
