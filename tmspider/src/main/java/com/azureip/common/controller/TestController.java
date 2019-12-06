@@ -1,11 +1,10 @@
 package com.azureip.common.controller;
 
-import com.azureip.tmspider.pojo.AnnListPojo;
-import com.azureip.ipspider.pojo.XiCiProxyIPPojo;
-import com.azureip.tmspider.service.RegistrationService;
 import com.azureip.common.util.ExcelUtils;
 import com.azureip.common.util.JSUtils;
 import com.azureip.common.util.SeleniumUtils;
+import com.azureip.tmspider.pojo.AnnListPojo;
+import com.azureip.tmspider.service.RegistrationService;
 import com.eclipsesource.v8.V8;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
@@ -17,9 +16,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.apache.poi.xssf.usermodel.*;
 import org.json.JSONObject;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -52,14 +48,10 @@ public class TestController {
         String projectBase = TestController.class.getClassLoader().getResource("").getPath();
         CHROME_DRIVER_DIR = projectBase + "drivers/chromedriver.exe";
         FF_DRIVER_DIR = projectBase + "drivers/geckodriver.exe";
-        Calendar c = Calendar.getInstance();
-        c.set(1970, Calendar.JANUARY, 1, 0, 0, 0);
-        INVALID_DATE = c.getTime();
     }
 
     private static final String CHROME_DRIVER_DIR;
     private static final String FF_DRIVER_DIR;
-    private static final Date INVALID_DATE;
 
     @GetMapping("test")
     public String test() {
@@ -67,11 +59,7 @@ public class TestController {
         return "forward:index.html";
     }
 
-    public static void main(String[] args) throws IOException {
-        Boolean b = null;
-        String s = b?"Y":"N";
-        System.out.println(s);
-        // xiciProxyIP();
+    public static void main(String[] args) throws Exception {
         // commandLineTest();
         // setProxy("218.73.58.18","14551");
         // removeProxy();
@@ -87,74 +75,6 @@ public class TestController {
         // getAbsoluteFilePath();
         // getFirstDayOfMonth();
         // getRandomNum();
-    }
-
-    // Xici代理抓取
-    private static void xiciProxyIP() throws IOException {
-        // 时间显示格式为：19-11-28 15:20
-        SimpleDateFormat format = new SimpleDateFormat("yy-MM-dd HH:mm");
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DAY_OF_MONTH, -1);
-        int page = 1;
-        boolean inOneDay = true;
-        while (inOneDay) {
-            String url = "https://www.xicidaili.com/wt/" + page++;
-            System.out.println(url);
-            Document doc = Jsoup.connect(url).get();
-            Elements ipList = doc.getElementById("ip_list").getElementsByTag("tbody").get(0).children();
-            for (int i = 1; i < ipList.size(); i++) {
-                Elements attrs = ipList.get(i).children();
-                Date verifyDate = getVerifyDate(format, attrs.get(9).html());
-                if (verifyDate.before(calendar.getTime()) && !verifyDate.equals(INVALID_DATE)) {
-                    inOneDay = false;
-                    break;
-                }
-                XiCiProxyIPPojo pojo = new XiCiProxyIPPojo(
-                        attrs.get(1).html(),
-                        Integer.parseInt(attrs.get(2).html()),
-                        attrs.get(3).text(),
-                        attrs.get(4).html(),
-                        attrs.get(5).html(),
-                        Double.parseDouble(attrs.get(6).child(0).attr("title").replace("秒", "")),
-                        Double.parseDouble(attrs.get(7).child(0).attr("title").replace("秒", "")),
-                        getSurviveMinutes(attrs.get(8).html()),
-                        verifyDate
-                );
-                /*if (pojo.getPort() != 9999 && pojo.getPort() != 8080 && pojo.getPort() != 80) {
-                    System.out.println(pojo.getIp() + ":" + pojo.getPort());
-                }*/
-                System.out.println(pojo.getIp() + ":" + pojo.getPort());
-            }
-            if (inOneDay) {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    private static Date getVerifyDate(SimpleDateFormat format, String text) {
-        // yy-MM-dd HH:mm
-        try {
-            return format.parse(text);
-        } catch (ParseException e) {
-            e.printStackTrace();
-            return INVALID_DATE;
-        }
-    }
-
-    private static Long getSurviveMinutes(String text) {
-        if (text.indexOf("分钟") > 0) {
-            return Long.parseLong(text.replace("分钟", ""));
-        } else if (text.indexOf("小时") > 0) {
-            return Long.parseLong(text.replace("小时", "")) * 60;
-        } else if (text.indexOf("天") > 0) {
-            return Long.parseLong(text.replace("天", "")) * 24 * 60;
-        } else {
-            return 0L;
-        }
     }
 
     private static void commandLineTest() {
