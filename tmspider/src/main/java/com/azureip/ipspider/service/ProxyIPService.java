@@ -111,16 +111,39 @@ public class ProxyIPService {
             String url = "http://www.89ip.cn/index_" + pageNo + ".html";
             System.out.println("Page " + pageNo + ": " + url);
             Document page = Jsoup.connect(url).get();
-            Elements ipList = page.getElementsByTag("table").get(0).child(1).children();
-            if (ipList.size() < 1) {
+            Elements proxyList = page.getElementsByTag("table").get(0).child(1).children();
+            if (proxyList.size() < 1) {
                 System.err.println("Page " + pageNo + " is empty!");
                 break;
             }
             pageNo += 1;
-            ipList.forEach(ip -> {
-                System.out.println(ip.child(0).text() + ":" + ip.child(1).text());
+            proxyList.forEach(proxy -> {
+                System.out.println(proxy.child(0).text() + ":" + proxy.child(1).text());
             });
             wait(800);
+        }
+    }
+
+    public void fetchFreeIPProxyIP() throws IOException {
+        List<String> urlList = new ArrayList<>();
+        urlList.add("https://www.freeip.top?protocol=https&country=中国&page=");
+        urlList.add("https://www.freeip.top?protocol=http&country=中国&page=");
+
+        for (String url : urlList) {
+            int pageNo = 1;
+            while (true) {
+                Document page = Jsoup.connect(url + pageNo).get();
+                Elements proxyList = page.getElementsByTag("table").get(0).child(1).children();
+                if (proxyList.size() < 1) {
+                    System.err.println("Page " + pageNo + " is empty!");
+                    break;
+                }
+                pageNo++;
+                proxyList.forEach(proxy -> {
+                    System.out.println(proxy.child(0).text() + ":" + proxy.child(1).text());
+                });
+                wait(2000);
+            }
         }
     }
 
