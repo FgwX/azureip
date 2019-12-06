@@ -1,18 +1,18 @@
 package com.azureip.ipspider.mapper;
 
 import com.azureip.ipspider.model.ProxyIPModel;
-import com.azureip.ipspider.model.ProxyIPModelKey;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 public interface ProxyIPModelMapper {
-    int deleteByPrimaryKey(ProxyIPModelKey key);
+    int deleteByPrimaryKey(@Param("ip") String ip, @Param("port") Integer port);
 
     int insert(ProxyIPModel record);
 
-    int insertSelective(ProxyIPModel record);
+    ProxyIPModel selectByPrimaryKey(@Param("ip") String ip, @Param("port") Integer port);
 
-    ProxyIPModel selectByPrimaryKey(ProxyIPModelKey key);
-
-    int updateByPrimaryKeySelective(ProxyIPModel record);
+    List<ProxyIPModel> selectAll();
 
     int updateByPrimaryKey(ProxyIPModel record);
 }

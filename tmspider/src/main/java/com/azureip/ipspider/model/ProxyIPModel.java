@@ -2,27 +2,47 @@ package com.azureip.ipspider.model;
 
 import java.util.Date;
 
-public class ProxyIPModel extends ProxyIPModelKey {
+public class ProxyIPModel {
+    private String ip;
+
+    private Integer port;
+
     private String type;
 
     private Boolean available;
 
-    private Float lag;
+    private Integer lag;
 
     private Date fetchTime;
 
     private Date verifyTime;
 
-    private Boolean invalidTimes;
+    private Integer invalidTimes;
 
     private Boolean discarded;
+
+    public String getIp() {
+        return ip;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
+    }
+
+    public Integer getPort() {
+        return port;
+    }
+
+    public void setPort(Integer port) {
+        this.port = port;
+    }
 
     public String getType() {
         return type;
     }
 
     public void setType(String type) {
-        this.type = type == null ? null : type.trim();
+        this.type = type;
     }
 
     public Boolean getAvailable() {
@@ -33,11 +53,11 @@ public class ProxyIPModel extends ProxyIPModelKey {
         this.available = available;
     }
 
-    public Float getLag() {
+    public Integer getLag() {
         return lag;
     }
 
-    public void setLag(Float lag) {
+    public void setLag(Integer lag) {
         this.lag = lag;
     }
 
@@ -57,11 +77,11 @@ public class ProxyIPModel extends ProxyIPModelKey {
         this.verifyTime = verifyTime;
     }
 
-    public Boolean getInvalidTimes() {
+    public Integer getInvalidTimes() {
         return invalidTimes;
     }
 
-    public void setInvalidTimes(Boolean invalidTimes) {
+    public void setInvalidTimes(Integer invalidTimes) {
         this.invalidTimes = invalidTimes;
     }
 

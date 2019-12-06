@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.azureip.ipspider.mapper.ProxyIPModelMapper">
+    <resultMap id="BaseResultMap" type="com.azureip.ipspider.model.ProxyIPModel">
+        <id column="ip" jdbcType="VARCHAR" property="ip"/>
+        <id column="port" jdbcType="INTEGER" property="port"/>
+        <result column="type" jdbcType="VARCHAR" property="type"/>
+        <result column="available" jdbcType="BIT" property="available"/>
+        <result column="lag" jdbcType="INTEGER" property="lag"/>
+        <result column="fetch_time" jdbcType="TIMESTAMP" property="fetchTime"/>
+        <result column="verify_time" jdbcType="TIMESTAMP" property="verifyTime"/>
+        <result column="invalid_times" jdbcType="INTEGER" property="invalidTimes"/>
+        <result column="discarded" jdbcType="BIT" property="discarded"/>
+    </resultMap>
+    <delete id="deleteByPrimaryKey" parameterType="map">
+    delete from pip_proxy_ip
+    where ip = #{ip,jdbcType=VARCHAR}
+      and port = #{port,jdbcType=INTEGER}
+  </delete>
+    <insert id="insert" parameterType="com.azureip.ipspider.model.ProxyIPModel">
+    insert into pip_proxy_ip (ip, port, type, 
+      available, lag, fetch_time, 
+      verify_time, invalid_times, discarded
+      )
+    values (#{ip,jdbcType=VARCHAR}, #{port,jdbcType=INTEGER}, #{type,jdbcType=VARCHAR}, 
+      #{available,jdbcType=BIT}, #{lag,jdbcType=INTEGER}, #{fetchTime,jdbcType=TIMESTAMP}, 
+      #{verifyTime,jdbcType=TIMESTAMP}, #{invalidTimes,jdbcType=INTEGER}, #{discarded,jdbcType=BIT}
+      )
+  </insert>
+    <update id="updateByPrimaryKey" parameterType="com.azureip.ipspider.model.ProxyIPModel">
+    update pip_proxy_ip
+    set type = #{type,jdbcType=VARCHAR},
+      available = #{available,jdbcType=BIT},
+      lag = #{lag,jdbcType=INTEGER},
+      fetch_time = #{fetchTime,jdbcType=TIMESTAMP},
+      verify_time = #{verifyTime,jdbcType=TIMESTAMP},
+      invalid_times = #{invalidTimes,jdbcType=INTEGER},
+      discarded = #{discarded,jdbcType=BIT}
+    where ip = #{ip,jdbcType=VARCHAR}
+      and port = #{port,jdbcType=INTEGER}
+  </update>
+    <select id="selectByPrimaryKey" parameterType="map" resultMap="BaseResultMap">
+    select ip, port, type, available, lag, fetch_time, verify_time, invalid_times, discarded
+    from pip_proxy_ip
+    where ip = #{ip,jdbcType=VARCHAR}
+      and port = #{port,jdbcType=INTEGER}
+  </select>
+    <select id="selectAll" resultMap="BaseResultMap">
+    select ip, port, type, available, lag, fetch_time, verify_time, invalid_times, discarded
+    from pip_proxy_ip
+  </select>
+</mapper>
