@@ -2,7 +2,7 @@ package com.azureip.ipspider.model;
 
 import java.util.Date;
 
-public class ProxyIPModel {
+public class ProxyIP {
     private String ip;
 
     private Integer port;

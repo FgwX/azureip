@@ -4,6 +4,7 @@ import com.azureip.ipspider.service.ProxyIPFetchService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -31,5 +32,9 @@ public class ProxyIPFetchJobs {
 
     public void fetch89ProxyIPJob() throws IOException {
         proxyIPFetchService.fetch89ProxyIP();
+    }
+
+    public void fetchFreeIPProxyIPJob() throws IOException {
+        proxyIPFetchService.fetchFreeIPProxyIP();
     }
 }

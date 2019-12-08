@@ -276,7 +276,7 @@
         </javaClientGenerator>
 
         <!--代表IP表-->
-        <table tableName="pip_proxy_ip" domainObjectName="ProxyIPModel">
+        <table tableName="pip_proxy_ip" domainObjectName="ProxyIP">
             <property name="useActualColumnNames" value="false"/>
         </table>
     </context>

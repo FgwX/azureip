@@ -63,7 +63,7 @@ public class ProxyIPFetchService {
                             proxy.child(5).html(),
                             Double.parseDouble(proxy.child(6).child(0).attr("title").replace("秒", "")),
                             Double.parseDouble(proxy.child(7).child(0).attr("title").replace("秒", "")),
-                            getXiciSurviveMinutes(proxy.child(8).html()),
+                            getXiCiSurviveMinutes(proxy.child(8).html()),
                             verifyTime
                     );
                     if (pojo.getPort() != 9999 && pojo.getPort() != 8080 && pojo.getPort() != 80) {
@@ -71,12 +71,12 @@ public class ProxyIPFetchService {
                     }
                     System.out.println(pojo.getIp() + ":" + pojo.getPort());*/
                 }
-                wait(2000);
+                wait(3000);
             }
         }
     }
 
-    private static Long getXiciSurviveMinutes(String text) {
+    private static Long getXiCiSurviveMinutes(String text) {
         if (text.indexOf("分钟") > 0) {
             return Long.parseLong(text.replace("分钟", ""));
         } else if (text.indexOf("小时") > 0) {
