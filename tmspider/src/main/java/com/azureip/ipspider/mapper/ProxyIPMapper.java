@@ -1,6 +1,8 @@
 package com.azureip.ipspider.mapper;
 
 import com.azureip.ipspider.model.ProxyIP;
+
+import java.util.Date;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
 
@@ -14,4 +16,8 @@ public interface ProxyIPMapper {
     List<ProxyIP> selectAll();
 
     int updateByPrimaryKey(ProxyIP record);
+
+    void saveAll(List<ProxyIP> proxyList);
+
+    List<ProxyIP> selectUnverifiedProxies(Date deadline, int limit);
 }

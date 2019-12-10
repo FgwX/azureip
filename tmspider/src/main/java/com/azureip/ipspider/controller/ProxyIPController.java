@@ -40,4 +40,9 @@ public class ProxyIPController {
     public void fetchFreeIPProxyIP() throws IOException {
         proxyIPFetchService.fetchFreeIPProxyIP();
     }
+
+    @GetMapping("/verify")
+    public void verifyProxyIP() {
+        proxyIPVerifyService.verify();
+    }
 }

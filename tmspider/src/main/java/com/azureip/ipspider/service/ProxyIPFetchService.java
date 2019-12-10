@@ -1,11 +1,14 @@
 package com.azureip.ipspider.service;
 
+import com.azureip.ipspider.mapper.ProxyIPMapper;
+import com.azureip.ipspider.model.ProxyIP;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -24,6 +27,8 @@ import java.util.List;
 @Service
 public class ProxyIPFetchService {
     private static final Logger LOG = LoggerFactory.getLogger(ProxyIPFetchService.class);
+    @Autowired(required = false)
+    private ProxyIPMapper proxyIPMapper;
 
     public void fetchXiCiProxyIP() throws IOException, ParseException {
         // 时间显示格式为：19-11-11 11:11
@@ -55,21 +60,8 @@ public class ProxyIPFetchService {
                         break;
                     }
                     System.out.println(proxy.child(1).text() + ":" + proxy.child(2).text());
-                    /*XiCiProxyIPPojo pojo = new XiCiProxyIPPojo(
-                            proxy.child(1).html(),
-                            Integer.parseInt(proxy.child(2).html()),
-                            proxy.child(3).text(),
-                            proxy.child(4).html(),
-                            proxy.child(5).html(),
-                            Double.parseDouble(proxy.child(6).child(0).attr("title").replace("秒", "")),
-                            Double.parseDouble(proxy.child(7).child(0).attr("title").replace("秒", "")),
-                            getXiCiSurviveMinutes(proxy.child(8).html()),
-                            verifyTime
-                    );
-                    if (pojo.getPort() != 9999 && pojo.getPort() != 8080 && pojo.getPort() != 80) {
-                        System.out.println(pojo.getIp() + ":" + pojo.getPort());
-                    }
-                    System.out.println(pojo.getIp() + ":" + pojo.getPort());*/
+                    ProxyIP existProxy = proxyIPMapper.selectByPrimaryKey(proxy.child(1).text(), Integer.parseInt(proxy.child(2).text()));
+
                 }
                 wait(3000);
             }
@@ -131,24 +123,53 @@ public class ProxyIPFetchService {
 
     public void fetchFreeIPProxyIP() throws IOException {
         List<String> urlList = new ArrayList<>();
-        urlList.add("https://www.freeip.top?protocol=https&country=中国&page=");
+        // urlList.add("https://www.freeip.top?protocol=https&country=中国&page=");
         urlList.add("https://www.freeip.top?protocol=http&country=中国&page=");
 
         for (String url : urlList) {
             int pageNo = 1;
             while (true) {
                 Document page = Jsoup.connect(url + pageNo).get();
-                Elements proxyList = page.getElementsByTag("table").get(0).child(1).children();
-                if (proxyList.size() < 1) {
+                Elements proxyEleList = page.getElementsByTag("table").get(0).child(1).children();
+                if (proxyEleList.size() < 1) {
                     System.err.println("Page " + pageNo + " is empty!");
                     break;
                 }
                 pageNo++;
-                proxyList.forEach(proxy -> {
-                    System.out.println(proxy.child(0).text() + ":" + proxy.child(1).text());
+
+                List<ProxyIP> proxyList = new ArrayList<>();
+                proxyEleList.forEach(proxyEle -> {
+                    String ip = proxyEle.child(0).text();
+                    int port = Integer.parseInt(proxyEle.child(1).text());
+                    ProxyIP existProxy = proxyIPMapper.selectByPrimaryKey(ip, port);
+                    if (existProxy == null) {
+                        String typeStr = proxyEle.child(3).text();
+                        System.out.println("新  增: " + ip + ":" + port + ", " + typeStr);
+                        Integer type = matchProxyType(typeStr);
+                        ProxyIP proxy = new ProxyIP(ip, port, type);
+                        proxyList.add(proxy);
+                    } else {
+                        System.out.println("已存在: " + ip + ":" + port);
+                    }
                 });
+                proxyIPMapper.saveAll(proxyList);
                 wait(2000);
             }
+        }
+    }
+
+    private Integer matchProxyType(String type) {
+        switch (type.toUpperCase()) {
+            case "HTTP":
+                return 1;
+            case "HTTPS":
+                return 2;
+            case "SOCKET":
+                return 3;
+            case "SOCKET5":
+                return 3;
+            default:
+                return 0;
         }
     }
 

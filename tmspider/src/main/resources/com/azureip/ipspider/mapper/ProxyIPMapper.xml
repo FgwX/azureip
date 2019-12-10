@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.azureip.ipspider.mapper.ProxyIPMapper">
-  <resultMap id="BaseResultMap" type="com.azureip.ipspider.model.ProxyIP">
-    <id column="ip" jdbcType="VARCHAR" property="ip" />
-    <id column="port" jdbcType="INTEGER" property="port" />
-    <result column="type" jdbcType="VARCHAR" property="type" />
-    <result column="available" jdbcType="BIT" property="available" />
-    <result column="lag" jdbcType="INTEGER" property="lag" />
-    <result column="fetch_time" jdbcType="TIMESTAMP" property="fetchTime" />
-    <result column="verify_time" jdbcType="TIMESTAMP" property="verifyTime" />
-    <result column="invalid_times" jdbcType="INTEGER" property="invalidTimes" />
-    <result column="discarded" jdbcType="BIT" property="discarded" />
-  </resultMap>
-  <delete id="deleteByPrimaryKey" parameterType="map">
+    <resultMap id="BaseResultMap" type="com.azureip.ipspider.model.ProxyIP">
+        <id column="ip" jdbcType="VARCHAR" property="ip"/>
+        <id column="port" jdbcType="INTEGER" property="port"/>
+        <result column="type" jdbcType="INTEGER" property="type"/>
+        <result column="available" jdbcType="BIT" property="available"/>
+        <result column="lag" jdbcType="INTEGER" property="lag"/>
+        <result column="fetch_time" jdbcType="TIMESTAMP" property="fetchTime"/>
+        <result column="verify_time" jdbcType="TIMESTAMP" property="verifyTime"/>
+        <result column="invalid_times" jdbcType="INTEGER" property="invalidTimes"/>
+        <result column="discarded" jdbcType="BIT" property="discarded"/>
+    </resultMap>
+    <delete id="deleteByPrimaryKey" parameterType="map">
     delete from pip_proxy_ip
     where ip = #{ip,jdbcType=VARCHAR}
       and port = #{port,jdbcType=INTEGER}
-  </delete>
-  <insert id="insert" parameterType="com.azureip.ipspider.model.ProxyIP">
+    </delete>
+    <insert id="insert" parameterType="com.azureip.ipspider.model.ProxyIP">
     insert into pip_proxy_ip (ip, port, type, 
       available, lag, fetch_time, 
       verify_time, invalid_times, discarded
       )
-    values (#{ip,jdbcType=VARCHAR}, #{port,jdbcType=INTEGER}, #{type,jdbcType=VARCHAR}, 
+    values (#{ip,jdbcType=VARCHAR}, #{port,jdbcType=INTEGER}, #{type,jdbcType=INTEGER}, 
       #{available,jdbcType=BIT}, #{lag,jdbcType=INTEGER}, #{fetchTime,jdbcType=TIMESTAMP}, 
       #{verifyTime,jdbcType=TIMESTAMP}, #{invalidTimes,jdbcType=INTEGER}, #{discarded,jdbcType=BIT}
       )
-  </insert>
-  <update id="updateByPrimaryKey" parameterType="com.azureip.ipspider.model.ProxyIP">
+    </insert>
+    <update id="updateByPrimaryKey" parameterType="com.azureip.ipspider.model.ProxyIP">
     update pip_proxy_ip
-    set type = #{type,jdbcType=VARCHAR},
+    set type = #{type,jdbcType=INTEGER},
       available = #{available,jdbcType=BIT},
       lag = #{lag,jdbcType=INTEGER},
       fetch_time = #{fetchTime,jdbcType=TIMESTAMP},
@@ -38,15 +38,32 @@
       discarded = #{discarded,jdbcType=BIT}
     where ip = #{ip,jdbcType=VARCHAR}
       and port = #{port,jdbcType=INTEGER}
-  </update>
-  <select id="selectByPrimaryKey" parameterType="map" resultMap="BaseResultMap">
+    </update>
+    <select id="selectByPrimaryKey" parameterType="map" resultMap="BaseResultMap">
     select ip, port, type, available, lag, fetch_time, verify_time, invalid_times, discarded
     from pip_proxy_ip
     where ip = #{ip,jdbcType=VARCHAR}
       and port = #{port,jdbcType=INTEGER}
-  </select>
-  <select id="selectAll" resultMap="BaseResultMap">
+    </select>
+    <select id="selectAll" resultMap="BaseResultMap">
     select ip, port, type, available, lag, fetch_time, verify_time, invalid_times, discarded
     from pip_proxy_ip
-  </select>
+    </select>
+
+    <insert id="saveAll" parameterType="java.util.List">
+        insert into pip_proxy_ip
+        (ip, port, type, available, fetch_time, discarded)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.ip}, #{item.port}, #{item.type}, #{item.available}, #{item.fetchTime}, #{item.discarded})
+        </foreach>
+    </insert>
+
+    <select id="selectUnverifiedProxies" resultMap="BaseResultMap">
+        select ip, port, type, available, lag, fetch_time, verify_time, invalid_times, discarded
+        from pip_proxy_ip
+        where (invalid_times is null or invalid_times &lt; 3)
+            and verify_time is null or verify_time &lt; #{deadline}
+        order by verify_time asc limit #{limit}
+    </select>
 </mapper>
