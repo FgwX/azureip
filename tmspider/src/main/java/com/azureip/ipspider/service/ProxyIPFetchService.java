@@ -40,7 +40,7 @@ public class ProxyIPFetchService {
         List<String> urlList = new ArrayList<>();
         // urlList.add("https://www.xicidaili.com/nn/");// 匿名
         // urlList.add("https://www.xicidaili.com/nt/");// 普通
-        urlList.add("https://www.xicidaili.com/wn/");// HTTPS
+        // urlList.add("https://www.xicidaili.com/wn/");// HTTPS
         urlList.add("https://www.xicidaili.com/wt/");// HTTP
 
         for (String url : urlList) {
@@ -87,7 +87,7 @@ public class ProxyIPFetchService {
         Elements indexList = indexPage.getElementById("main").previousElementSibling().getElementsByTag("ul").get(0).children();
 
         // 根据索引列表获取IP
-        for (int i = 1; i < 3; i++) {
+        for (int i = 1; i < indexList.size(); i++) {
             Element a = indexList.get(i).child(0);
             String url = indexURL + a.attr("href");
             System.out.println(a.text() + "：" + url);
@@ -141,7 +141,9 @@ public class ProxyIPFetchService {
                 proxyEleList.forEach(proxyEle -> {
                     String ip = proxyEle.child(0).text();
                     int port = Integer.parseInt(proxyEle.child(1).text());
-                    ProxyIP existProxy = proxyIPMapper.selectByPrimaryKey(ip, port);
+                    System.out.println(ip + ":" + port);
+                    // 插入数据库
+                    /*ProxyIP existProxy = proxyIPMapper.selectByPrimaryKey(ip, port);
                     if (existProxy == null) {
                         String typeStr = proxyEle.child(3).text();
                         System.out.println("新  增: " + ip + ":" + port + ", " + typeStr);
@@ -150,9 +152,9 @@ public class ProxyIPFetchService {
                         proxyList.add(proxy);
                     } else {
                         System.out.println("已存在: " + ip + ":" + port);
-                    }
+                    }*/
                 });
-                proxyIPMapper.saveAll(proxyList);
+                // proxyIPMapper.saveAll(proxyList);
                 wait(2000);
             }
         }
