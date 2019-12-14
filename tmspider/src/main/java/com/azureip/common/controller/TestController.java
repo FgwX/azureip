@@ -63,7 +63,7 @@ public class TestController {
         // commandLineTest();
         // setProxy("218.73.58.18","14551");
         // removeProxy();
-        // firefoxProxyTest();
+        firefoxProxyTest();
         // jsReadyStateTest();
         // crackAnnPost();
         // gsonTest();
@@ -102,13 +102,10 @@ public class TestController {
 
     // Firefox代理测试
     private static void firefoxProxyTest() {
-        // 代理隧道验证信息
-        StringBuilder authSB = new StringBuilder();
-        authSB.append("JRPXXUKF1RN7DMUW").append(":").append("C47H3955V1NG");
-
         // 代理服务器
-        final String proxyHost = "114.231.241.237";
-        final int proxyPort = 21307;
+        // 118.89.234.236:8787
+        // 119.23.21.39:80
+        String[] proxy = "117.78.33.45:80".split(":");
         System.setProperty("webdriver.gecko.driver", FF_DRIVER_DIR);
 
         FirefoxProfile profile = new FirefoxProfile();
@@ -116,11 +113,11 @@ public class TestController {
         // 使用代理
         profile.setPreference("network.proxy.type", 1);
         // 代理服务器配置
-        profile.setPreference("network.proxy.http", proxyHost);
-        profile.setPreference("network.proxy.http_port", proxyPort);
+        profile.setPreference("network.proxy.http", proxy[0]);
+        profile.setPreference("network.proxy.http_port", proxy[1]);
 
-        profile.setPreference("network.proxy.ssl", proxyHost);
-        profile.setPreference("network.proxy.ssl_port", proxyPort);
+        profile.setPreference("network.proxy.ssl", proxy[0]);
+        profile.setPreference("network.proxy.ssl_port", proxy[1]);
 
         // profile.setPreference("username", proxyUser);
         // profile.setPreference("password", proxyPass);
@@ -133,27 +130,12 @@ public class TestController {
         FirefoxOptions option = new FirefoxOptions();
         option.setProfile(profile);
         // 以代理方式启动firefox
-        RemoteWebDriver driver = new FirefoxDriver(option);
-        Command command = new Command(driver.getSessionId(), DriverCommand.GET,
-                ImmutableMap.of("url", "www.baidu.com"));
+        WebDriver driver = new FirefoxDriver(option);
 
-        CommandExecutor executor = driver.getCommandExecutor();
-        try {
-            Response resp = executor.execute(command);
-            System.out.println("响应状态：" + resp.getStatus());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        driver.getKeyboard().sendKeys("12341234");
-        // Alert alert = driver.switchTo().alert();
-        // System.out.println(alert.getText());
+        driver.get("http://ip138.com");
+        // driver.get("http://wsjs.saic.gov.cn");
 
-        /*String auth = new String(Base64.getEncoder().encode(authSB.toString().getBytes()));
-        System.out.println(auth);
 
-        driver.get("www.baidu.com");
-        Alert alert = driver.switchTo().alert();
-        System.out.println(alert.getText());*/
 
     }
 
