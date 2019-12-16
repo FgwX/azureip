@@ -9,6 +9,7 @@
         <result column="lag" jdbcType="INTEGER" property="lag"/>
         <result column="fetch_time" jdbcType="TIMESTAMP" property="fetchTime"/>
         <result column="verify_time" jdbcType="TIMESTAMP" property="verifyTime"/>
+        <result column="void_time" jdbcType="TIMESTAMP" property="voidTime"/>
         <result column="invalid_times" jdbcType="INTEGER" property="invalidTimes"/>
         <result column="discarded" jdbcType="BIT" property="discarded"/>
     </resultMap>
@@ -59,11 +60,25 @@
         </foreach>
     </insert>
 
+    <!--提取待验证的代理IP：未废弃，验证时间为空或超过6个小时-->
     <select id="selectUnverifiedProxies" resultMap="BaseResultMap">
         select ip, port, type, available, lag, fetch_time, verify_time, invalid_times, discarded
         from pip_proxy_ip
-        where (invalid_times is null or invalid_times &lt; 3)
+        where available=0 and discarded=0
             and verify_time is null or verify_time &lt; #{deadline}
         order by verify_time asc limit #{limit}
     </select>
+
+    <update id="updateProxyIP" parameterType="com.azureip.ipspider.model.ProxyIP">
+        update pip_proxy_ip
+        set type = #{type,jdbcType=INTEGER},
+            available = #{available,jdbcType=BIT},
+            lag = #{lag,jdbcType=INTEGER},
+            verify_time = #{verifyTime,jdbcType=TIMESTAMP},
+            void_time = #{voidTime,jdbcType=TIMESTAMP},
+            invalid_times = #{invalidTimes,jdbcType=INTEGER},
+            discarded = #{discarded,jdbcType=BIT}
+        where ip = #{ip,jdbcType=VARCHAR}
+            and port = #{port,jdbcType=INTEGER}
+    </update>
 </mapper>

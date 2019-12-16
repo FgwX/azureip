@@ -96,9 +96,17 @@ public class ProxyIPFetchService {
             Elements ipList = table.child(0).children();
             for (int j = 1; j < ipList.size(); j++) {
                 Element e = ipList.get(j);
-                System.out.println(e.child(0).text() + ":" + e.child(1).text());
+                String ip = e.child(0).text();
+                int port = Integer.parseInt(e.child(1).text());
+                ProxyIP existsProxy = proxyIPMapper.selectByPrimaryKey(ip, port);
+                if (existsProxy == null) {
+                    int result = proxyIPMapper.insert(new ProxyIP(ip, port));
+                    LOG.debug(ip + ":" + port + "已创建：" + result);
+                } else {
+                    LOG.warn(ip + ":" + port + "已存在！");
+                }
             }
-            wait(800);
+            wait(1000);
         }
     }
 

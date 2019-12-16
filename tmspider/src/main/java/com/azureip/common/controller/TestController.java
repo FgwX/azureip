@@ -17,7 +17,9 @@ import org.apache.http.util.EntityUtils;
 import org.apache.poi.xssf.usermodel.*;
 import org.json.JSONObject;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Proxy;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
@@ -100,6 +102,46 @@ public class TestController {
         }
     }
 
+    // Chrome代理测试
+    private static void chromeProxyTest() {
+        // 代理服务器
+        // 118.89.234.236:8787
+        // 119.23.21.39:80
+        String[] ip = "117.78.33.45:80".split(":");
+        System.setProperty("webdriver.gecko.driver", FF_DRIVER_DIR);
+
+        Proxy proxy = new Proxy();
+
+        ChromeOptions o = new ChromeOptions();
+        o.setProxy(proxy);
+        FirefoxProfile profile = new FirefoxProfile();
+        // FirefoxProfile profile = new ProfilesIni().getProfile("default");
+        // 使用代理
+        profile.setPreference("network.ip.type", 1);
+        // 代理服务器配置
+        profile.setPreference("network.ip.http", ip[0]);
+        profile.setPreference("network.ip.http_port", ip[1]);
+
+        profile.setPreference("network.ip.ssl", ip[0]);
+        profile.setPreference("network.ip.ssl_port", ip[1]);
+
+        // profile.setPreference("username", proxyUser);
+        // profile.setPreference("password", proxyPass);
+
+        // 所有协议公用一种代理配置，如果单独配置，这项设置为false
+        profile.setPreference("network.ip.share_proxy_settings", true);
+
+        // 对于localhost的不用代理，这里必须要配置，否则无法和webdriver通讯
+        profile.setPreference("network.ip.no_proxies_on", "localhost");
+        FirefoxOptions option = new FirefoxOptions();
+        option.setProfile(profile);
+        // 以代理方式启动firefox
+        FirefoxDriver driver = new FirefoxDriver(option);
+
+        driver.get("http://ip138.com");
+        // driver.get("http://wsjs.saic.gov.cn");
+    }
+
     // Firefox代理测试
     private static void firefoxProxyTest() {
         // 代理服务器
@@ -130,13 +172,10 @@ public class TestController {
         FirefoxOptions option = new FirefoxOptions();
         option.setProfile(profile);
         // 以代理方式启动firefox
-        WebDriver driver = new FirefoxDriver(option);
+        FirefoxDriver driver = new FirefoxDriver(option);
 
         driver.get("http://ip138.com");
         // driver.get("http://wsjs.saic.gov.cn");
-
-
-
     }
 
     private static void jsReadyStateTest() {

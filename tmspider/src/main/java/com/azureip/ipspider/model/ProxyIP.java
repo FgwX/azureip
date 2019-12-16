@@ -7,7 +7,7 @@ public class ProxyIP {
     private String ip;
     // 端口号
     private Integer port;
-    // 类型（0-未知；1-HTTP；2-HTTPS；3-SOCKET）
+    // 类型（0-未知；1-HTTP；2-HTTPS；3-SOCKET；4-其他）
     private Integer type;
     // 可用标记
     private Boolean available;
@@ -15,8 +15,10 @@ public class ProxyIP {
     private Integer lag;
     // 抓取/入库时间
     private Date fetchTime;
-    // 上次验证时间
+    // 验证时间
     private Date verifyTime;
+    // 失败时间（使用时连接失败）
+    private Date voidTime;
     // 无效次数
     private Integer invalidTimes;
     // 废弃标记
@@ -31,6 +33,7 @@ public class ProxyIP {
         this.type = 0;
         this.available = false;
         this.fetchTime = new Date();
+        this.invalidTimes = 0;
         this.discarded = false;
     }
 
@@ -40,6 +43,7 @@ public class ProxyIP {
         this.type = type;
         this.available = false;
         this.fetchTime = new Date();
+        this.invalidTimes = 0;
         this.discarded = false;
     }
 
@@ -113,5 +117,22 @@ public class ProxyIP {
 
     public void setDiscarded(Boolean discarded) {
         this.discarded = discarded;
+    }
+
+    public Date getVoidTime() {
+        return voidTime;
+    }
+
+    public void setVoidTime(Date voidTime) {
+        this.voidTime = voidTime;
+    }
+
+    @Override
+    public String toString() {
+        return ip + ":" + port + ", type=" + type + ", available=" + available + ", lag=" + lag
+                + ", fetchTime=" + (fetchTime == null ? "" : fetchTime.toLocaleString())
+                + ", verifyTime=" + (verifyTime == null ? "" : verifyTime.toLocaleString())
+                + ", voidTime=" + (voidTime == null ? "" : voidTime.toLocaleString())
+                + ", invalidTimes=" + invalidTimes + ", discarded=" + discarded;
     }
 }

@@ -3,20 +3,20 @@ Configuration:
   status: WARN
   # 每隔10秒（最小5秒）检查配置文件是否修改，并自动重新配置
   monitorInterval: 10
-####################################################################################################
+  ####################################################################################################
   # 定义全局变量
   Properties:
     # 缺省参数配置，其他环境需要在VM参数中指定，如下：
     Property:
       - name: log.level.console
-        value: info
+        value: debug
       - name: log.level.file
         value: warn
       - name: log.path
         value: D:/TMSpider/logs
       - name: project.name
         value: azureip
-####################################################################################################
+  ####################################################################################################
   Appenders:
     # 控制台输出配置
     Console:
@@ -41,11 +41,11 @@ Configuration:
           TimeBasedTriggeringPolicy:
             modulate: true
             interval: 1
-          #SizeBasedTriggeringPolicy:
+            #SizeBasedTriggeringPolicy:
             #size: "128 MB"
         DefaultRolloverStrategy:
           max: 1000
-####################################################################################################
+  ####################################################################################################
   Loggers:
     Root:
       level: info
@@ -57,6 +57,13 @@ Configuration:
       - name: com.azureip.tmspider
         additivity: false
         level: info
+        AppenderRef:
+          - ref: CONSOLE
+          - ref: ROLLING_FILE
+
+      - name: com.azureip.ipspider
+        additivity: false
+        level: debug
         AppenderRef:
           - ref: CONSOLE
           - ref: ROLLING_FILE
