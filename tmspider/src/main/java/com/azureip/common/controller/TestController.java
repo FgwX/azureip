@@ -18,7 +18,6 @@ import org.json.JSONObject;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Proxy;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
@@ -152,11 +151,11 @@ public class TestController {
         // 使用代理
         profile.setPreference("network.proxy.type", 1);
         // 代理服务器配置
-        profile.setPreference("network.proxy.http", proxy[0]);
-        profile.setPreference("network.proxy.http_port", proxy[1]);
+        profile.setPreference("network.proxy.http", proxyHost);
+        profile.setPreference("network.proxy.http_port", proxyPort);
 
-        profile.setPreference("network.proxy.ssl", proxy[0]);
-        profile.setPreference("network.proxy.ssl_port", proxy[1]);
+        profile.setPreference("network.proxy.ssl", proxyHost);
+        profile.setPreference("network.proxy.ssl_port", proxyPort);
 
         // profile.setPreference("username", proxyUser);
         // profile.setPreference("password", proxyPass);
