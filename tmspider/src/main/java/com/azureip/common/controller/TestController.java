@@ -6,7 +6,6 @@ import com.azureip.common.util.SeleniumUtils;
 import com.azureip.tmspider.pojo.AnnListPojo;
 import com.azureip.tmspider.service.RegistrationService;
 import com.eclipsesource.v8.V8;
-import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
@@ -24,7 +23,6 @@ import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.logging.LogEntries;
 import org.openqa.selenium.logging.LogEntry;
-import org.openqa.selenium.remote.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -63,7 +61,7 @@ public class TestController {
         // commandLineTest();
         // setProxy("218.73.58.18","14551");
         // removeProxy();
-        // firefoxProxyTest();
+        firefoxProxyTest();
         // jsReadyStateTest();
         // crackAnnPost();
         // gsonTest();
@@ -107,8 +105,8 @@ public class TestController {
         authSB.append("JRPXXUKF1RN7DMUW").append(":").append("C47H3955V1NG");
 
         // 代理服务器
-        final String proxyHost = "114.231.241.237";
-        final int proxyPort = 21307;
+        final String proxyHost = "52.80.58.248";
+        final int proxyPort = 3128;
         System.setProperty("webdriver.gecko.driver", FF_DRIVER_DIR);
 
         FirefoxProfile profile = new FirefoxProfile();
@@ -133,27 +131,9 @@ public class TestController {
         FirefoxOptions option = new FirefoxOptions();
         option.setProfile(profile);
         // 以代理方式启动firefox
-        RemoteWebDriver driver = new FirefoxDriver(option);
-        Command command = new Command(driver.getSessionId(), DriverCommand.GET,
-                ImmutableMap.of("url", "www.baidu.com"));
+        WebDriver driver = new FirefoxDriver(option);
 
-        CommandExecutor executor = driver.getCommandExecutor();
-        try {
-            Response resp = executor.execute(command);
-            System.out.println("响应状态：" + resp.getStatus());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        driver.getKeyboard().sendKeys("12341234");
-        // Alert alert = driver.switchTo().alert();
-        // System.out.println(alert.getText());
-
-        /*String auth = new String(Base64.getEncoder().encode(authSB.toString().getBytes()));
-        System.out.println(auth);
-
-        driver.get("www.baidu.com");
-        Alert alert = driver.switchTo().alert();
-        System.out.println(alert.getText());*/
+        driver.get("http://www.azure-ip.com");
 
     }
 
