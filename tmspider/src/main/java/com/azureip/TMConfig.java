@@ -1,6 +1,7 @@
 package com.azureip;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
@@ -15,8 +16,6 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
-
-import java.util.concurrent.Executor;
 
 @Configuration
 @EnableWebMvc
@@ -48,15 +47,16 @@ public class TMConfig implements WebMvcConfigurer, SchedulingConfigurer, AsyncCo
         return viewResolver;
     }
 
+    // 线程池
     @Bean
-    public Executor tmAsyncExecutor() {
+    public ThreadPoolTaskExecutor tmAsyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(4);
-        executor.setMaxPoolSize(8);
-        executor.setQueueCapacity(16);
-        executor.setKeepAliveSeconds(30);
+        executor.setCorePoolSize(16);
+        executor.setMaxPoolSize(32);
+        executor.setQueueCapacity(64);
+        executor.setKeepAliveSeconds(120);
         // 线程名称前缀
-        executor.setThreadNamePrefix("[TMSpider.Exec]-");
+        executor.setThreadNamePrefix("[TMS.Exec]-");
         // 等待时间
         executor.setAwaitTerminationSeconds(90);
         // 等待所有线程执行完

@@ -2,8 +2,8 @@ package com.azureip.ipspider.controller;
 
 import com.azureip.ipspider.service.ProxyIPFetchService;
 import com.azureip.ipspider.service.ProxyIPVerifyService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,7 +15,7 @@ import java.text.ParseException;
 @Controller
 @RequestMapping("proxy")
 public class ProxyIPController {
-    private static final Logger LOG = LoggerFactory.getLogger(ProxyIPController.class);
+    private static final Logger LOG = LogManager.getLogger(ProxyIPController.class);
     @Autowired
     private ProxyIPFetchService proxyIPFetchService;
     @Autowired
@@ -43,6 +43,6 @@ public class ProxyIPController {
 
     @GetMapping("/verify")
     public void verifyProxyIP() {
-        proxyIPVerifyService.verify();
+        proxyIPVerifyService.verifyProxyIP(13, 32);
     }
 }

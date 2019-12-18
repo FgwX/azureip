@@ -2,6 +2,8 @@ package com.azureip.common.job;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -11,7 +13,7 @@ public class TestJobs {
 
     // @Async("tmAsyncExecutor")
     // @Scheduled(cron = "0/3 * * * * ?")
-    public synchronized void job1() {
+    public void job1() {
         // if (canExecute) {
         //     canExecute = false;
             LOG.warn(Thread.currentThread().getName() + " -> Job1: started...");
