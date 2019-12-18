@@ -151,7 +151,7 @@ public class RegistrationService {
                 }
             }
             // 设置等待时间，控制速度
-            threadWait(new Random().nextInt(4000));
+            threadWait(new Random().nextInt(2000));
         }
         SeleniumUtils.quitBrowser(driver);
     }
@@ -209,7 +209,7 @@ public class RegistrationService {
         while (resultEle == null) {
             try {
                 // 每隔500毫秒去调用一下until中的函数，默认是0.5秒，如果等待3秒还没有找到元素，则抛出异常。
-                resultEle = new WebDriverWait(driver, (resultRetryTimes++ > 1 ? 10 : 12), 500).until(new ExpectedCondition<WebElement>() {
+                resultEle = new WebDriverWait(driver, (resultRetryTimes++ > 1 ? 3 : 5), 500).until(new ExpectedCondition<WebElement>() {
                     @NullableDecl
                     @Override
                     public WebElement apply(WebDriver driver) {
@@ -239,7 +239,7 @@ public class RegistrationService {
                 return true;
             }
         }
-        threadWait(400);
+        threadWait(200);
         resultEle.click();
 
         // 切换到详情页，获取流程列表
@@ -249,7 +249,7 @@ public class RegistrationService {
         while (regFlowsEle == null) {
             final int retryTimes = ++detailRetryTimes;
             try {
-                regFlowsEle = new WebDriverWait(driver, (detailRetryTimes > 1 ? 10 : 12), 500).until(new ExpectedCondition<WebElement>() {
+                regFlowsEle = new WebDriverWait(driver, (detailRetryTimes > 1 ? 3 : 5), 500).until(new ExpectedCondition<WebElement>() {
                     @NullableDecl
                     @Override
                     public WebElement apply(WebDriver driver) {
@@ -334,7 +334,7 @@ public class RegistrationService {
         WebElement statusQueryEle = null;
         while (statusQueryEle == null) {
             try {
-                driver.get("http://wsjs.saic.gov.cn");
+                driver.get("http://wcjs.sbj.cnipa.gov.cn");
                 statusQueryEle = new WebDriverWait(driver, 10, 500).until(new ExpectedCondition<WebElement>() {
                     @NullableDecl
                     @Override

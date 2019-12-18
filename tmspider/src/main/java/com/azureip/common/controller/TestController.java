@@ -59,10 +59,12 @@ public class TestController {
     }
 
     public static void main(String[] args) throws Exception {
+
+
         // commandLineTest();
         // setProxy("218.73.58.18","14551");
         // removeProxy();
-        firefoxProxyTest();
+        // firefoxProxyTest();
         // jsReadyStateTest();
         // crackAnnPost();
         // gsonTest();
