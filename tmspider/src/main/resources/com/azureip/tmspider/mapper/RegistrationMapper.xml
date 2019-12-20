@@ -1,128 +1,129 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.azureip.tmspider.mapper.RegistrationMapper">
-  <resultMap id="BaseResultMap" type="com.azureip.tmspider.model.Registration">
-    <id column="reg_num" jdbcType="VARCHAR" property="regNum" />
-    <result column="tm_name" jdbcType="VARCHAR" property="tmName" />
-    <result column="tm_type" jdbcType="INTEGER" property="tmType" />
-    <result column="app_name" jdbcType="VARCHAR" property="appName" />
-    <result column="app_date" jdbcType="DATE" property="appDate" />
-    <result column="app_address" jdbcType="VARCHAR" property="appAddress" />
-    <result column="is_accepted" jdbcType="INTEGER" property="isAccepted" />
-    <result column="audit_date" jdbcType="DATE" property="auditDate" />
-  </resultMap>
-  <sql id="Base_Column_List">
-    reg_num, tm_name, tm_type, app_name, app_date, app_address, is_accepted, audit_date
-  </sql>
-  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
-    select 
-    <include refid="Base_Column_List" />
-    from registration
-    where reg_num = #{regNum,jdbcType=VARCHAR}
-  </select>
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
-    delete from registration
-    where reg_num = #{regNum,jdbcType=VARCHAR}
-  </delete>
-  <insert id="insert" parameterType="com.azureip.tmspider.model.Registration">
-    insert into registration (reg_num, tm_name, tm_type, 
-      app_name, app_date, app_address, 
-      is_accepted, audit_date)
-    values (#{regNum,jdbcType=VARCHAR}, #{tmName,jdbcType=VARCHAR}, #{tmType,jdbcType=INTEGER}, 
-      #{appName,jdbcType=VARCHAR}, #{appDate,jdbcType=DATE}, #{appAddress,jdbcType=VARCHAR}, 
-      #{isAccepted,jdbcType=INTEGER}, #{auditDate,jdbcType=DATE})
-  </insert>
-  <insert id="insertSelective" parameterType="com.azureip.tmspider.model.Registration">
-    insert into registration
-    <trim prefix="(" suffix=")" suffixOverrides=",">
-      <if test="regNum != null">
-        reg_num,
-      </if>
-      <if test="tmName != null">
-        tm_name,
-      </if>
-      <if test="tmType != null">
-        tm_type,
-      </if>
-      <if test="appName != null">
-        app_name,
-      </if>
-      <if test="appDate != null">
-        app_date,
-      </if>
-      <if test="appAddress != null">
-        app_address,
-      </if>
-      <if test="isAccepted != null">
-        is_accepted,
-      </if>
-      <if test="auditDate != null">
-        audit_date,
-      </if>
-    </trim>
-    <trim prefix="values (" suffix=")" suffixOverrides=",">
-      <if test="regNum != null">
-        #{regNum,jdbcType=VARCHAR},
-      </if>
-      <if test="tmName != null">
-        #{tmName,jdbcType=VARCHAR},
-      </if>
-      <if test="tmType != null">
-        #{tmType,jdbcType=INTEGER},
-      </if>
-      <if test="appName != null">
-        #{appName,jdbcType=VARCHAR},
-      </if>
-      <if test="appDate != null">
-        #{appDate,jdbcType=DATE},
-      </if>
-      <if test="appAddress != null">
-        #{appAddress,jdbcType=VARCHAR},
-      </if>
-      <if test="isAccepted != null">
-        #{isAccepted,jdbcType=INTEGER},
-      </if>
-      <if test="auditDate != null">
-        #{auditDate,jdbcType=DATE},
-      </if>
-    </trim>
-  </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.azureip.tmspider.model.Registration">
-    update registration
-    <set>
-      <if test="tmName != null">
-        tm_name = #{tmName,jdbcType=VARCHAR},
-      </if>
-      <if test="tmType != null">
-        tm_type = #{tmType,jdbcType=INTEGER},
-      </if>
-      <if test="appName != null">
-        app_name = #{appName,jdbcType=VARCHAR},
-      </if>
-      <if test="appDate != null">
-        app_date = #{appDate,jdbcType=DATE},
-      </if>
-      <if test="appAddress != null">
-        app_address = #{appAddress,jdbcType=VARCHAR},
-      </if>
-      <if test="isAccepted != null">
-        is_accepted = #{isAccepted,jdbcType=INTEGER},
-      </if>
-      <if test="auditDate != null">
-        audit_date = #{auditDate,jdbcType=DATE},
-      </if>
-    </set>
-    where reg_num = #{regNum,jdbcType=VARCHAR}
-  </update>
-  <update id="updateByPrimaryKey" parameterType="com.azureip.tmspider.model.Registration">
-    update registration
-    set tm_name = #{tmName,jdbcType=VARCHAR},
-      tm_type = #{tmType,jdbcType=INTEGER},
-      app_name = #{appName,jdbcType=VARCHAR},
-      app_date = #{appDate,jdbcType=DATE},
-      app_address = #{appAddress,jdbcType=VARCHAR},
-      is_accepted = #{isAccepted,jdbcType=INTEGER},
-      audit_date = #{auditDate,jdbcType=DATE}
-    where reg_num = #{regNum,jdbcType=VARCHAR}
-  </update>
+    <resultMap id="BaseResultMap" type="com.azureip.tmspider.model.Registration">
+        <id column="reg_num" jdbcType="VARCHAR" property="regNum"/>
+        <result column="tm_name" jdbcType="VARCHAR" property="tmName"/>
+        <result column="tm_type" jdbcType="INTEGER" property="tmType"/>
+        <result column="app_name" jdbcType="VARCHAR" property="appName"/>
+        <result column="app_date" jdbcType="DATE" property="appDate"/>
+        <result column="app_address" jdbcType="VARCHAR" property="appAddress"/>
+        <result column="is_accepted" jdbcType="INTEGER" property="isAccepted"/>
+        <result column="audit_date" jdbcType="DATE" property="auditDate"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        reg_num, tm_name, tm_type, app_name, app_date, app_address, is_accepted, audit_date
+    </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from tms_registration
+        where reg_num = #{regNum,jdbcType=VARCHAR}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+        delete
+        from tms_registration
+        where reg_num = #{regNum,jdbcType=VARCHAR}
+    </delete>
+    <insert id="insert" parameterType="com.azureip.tmspider.model.Registration">
+        insert into tms_registration (reg_num, tm_name, tm_type,
+                                      app_name, app_date, app_address,
+                                      is_accepted, audit_date)
+        values (#{regNum,jdbcType=VARCHAR}, #{tmName,jdbcType=VARCHAR}, #{tmType,jdbcType=INTEGER},
+                #{appName,jdbcType=VARCHAR}, #{appDate,jdbcType=DATE}, #{appAddress,jdbcType=VARCHAR},
+                #{isAccepted,jdbcType=INTEGER}, #{auditDate,jdbcType=DATE})
+    </insert>
+    <insert id="insertSelective" parameterType="com.azureip.tmspider.model.Registration">
+        insert into tms_registration
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="regNum != null">
+                reg_num,
+            </if>
+            <if test="tmName != null">
+                tm_name,
+            </if>
+            <if test="tmType != null">
+                tm_type,
+            </if>
+            <if test="appName != null">
+                app_name,
+            </if>
+            <if test="appDate != null">
+                app_date,
+            </if>
+            <if test="appAddress != null">
+                app_address,
+            </if>
+            <if test="isAccepted != null">
+                is_accepted,
+            </if>
+            <if test="auditDate != null">
+                audit_date,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="regNum != null">
+                #{regNum,jdbcType=VARCHAR},
+            </if>
+            <if test="tmName != null">
+                #{tmName,jdbcType=VARCHAR},
+            </if>
+            <if test="tmType != null">
+                #{tmType,jdbcType=INTEGER},
+            </if>
+            <if test="appName != null">
+                #{appName,jdbcType=VARCHAR},
+            </if>
+            <if test="appDate != null">
+                #{appDate,jdbcType=DATE},
+            </if>
+            <if test="appAddress != null">
+                #{appAddress,jdbcType=VARCHAR},
+            </if>
+            <if test="isAccepted != null">
+                #{isAccepted,jdbcType=INTEGER},
+            </if>
+            <if test="auditDate != null">
+                #{auditDate,jdbcType=DATE},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.azureip.tmspider.model.Registration">
+        update tms_registration
+        <set>
+            <if test="tmName != null">
+                tm_name = #{tmName,jdbcType=VARCHAR},
+            </if>
+            <if test="tmType != null">
+                tm_type = #{tmType,jdbcType=INTEGER},
+            </if>
+            <if test="appName != null">
+                app_name = #{appName,jdbcType=VARCHAR},
+            </if>
+            <if test="appDate != null">
+                app_date = #{appDate,jdbcType=DATE},
+            </if>
+            <if test="appAddress != null">
+                app_address = #{appAddress,jdbcType=VARCHAR},
+            </if>
+            <if test="isAccepted != null">
+                is_accepted = #{isAccepted,jdbcType=INTEGER},
+            </if>
+            <if test="auditDate != null">
+                audit_date = #{auditDate,jdbcType=DATE},
+            </if>
+        </set>
+        where reg_num = #{regNum,jdbcType=VARCHAR}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.azureip.tmspider.model.Registration">
+        update tms_registration
+        set tm_name     = #{tmName,jdbcType=VARCHAR},
+            tm_type     = #{tmType,jdbcType=INTEGER},
+            app_name    = #{appName,jdbcType=VARCHAR},
+            app_date    = #{appDate,jdbcType=DATE},
+            app_address = #{appAddress,jdbcType=VARCHAR},
+            is_accepted = #{isAccepted,jdbcType=INTEGER},
+            audit_date  = #{auditDate,jdbcType=DATE}
+        where reg_num = #{regNum,jdbcType=VARCHAR}
+    </update>
 </mapper>

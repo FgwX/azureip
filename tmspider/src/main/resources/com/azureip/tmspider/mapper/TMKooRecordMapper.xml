@@ -10,28 +10,27 @@
         <result column="app_address" jdbcType="VARCHAR" property="appAddress"/>
     </resultMap>
     <sql id="Base_Column_List">
-    reg_num, tm_name, tm_type, app_name, app_date, app_address
+        reg_num, tm_name, tm_type, app_name, app_date, app_address
     </sql>
     <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from tmkoo_record
+        from tms_tmkoo_record
         where reg_num = #{regNum,jdbcType=VARCHAR}
     </select>
     <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
-    delete from tmkoo_record
-    where reg_num = #{regNum,jdbcType=VARCHAR}
+        delete
+        from tms_tmkoo_record
+        where reg_num = #{regNum,jdbcType=VARCHAR}
     </delete>
     <insert id="insert" parameterType="com.azureip.tmspider.model.TMKooRecord">
-    insert into tmkoo_record (reg_num, tm_name, tm_type, 
-      app_name, app_date, app_address
-      )
-    values (#{regNum,jdbcType=VARCHAR}, #{tmName,jdbcType=VARCHAR}, #{tmType,jdbcType=INTEGER}, 
-      #{appName,jdbcType=VARCHAR}, #{appDate,jdbcType=DATE}, #{appAddress,jdbcType=VARCHAR}
-      )
+        insert into tms_tmkoo_record (reg_num, tm_name, tm_type,
+                                      app_name, app_date, app_address)
+        values (#{regNum,jdbcType=VARCHAR}, #{tmName,jdbcType=VARCHAR}, #{tmType,jdbcType=INTEGER},
+                #{appName,jdbcType=VARCHAR}, #{appDate,jdbcType=DATE}, #{appAddress,jdbcType=VARCHAR})
     </insert>
     <insert id="insertSelective" parameterType="com.azureip.tmspider.model.TMKooRecord">
-        insert into tmkoo_record
+        insert into tms_tmkoo_record
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="regNum != null">
                 reg_num,
@@ -74,7 +73,7 @@
         </trim>
     </insert>
     <update id="updateByPrimaryKeySelective" parameterType="com.azureip.tmspider.model.TMKooRecord">
-        update tmkoo_record
+        update tms_tmkoo_record
         <set>
             <if test="tmName != null">
                 tm_name = #{tmName,jdbcType=VARCHAR},
@@ -95,17 +94,17 @@
         where reg_num = #{regNum,jdbcType=VARCHAR}
     </update>
     <update id="updateByPrimaryKey" parameterType="com.azureip.tmspider.model.TMKooRecord">
-    update tmkoo_record
-    set tm_name = #{tmName,jdbcType=VARCHAR},
-      tm_type = #{tmType,jdbcType=INTEGER},
-      app_name = #{appName,jdbcType=VARCHAR},
-      app_date = #{appDate,jdbcType=DATE},
-      app_address = #{appAddress,jdbcType=VARCHAR}
-    where reg_num = #{regNum,jdbcType=VARCHAR}
+        update tms_tmkoo_record
+        set tm_name     = #{tmName,jdbcType=VARCHAR},
+            tm_type     = #{tmType,jdbcType=INTEGER},
+            app_name    = #{appName,jdbcType=VARCHAR},
+            app_date    = #{appDate,jdbcType=DATE},
+            app_address = #{appAddress,jdbcType=VARCHAR}
+        where reg_num = #{regNum,jdbcType=VARCHAR}
     </update>
 
     <insert id="insertAll" parameterType="java.util.List">
-        insert into tmkoo_record (reg_num,tm_name,tm_type,app_name,app_date,app_address)
+        insert into tms_tmkoo_record (reg_num,tm_name,tm_type,app_name,app_date,app_address)
         values
         <foreach collection="list" index="i" item="record" separator=",">
             (#{record.regNum},#{record.tmName},#{record.tmType},#{record.appName},#{record.appDate},#{record.appAddress})

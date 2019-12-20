@@ -21,24 +21,25 @@
     <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
         select
         <include refid="BaseColumnList"/>
-        from announcement
+        from tms_announcement
         where id = #{id,jdbcType=VARCHAR}
     </select>
 
     <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
-        delete from announcement
+        delete
+        from tms_announcement
         where id = #{id,jdbcType=VARCHAR}
     </delete>
 
     <insert id="insert" parameterType="com.azureip.tmspider.model.Announcement">
-        insert into announcement (id, page_no, ann_type_code, ann_type, ann_num, ann_date, reg_name, reg_num, tm_name)
+        insert into tms_announcement (id, page_no, ann_type_code, ann_type, ann_num, ann_date, reg_name, reg_num, tm_name)
         values (#{id,jdbcType=VARCHAR}, #{page_no,jdbcType=INTEGER}, #{ann_type_code,jdbcType=VARCHAR}, #{ann_type,jdbcType=VARCHAR},
-            #{ann_num,jdbcType=VARCHAR}, #{ann_date,jdbcType=TIMESTAMP}, #{reg_name,jdbcType=VARCHAR}, #{reg_num,jdbcType=VARCHAR},
-            #{tm_name,jdbcType=VARCHAR})
+                #{ann_num,jdbcType=VARCHAR}, #{ann_date,jdbcType=TIMESTAMP}, #{reg_name,jdbcType=VARCHAR}, #{reg_num,jdbcType=VARCHAR},
+                #{tm_name,jdbcType=VARCHAR})
     </insert>
 
     <insert id="insertSelective" parameterType="com.azureip.tmspider.model.Announcement">
-        insert into announcement
+        insert into tms_announcement
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="id != null">
                 id,
@@ -69,29 +70,29 @@
             </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="id != null"> #{id,jdbcType=VARCHAR},
+            <if test="id != null">#{id,jdbcType=VARCHAR},
             </if>
-            <if test="page_no != null"> #{page_no,jdbcType=INTEGER},
+            <if test="page_no != null">#{page_no,jdbcType=INTEGER},
             </if>
-            <if test="ann_type_code != null"> #{ann_type_code,jdbcType=VARCHAR},
+            <if test="ann_type_code != null">#{ann_type_code,jdbcType=VARCHAR},
             </if>
-            <if test="ann_type != null"> #{ann_type,jdbcType=VARCHAR},
+            <if test="ann_type != null">#{ann_type,jdbcType=VARCHAR},
             </if>
-            <if test="ann_num != null"> #{ann_num,jdbcType=VARCHAR},
+            <if test="ann_num != null">#{ann_num,jdbcType=VARCHAR},
             </if>
-            <if test="ann_date != null"> #{ann_date,jdbcType=TIMESTAMP},
+            <if test="ann_date != null">#{ann_date,jdbcType=TIMESTAMP},
             </if>
-            <if test="reg_name != null"> #{reg_name,jdbcType=VARCHAR},
+            <if test="reg_name != null">#{reg_name,jdbcType=VARCHAR},
             </if>
-            <if test="reg_num != null"> #{reg_num,jdbcType=VARCHAR},
+            <if test="reg_num != null">#{reg_num,jdbcType=VARCHAR},
             </if>
-            <if test="tm_name != null"> #{tm_name,jdbcType=VARCHAR},
+            <if test="tm_name != null">#{tm_name,jdbcType=VARCHAR},
             </if>
         </trim>
     </insert>
 
     <update id="updateByPrimaryKeySelective" parameterType="com.azureip.tmspider.model.Announcement">
-        update announcement
+        update tms_announcement
         <set>
             <if test="page_no != null">
                 page_no = #{page_no,jdbcType=INTEGER},
@@ -122,31 +123,34 @@
     </update>
 
     <update id="updateByPrimaryKey" parameterType="com.azureip.tmspider.model.Announcement">
-        update announcement
-        set page_no = #{page_no,jdbcType=INTEGER},
+        update tms_announcement
+        set page_no       = #{page_no,jdbcType=INTEGER},
             ann_type_code = #{ann_type_code,jdbcType=VARCHAR},
-            ann_type = #{ann_type,jdbcType=VARCHAR},
-            ann_num = #{ann_num,jdbcType=VARCHAR},
-            ann_date = #{ann_date,jdbcType=TIMESTAMP},
-            reg_name = #{reg_name,jdbcType=VARCHAR},
-            reg_num = #{reg_num,jdbcType=VARCHAR},
-            tm_name = #{tm_name,jdbcType=VARCHAR}
+            ann_type      = #{ann_type,jdbcType=VARCHAR},
+            ann_num       = #{ann_num,jdbcType=VARCHAR},
+            ann_date      = #{ann_date,jdbcType=TIMESTAMP},
+            reg_name      = #{reg_name,jdbcType=VARCHAR},
+            reg_num       = #{reg_num,jdbcType=VARCHAR},
+            tm_name       = #{tm_name,jdbcType=VARCHAR}
         where id = #{id,jdbcType=VARCHAR}
     </update>
 
     <!--查询本地公告中最新一期的期号-->
     <select id="queryLocalLatestAnnNum" resultType="java.lang.String">
-        select max(ann_num) from announcement
+        select max(ann_num)
+        from tms_announcement
     </select>
 
     <!--根据期号查询公告数量-->
     <select id="queryAnnCountByAnnNum" parameterType="java.lang.Integer" resultType="java.lang.Integer">
-        select count(1) from announcement where ann_num = #{annNum}
+        select count(1)
+        from tms_announcement
+        where ann_num = #{annNum}
     </select>
 
     <!--插入公告集合-->
     <insert id="insertList" parameterType="java.util.List">
-        insert into announcement (id,page_no,ann_type_code,ann_type,ann_num,ann_date,reg_name,reg_num,tm_name)
+        insert into tms_announcement (id,page_no,ann_type_code,ann_type,ann_num,ann_date,reg_name,reg_num,tm_name)
         values
         <foreach collection="list" index="i" item="ann" separator=",">
             (#{ann.id},#{ann.page_no},#{ann.ann_type_code},#{ann.ann_type},#{ann.ann_num},#{ann.ann_date},#{ann.reg_name},#{ann.reg_num},#{ann.tm_name})
@@ -156,19 +160,23 @@
     <!--通过注册号查询公告-->
     <select id="getByRegNum" parameterType="java.lang.String" resultMap="BaseResultMap">
         select
-        <include refid="BaseColumnList" />
-        from announcement
+        <include refid="BaseColumnList"/>
+        from tms_announcement
         where reg_num = #{regNum}
     </select>
 
     <!--通过注册号查询公告数量-->
     <select id="getCountByRegNum" parameterType="java.lang.String" resultType="java.lang.Integer">
-        select count(1) from announcement where reg_num = #{regNum}
+        select count(1)
+        from tms_announcement
+        where reg_num = #{regNum}
     </select>
 
     <!--根据期号删除公告-->
     <delete id="deleteAnnByAnnNum" parameterType="java.lang.Integer">
-        delete from announcement where ann_num = #{annNum}
+        delete
+        from tms_announcement
+        where ann_num = #{annNum}
     </delete>
 
 </mapper>

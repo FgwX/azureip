@@ -154,7 +154,7 @@
         注意：table里面很多参数都是对javaModelGenerator，context等元素的默认属性的一个复写 &ndash;&gt;
 
         &lt;!&ndash;公告数据表&ndash;&gt;
-        &lt;!&ndash;<table tableName="announcement" domainObjectName="Announcement" enableCountByExample="false"&ndash;&gt;
+        &lt;!&ndash;<table tableName="tms_announcement" domainObjectName="Announcement" enableCountByExample="false"&ndash;&gt;
         &lt;!&ndash;enableUpdateByExample="false"&ndash;&gt;
         &lt;!&ndash;enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">&ndash;&gt;
 
@@ -243,17 +243,17 @@
         &lt;!&ndash;<ignoreColumn column="deptId" delimitedColumnName=""/>&ndash;&gt;
         &lt;!&ndash;</table>&ndash;&gt;
         &lt;!&ndash;表格处理记录表&ndash;&gt;
-        &lt;!&ndash;<table tableName="excel_opt_record" domainObjectName="ExcelOptRecord"
+        &lt;!&ndash;<table tableName="tms_excel_opt_record" domainObjectName="ExcelOptRecord"
                enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
             <property name="useActualColumnNames" value="false"/>
         </table>&ndash;&gt;
         &lt;!&ndash;标库网商标信息表&ndash;&gt;
-        &lt;!&ndash;<table tableName="tmkoo_record" domainObjectName="TMKooRecord"
+        &lt;!&ndash;<table tableName="tms_tmkoo_record" domainObjectName="TMKooRecord"
                enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
             <property name="useActualColumnNames" value="false"/>
         </table>&ndash;&gt;
         &lt;!&ndash;商标注册申请信息表&ndash;&gt;
-        &lt;!&ndash;<table tableName="registration" domainObjectName="Registration"
+        &lt;!&ndash;<table tableName="tms_registration" domainObjectName="Registration"
                enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
             <property name="useActualColumnNames" value="false"/>
         </table>&ndash;&gt;
@@ -275,8 +275,13 @@
             <property name="enableSubPackages" value="false"/>
         </javaClientGenerator>
 
-        <!--代表IP表-->
-        <table tableName="pip_proxy_ip" domainObjectName="ProxyIP">
+        <!--代理IP表-->
+        <!--<table tableName="pip_proxy_ip" domainObjectName="ProxyIP">
+            <property name="useActualColumnNames" value="false"/>
+        </table>-->
+
+        <!--驳回数据表-->
+        <table tableName="tms_rejection_data" domainObjectName="RejectionData">
             <property name="useActualColumnNames" value="false"/>
         </table>
     </context>
