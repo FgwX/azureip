@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.azureip.tmspider.mapper.RejectionDataMapper">
+    <resultMap id="BaseResultMap" type="com.azureip.tmspider.model.RejectionData">
+        <id column="reg_num" jdbcType="VARCHAR" property="regNum"/>
+        <id column="type" jdbcType="TINYINT" property="type"/>
+        <result column="approved" jdbcType="BIT" property="approved"/>
+        <result column="reviewed" jdbcType="BIT" property="reviewed"/>
+        <result column="check_time" jdbcType="TIMESTAMP" property="checkTime"/>
+        <result column="rejected" jdbcType="BIT" property="rejected"/>
+        <result column="reject_date" jdbcType="TIMESTAMP" property="rejectDate"/>
+        <result column="handled" jdbcType="BIT" property="handled"/>
+    </resultMap>
+    <delete id="deleteByPrimaryKey" parameterType="map">
+        delete
+        from tms_rejection_data
+        where reg_num = #{regNum,jdbcType=VARCHAR}
+          and type = #{type,jdbcType=TINYINT}
+    </delete>
+    <insert id="insert" parameterType="com.azureip.tmspider.model.RejectionData">
+        insert into tms_rejection_data (reg_num, type, approved,
+                                        reviewed, check_time, rejected,
+                                        reject_date, handled)
+        values (#{regNum,jdbcType=VARCHAR}, #{type,jdbcType=TINYINT}, #{approved,jdbcType=BIT},
+                #{reviewed,jdbcType=BIT}, #{checkTime,jdbcType=TIMESTAMP}, #{rejected,jdbcType=BIT},
+                #{rejectDate,jdbcType=TIMESTAMP}, #{handled,jdbcType=BIT})
+    </insert>
+    <update id="updateByPrimaryKey" parameterType="com.azureip.tmspider.model.RejectionData">
+        update tms_rejection_data
+        set approved    = #{approved,jdbcType=BIT},
+            reviewed    = #{reviewed,jdbcType=BIT},
+            check_time  = #{checkTime,jdbcType=TIMESTAMP},
+            rejected    = #{rejected,jdbcType=BIT},
+            reject_date = #{rejectDate,jdbcType=TIMESTAMP},
+            handled     = #{handled,jdbcType=BIT}
+        where reg_num = #{regNum,jdbcType=VARCHAR}
+          and type = #{type,jdbcType=TINYINT}
+    </update>
+    <select id="selectByPrimaryKey" parameterType="map" resultMap="BaseResultMap">
+        select reg_num,
+               type,
+               approved,
+               reviewed,
+               check_time,
+               rejected,
+               reject_date,
+               handled
+        from tms_rejection_data
+        where reg_num = #{regNum,jdbcType=VARCHAR}
+          and type = #{type,jdbcType=TINYINT}
+    </select>
+    <select id="selectAll" resultMap="BaseResultMap">
+        select reg_num,
+               type,
+               approved,
+               reviewed,
+               check_time,
+               rejected,
+               reject_date,
+               handled
+        from tms_rejection_data
+    </select>
+</mapper>
