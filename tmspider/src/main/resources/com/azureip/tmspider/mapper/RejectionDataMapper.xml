@@ -11,6 +11,11 @@
         <result column="reject_date" jdbcType="TIMESTAMP" property="rejectDate"/>
         <result column="handled" jdbcType="BIT" property="handled"/>
     </resultMap>
+
+    <sql id="BaseColumnList">
+        reg_num, type, approved, reviewed, check_time, rejected, reject_date, handled
+    </sql>
+
     <delete id="deleteByPrimaryKey" parameterType="map">
         delete
         from tms_rejection_data
@@ -50,14 +55,21 @@
           and type = #{type,jdbcType=TINYINT}
     </select>
     <select id="selectAll" resultMap="BaseResultMap">
-        select reg_num,
-               type,
-               approved,
-               reviewed,
-               check_time,
-               rejected,
-               reject_date,
-               handled
+        select
+        <include refid="BaseColumnList"/>
         from tms_rejection_data
+    </select>
+
+    getPendingRejectionDatas
+    <select id="selectAll" resultMap="BaseResultMap">
+        select *
+        from tms_rejection_data
+        where approved = false
+          and reviewed = false
+          and (check_time is null or check_time &lt; #{deadline})
+          and rejected = false
+          and handled = false
+        order by check_time
+        limit #{limit}
     </select>
 </mapper>

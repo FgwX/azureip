@@ -2,6 +2,8 @@ package com.azureip.tmspider.service;
 
 import com.azureip.common.util.ExcelUtils;
 import com.azureip.common.util.SeleniumUtils;
+import com.azureip.tmspider.mapper.RejectionDataMapper;
+import com.azureip.tmspider.model.RejectionData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.CellType;
@@ -9,6 +11,7 @@ import org.apache.poi.xssf.usermodel.*;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -18,6 +21,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
@@ -37,6 +41,8 @@ public class RejectionService {
     private static final String CHROME_DRIVER_DIR;
     private static final String FF_DRIVER_DIR;
     private static final SimpleDateFormat dateFormat;
+    @Autowired(required = false)
+    private RejectionDataMapper rejectionDataMapper;
 
     /**
      * 处理表格（查询驳回）
@@ -188,6 +194,19 @@ public class RejectionService {
             Thread.sleep(ms);
         } catch (InterruptedException e) {
             e.printStackTrace();
+        }
+    }
+
+
+    private void handleRejectionData() {
+        Date deadline = new Date();
+        // TODO 获取待查询的数据
+        List<RejectionData> datas = rejectionDataMapper.getPendingRejectionDatas(deadline,100);
+
+        System.setProperty("webdriver.gecko.driver", FF_DRIVER_DIR);
+        // TODO 查询驳回状态
+        for (int i = 0; i < datas.size(); i++) {
+            RejectionData data = datas.get(i);
         }
     }
 }
