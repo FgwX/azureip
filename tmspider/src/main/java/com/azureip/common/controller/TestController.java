@@ -1,5 +1,6 @@
 package com.azureip.common.controller;
 
+import com.azureip.common.constant.Constant;
 import com.azureip.common.util.ExcelUtils;
 import com.azureip.common.util.JSUtils;
 import com.azureip.common.util.SeleniumUtils;
@@ -59,8 +60,6 @@ public class TestController {
     }
 
     public static void main(String[] args) throws Exception {
-
-
         // commandLineTest();
         // setProxy("218.73.58.18","14551");
         // removeProxy();
@@ -180,7 +179,7 @@ public class TestController {
         // 初始化Selenium功能参数
         System.setProperty("webdriver.chrome.driver", CHROME_DRIVER_DIR);
         System.setProperty("webdriver.gecko.driver", FF_DRIVER_DIR);
-        WebDriver driver = SeleniumUtils.initBrowser(false, null);
+        WebDriver driver = SeleniumUtils.initBrowser(Constant.WEB_DRIVER_FIREFOX, null);
 
         driver.get("http://sbgg.saic.gov.cn:9080/tmann/annInfoView/annSearchDG.html?page=3&rows=100&annNum=1638&annType=TMZCSQ&totalYOrN=true&agentName=");
         String source = driver.getPageSource();

@@ -37,6 +37,7 @@
             check_time  = #{checkTime,jdbcType=TIMESTAMP},
             rejected    = #{rejected,jdbcType=BIT},
             reject_date = #{rejectDate,jdbcType=TIMESTAMP},
+            timeout     = #{timeout,jdbcType=BIT},
             handled     = #{handled,jdbcType=BIT}
         where reg_num = #{regNum,jdbcType=VARCHAR}
           and type = #{type,jdbcType=TINYINT}
@@ -60,15 +61,14 @@
         from tms_rejection_data
     </select>
 
-    getPendingRejectionDatas
-    <select id="selectAll" resultMap="BaseResultMap">
+    <select id="getPendingRejectionDatas" resultMap="BaseResultMap">
         select *
         from tms_rejection_data
         where approved = false
-          and reviewed = false
-          and (check_time is null or check_time &lt; #{deadline})
-          and rejected = false
-          and handled = false
+            and reviewed = false
+            and (check_time is null or check_time &lt; #{deadline})
+            and rejected = false
+            and handled = false
         order by check_time
         limit #{limit}
     </select>

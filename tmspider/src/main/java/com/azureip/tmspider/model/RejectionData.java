@@ -11,6 +11,7 @@ public class RejectionData {
     private Date checkTime;
     private Boolean rejected;
     private Date rejectDate;
+    private Boolean timeout;
     private Boolean handled;
 
     public RejectionData() {
@@ -77,11 +78,26 @@ public class RejectionData {
         this.rejectDate = rejectDate;
     }
 
+    public Boolean getTimeout() {
+        return timeout;
+    }
+
+    public void setTimeout(Boolean timeout) {
+        this.timeout = timeout;
+    }
+
     public Boolean getHandled() {
         return handled;
     }
 
     public void setHandled(Boolean handled) {
         this.handled = handled;
+    }
+
+    @Override
+    public String toString() {
+        return "RejectionData[regNum=" + regNum + ", type=" + type + ", approved=" + approved
+                + ", reviewed=" + reviewed + ", checkTime=" + checkTime + ", rejected=" + rejected +
+                ", rejectDate=" + rejectDate + ", timeout=" + timeout + ", handled=" + handled + "]";
     }
 }

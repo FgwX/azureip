@@ -1,5 +1,6 @@
 package com.azureip.tmspider.service;
 
+import com.azureip.common.constant.Constant;
 import com.azureip.common.exception.RetriedTooManyTimesException;
 import com.azureip.common.util.ExcelUtils;
 import com.azureip.common.util.SeleniumUtils;
@@ -267,7 +268,7 @@ public class ExtensionService {
     // 初始化查询页面
     private WebDriver initQueryPage() {
         LOG.warn("正在初始化浏览器...");
-        WebDriver driver = SeleniumUtils.initBrowser(false, null);
+        WebDriver driver = SeleniumUtils.initBrowser(Constant.WEB_DRIVER_FIREFOX, null);
         int retryTimes = 0;
         // 打开检索系统主页
         WebElement statusQueryEle = null;

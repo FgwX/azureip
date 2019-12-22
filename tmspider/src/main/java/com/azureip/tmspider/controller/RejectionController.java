@@ -41,4 +41,24 @@ public class RejectionController {
         }
         return response;
     }
+
+
+    /**
+     * 查询数据库驳回数据状态
+     * URL: http://localhost/rej/handleRej
+     */
+    @GetMapping("handleRej")
+    public GlobalResponse handleRejections() {
+        GlobalResponse<String> response = new GlobalResponse<>();
+        try {
+            rejectionService.handleRejectionData();
+            response.setStatus(GlobalResponse.SUCCESS);
+            response.setMessage("Succeed");
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setStatus(GlobalResponse.ERROR);
+            response.setMessage(e.getMessage());
+        }
+        return response;
+    }
 }

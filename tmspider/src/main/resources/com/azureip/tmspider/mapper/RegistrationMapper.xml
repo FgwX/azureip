@@ -11,9 +11,11 @@
         <result column="is_accepted" jdbcType="INTEGER" property="isAccepted"/>
         <result column="audit_date" jdbcType="DATE" property="auditDate"/>
     </resultMap>
+
     <sql id="Base_Column_List">
         reg_num, tm_name, tm_type, app_name, app_date, app_address, is_accepted, audit_date
     </sql>
+
     <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>

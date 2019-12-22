@@ -9,7 +9,7 @@ Configuration:
     # 缺省参数配置，其他环境需要在VM参数中指定，如下：
     Property:
       - name: log.level.console
-        value: debug
+        value: info
       - name: log.level.file
         value: warn
       - name: log.path

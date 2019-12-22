@@ -1,27 +1,35 @@
 package com.azureip.common.util;
 
+import com.azureip.common.constant.Constant;
+import com.azureip.tmspider.constant.TMSConstant;
+import com.azureip.tmspider.service.RegistrationService;
 import org.apache.commons.lang3.StringUtils;
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.Point;
-import org.openqa.selenium.WebDriver;
+import org.checkerframework.checker.nullness.compatqual.NullableDecl;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.firefox.internal.ProfilesIni;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
+import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class SeleniumUtils {
-    private static final List<String> UA_LIST;
+    private static final Logger LOG = LoggerFactory.getLogger(SeleniumUtils.class);
+    // private static final List<String> UA_LIST;
 
     static {
-        UA_LIST = new ArrayList<>();
+        String projectBase = RegistrationService.class.getClassLoader().getResource("").getPath();
+        System.setProperty("webdriver.chrome.driver", projectBase + "drivers/chromedriver.exe");
+        System.setProperty("webdriver.gecko.driver", projectBase + "drivers/geckodriver.exe");
+        /*UA_LIST = new ArrayList<>();
         UA_LIST.add("Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36");
         UA_LIST.add("Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36");
         UA_LIST.add("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36");
@@ -35,36 +43,45 @@ public class SeleniumUtils {
         UA_LIST.add("Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko");
         UA_LIST.add("Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko");
         UA_LIST.add("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.18362");
-        UA_LIST.add("Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36 SE 2.X MetaSr 1.0");
+        UA_LIST.add("Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36 SE 2.X MetaSr 1.0");*/
     }
 
     /**
      * 初始化浏览器
      */
-    public static WebDriver initBrowser(boolean useChrome, Long loadTimeOut) {
+    public static WebDriver initBrowser(String type, Integer timeOut) {
         WebDriver driver;
-        if (useChrome) {
-            // ChromeOptions options = new ChromeOptions();
-            // options.addArguments("--user-data-dir=C:/Users/LewisZhang/AppData/Local/Google/Chrome/User Data");
-            // options.addArguments("--no-infobars");
-            // driver = new ChromeDriver(options);
-            driver = new ChromeDriver();
-            driver.manage().window().setSize(new Dimension(1000, 600));
-        } else {
-            FirefoxOptions options = new FirefoxOptions();
-            // options.addArguments("-safe-mode");
-            // options.addArguments("-headless");
-            FirefoxProfile profile = new ProfilesIni().getProfile("default");
-            options.setProfile(profile);
-            driver = new FirefoxDriver(options);
-            // driver = new FirefoxDriver();
-            driver.manage().window().setSize(new Dimension(1000, 600));
+        switch (type) {
+            case Constant.WEB_DRIVER_CHROME:
+                // ChromeOptions options = new ChromeOptions();
+                // options.addArguments("--user-data-dir=C:/Users/LewisZhang/AppData/Local/Google/Chrome/User Data");
+                // options.addArguments("--no-infobars");
+                // driver = new ChromeDriver(options);
+                driver = new ChromeDriver();
+                driver.manage().window().setSize(new Dimension(1000, 600));
+                break;
+            case Constant.WEB_DRIVER_FIREFOX:
+                // FirefoxOptions options = new FirefoxOptions();
+                // options.addArguments("-safe-mode");
+                // options.addArguments("-headless");
+                // FirefoxProfile profile = new ProfilesIni().getProfile("default");
+                // options.setProfile(profile);
+                // driver = new FirefoxDriver(options);
+                driver = new FirefoxDriver();
+                driver.manage().window().setSize(new Dimension(1000, 600));
+                break;
+            case Constant.WEB_DRIVER_HTML:
+                driver = new HtmlUnitDriver();
+                break;
+            default:
+                return null;
         }
+
         Objects.requireNonNull(driver).manage().window().setPosition(new Point(0, 0));
 
         // driver.manage().timeouts().implicitlyWait(500, TimeUnit.SECONDS);
-        if (loadTimeOut != null && loadTimeOut > 0) {
-            driver.manage().timeouts().pageLoadTimeout(loadTimeOut, TimeUnit.MILLISECONDS);
+        if (timeOut != null && timeOut > 0) {
+            driver.manage().timeouts().pageLoadTimeout(timeOut, TimeUnit.MILLISECONDS);
         }
         // driver.manage().timeouts().setScriptTimeout(500, TimeUnit.MILLISECONDS);
         return driver;
@@ -84,7 +101,22 @@ public class SeleniumUtils {
     }
 
     /**
+     * 初始化状态查询页面
+     */
+    public static WebDriver initStatusQueryPage(WebDriver driver, String type, Integer timeout) {
+        if (driver != null) {
+            quitBrowser(driver);
+            driver = null;
+        }
+        while (driver == null) {
+            driver = initStatusQueryPage(type, timeout);
+        }
+        return driver;
+    }
+
+    /**
      * 关闭所有窗口
+     * @param driver WebDriver
      */
     public static void quitBrowser(WebDriver driver) {
         if (driver == null) {
@@ -97,12 +129,14 @@ public class SeleniumUtils {
             }
             driver.quit();
         } catch (Exception e) {
-            // e.printStackTrace();
+            LOG.error("关闭所有窗口异常[" + e.getClass().getName() + "]：" + e.getMessage());
         }
     }
 
     /**
      * 通过窗口标题切换窗口
+     * @param driver      WebDriver
+     * @param targetTitle 目标窗口标题
      */
     public static void switchByTitle(WebDriver driver, String targetTitle) {
         // 目标窗口如果是当前窗口，直接返回
@@ -128,6 +162,8 @@ public class SeleniumUtils {
 
     /**
      * 通过句柄切换窗口
+     * @param driver       WebDriver
+     * @param targetHandle 目标窗口句柄
      */
     public static void switchByHandle(WebDriver driver, String targetHandle) {
         // 获取所有的窗口句柄
@@ -166,5 +202,50 @@ public class SeleniumUtils {
     private static boolean isQueryPage(String title) {
         // return StringUtils.isBlank(title) || (!"商标状态检索".equals(title) && !"商标检索结果".equals(title) && !"商标详细内容".equals(title));
         return StringUtils.isNotBlank(title) && "商标状态检索".equals(title);
+    }
+
+    // 初始化查询页面
+    private static WebDriver initStatusQueryPage(String type, Integer timeout) {
+        LOG.warn("正在初始化浏览器...");
+        WebDriver driver = initBrowser(type, timeout);
+        int retryTimes = 0;
+        // 打开检索系统主页
+        WebElement statusQueryEle = null;
+        while (statusQueryEle == null) {
+            try {
+                driver.get(TMSConstant.STATUS_DOMAIN);
+                statusQueryEle = new WebDriverWait(driver, 10, 500).until(new ExpectedCondition<WebElement>() {
+                    @NullableDecl
+                    @Override
+                    public WebElement apply(WebDriver driver) {
+                        // 选择商标状态查询
+                        return driver.findElement(By.xpath("//*[@id='txnS03']"));
+                    }
+                });
+            } catch (TimeoutException e) {
+                LOG.error("重新打开状态查询页面...");
+            }
+            if (retryTimes++ >= 5) {
+                LOG.error("打开检索系统主页超时！");
+                quitBrowser(driver);
+                return null;
+            }
+        }
+        statusQueryEle.click();
+        // 等待页面加载完成（通过查询按钮判断页面是否加载完成）
+        try {
+            new WebDriverWait(driver, 12, 500).until(new ExpectedCondition<WebElement>() {
+                @NullableDecl
+                @Override
+                public WebElement apply(WebDriver driver) {
+                    return driver.findElement(By.id("_searchButton"));
+                }
+            });
+        } catch (TimeoutException e) {
+            LOG.error("跳转到“状态查询”超时！");
+            quitBrowser(driver);
+            return null;
+        }
+        return driver;
     }
 }

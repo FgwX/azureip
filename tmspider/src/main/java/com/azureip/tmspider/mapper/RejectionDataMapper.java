@@ -19,7 +19,7 @@ public interface RejectionDataMapper {
 
     List<RejectionData> selectAll();
 
-    int updateByPrimaryKey(RejectionData record);
+    int updateByPrimaryKey(RejectionData data);
 
     /**
      * 获取待查询驳回状态的数据

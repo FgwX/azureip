@@ -1,14 +1,15 @@
 package com.azureip.tmspider.service;
 
 import com.alibaba.druid.util.StringUtils;
+import com.azureip.common.util.ExcelUtils;
+import com.azureip.common.util.JSUtils;
+import com.azureip.tmspider.constant.TMSConstant;
 import com.azureip.tmspider.mapper.AnnouncementMapper;
 import com.azureip.tmspider.mapper.ExcelOptRecordMapper;
 import com.azureip.tmspider.model.Announcement;
 import com.azureip.tmspider.model.ExcelOptRecord;
 import com.azureip.tmspider.pojo.AnnListPojo;
 import com.azureip.tmspider.pojo.AnnQueryPojo;
-import com.azureip.common.util.ExcelUtils;
-import com.azureip.common.util.JSUtils;
 import com.eclipsesource.v8.V8;
 import com.google.gson.Gson;
 import org.apache.http.client.config.RequestConfig;
@@ -68,7 +69,7 @@ public class AnnouncementService {
 
         // 查询商标网公告数量
         RequestConfig config = RequestConfig.custom().setConnectionRequestTimeout(6000).setConnectTimeout(9000).setSocketTimeout(12000).build();
-        StringBuilder countUrl = new StringBuilder("http://sbgg.saic.gov.cn:9080/tmann/annInfoView/annSearchDG.html");
+        StringBuilder countUrl = new StringBuilder(TMSConstant.ANN_DOMAIN + "/tmann/annInfoView/annSearchDG.html");
         countUrl.append("?page=1&rows=0").append("&annNum=").append(pojo.getAnnNum()).append("&annType=").append(pojo.getAnnType()).append("&totalYOrN=true");
         if (!StringUtils.isEmpty(pojo.getAppDateBegin()) && !StringUtils.isEmpty(pojo.getAppDateEnd())) {
             countUrl.append("&appDateBegin=").append(pojo.getAppDateBegin()).append("&appDateEnd=").append(pojo.getAppDateEnd());
@@ -93,8 +94,9 @@ public class AnnouncementService {
     public int importAnns(AnnQueryPojo queryPojo) throws IOException {
         RequestConfig config = RequestConfig.custom().setConnectionRequestTimeout(10000).setConnectTimeout(20000).setSocketTimeout(60000).build();
         // CloseableHttpClient client = HttpClients.createDefault();
+        String baseUrl = TMSConstant.ANN_DOMAIN + "/tmann/annInfoView/annSearchDG.html";
         if (queryPojo.getTotal() < 1) {
-            StringBuilder countUrl = new StringBuilder("http://sbgg.saic.gov.cn:9080/tmann/annInfoView/annSearchDG.html");
+            StringBuilder countUrl = new StringBuilder(baseUrl);
             countUrl.append("?page=1&rows=0").append("&annNum=").append(queryPojo.getAnnNum()).append("&annType=").append(queryPojo.getAnnType())
                     .append("&totalYOrN=true");
             if (!StringUtils.isEmpty(queryPojo.getAppDateBegin()) && !StringUtils.isEmpty(queryPojo.getAppDateEnd())) {
@@ -113,7 +115,7 @@ public class AnnouncementService {
         int times = (int) Math.ceil(queryPojo.getTotal() / (double) queryPojo.getRows());
         int successCount = 0;
         for (int i = 0; i < times; i++) {
-            StringBuilder listUrl = new StringBuilder("http://sbgg.saic.gov.cn:9080/tmann/annInfoView/annSearchDG.html");
+            StringBuilder listUrl = new StringBuilder(baseUrl);
             listUrl.append("?page=").append(i + 1).append("&rows=").append(queryPojo.getRows()).append("&annNum=").append(queryPojo.getAnnNum()).append("&annType=").append(queryPojo.getAnnType())
                     .append("&totalYOrN=true");
             if (!StringUtils.isEmpty(queryPojo.getAppDateBegin()) && !StringUtils.isEmpty(queryPojo.getAppDateEnd())) {
@@ -221,7 +223,7 @@ public class AnnouncementService {
                         String regNum = regNumCell.getStringCellValue();
                         int annCount = getCountByRegNum(regNum);
                         if (annCount > 0) {
-                            ExcelUtils.setText(workbook,row.createCell(7),FIRST_TRIAL_ANN);
+                            ExcelUtils.setText(workbook, row.createCell(7), FIRST_TRIAL_ANN);
                             markCount++;
                             System.out.print("!");
                         } else {
