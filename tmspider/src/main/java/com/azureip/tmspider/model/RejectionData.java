@@ -3,24 +3,35 @@ package com.azureip.tmspider.model;
 import java.util.Date;
 
 public class RejectionData {
-
     private String regNum;
+
     private Integer type;
-    private Boolean approved;
-    private Boolean reviewed;
-    private Date checkTime;
-    private Boolean rejected;
+
+    private String tmName;
+
+    private String appName;
+
+    private String appAddr;
+
+    private Date appDate;
+
     private Date rejectDate;
+
+    private Date checkTime;
+
+    private Boolean approved;
+
+    private Boolean reviewed;
+
+    private Boolean rejected;
+
     private Boolean timeout;
+
+    private Boolean treated;
+
+    private Boolean exported;
+
     private Boolean handled;
-
-    public RejectionData() {
-    }
-
-    public RejectionData(String regNum, Integer type) {
-        this.regNum = regNum;
-        this.type = type;
-    }
 
     public String getRegNum() {
         return regNum;
@@ -36,6 +47,54 @@ public class RejectionData {
 
     public void setType(Integer type) {
         this.type = type;
+    }
+
+    public String getTmName() {
+        return tmName;
+    }
+
+    public void setTmName(String tmName) {
+        this.tmName = tmName;
+    }
+
+    public String getAppName() {
+        return appName;
+    }
+
+    public void setAppName(String appName) {
+        this.appName = appName;
+    }
+
+    public String getAppAddr() {
+        return appAddr;
+    }
+
+    public void setAppAddr(String appAddr) {
+        this.appAddr = appAddr;
+    }
+
+    public Date getAppDate() {
+        return appDate;
+    }
+
+    public void setAppDate(Date appDate) {
+        this.appDate = appDate;
+    }
+
+    public Date getRejectDate() {
+        return rejectDate;
+    }
+
+    public void setRejectDate(Date rejectDate) {
+        this.rejectDate = rejectDate;
+    }
+
+    public Date getCheckTime() {
+        return checkTime;
+    }
+
+    public void setCheckTime(Date checkTime) {
+        this.checkTime = checkTime;
     }
 
     public Boolean getApproved() {
@@ -54,28 +113,12 @@ public class RejectionData {
         this.reviewed = reviewed;
     }
 
-    public Date getCheckTime() {
-        return checkTime;
-    }
-
-    public void setCheckTime(Date checkTime) {
-        this.checkTime = checkTime;
-    }
-
     public Boolean getRejected() {
         return rejected;
     }
 
     public void setRejected(Boolean rejected) {
         this.rejected = rejected;
-    }
-
-    public Date getRejectDate() {
-        return rejectDate;
-    }
-
-    public void setRejectDate(Date rejectDate) {
-        this.rejectDate = rejectDate;
     }
 
     public Boolean getTimeout() {
@@ -86,18 +129,27 @@ public class RejectionData {
         this.timeout = timeout;
     }
 
+    public Boolean getTreated() {
+        return treated;
+    }
+
+    public void setTreated(Boolean treated) {
+        this.treated = treated;
+    }
+
+    public Boolean getExported() {
+        return exported;
+    }
+
+    public void setExported(Boolean exported) {
+        this.exported = exported;
+    }
+
     public Boolean getHandled() {
         return handled;
     }
 
     public void setHandled(Boolean handled) {
         this.handled = handled;
-    }
-
-    @Override
-    public String toString() {
-        return "RejectionData[regNum=" + regNum + ", type=" + type + ", approved=" + approved
-                + ", reviewed=" + reviewed + ", checkTime=" + checkTime + ", rejected=" + rejected +
-                ", rejectDate=" + rejectDate + ", timeout=" + timeout + ", handled=" + handled + "]";
     }
 }

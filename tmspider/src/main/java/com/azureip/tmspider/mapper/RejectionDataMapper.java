@@ -10,12 +10,11 @@ import java.util.List;
  * 驳回信息Mapper
  */
 public interface RejectionDataMapper {
-
-    int deleteByPrimaryKey(@Param("regNum") String regNum, @Param("type") Byte type);
+    int deleteByPrimaryKey(@Param("regNum") String regNum, @Param("type") Integer type);
 
     int insert(RejectionData record);
 
-    RejectionData selectByPrimaryKey(@Param("regNum") String regNum, @Param("type") Byte type);
+    RejectionData selectByPrimaryKey(@Param("regNum") String regNum, @Param("type") Integer type);
 
     List<RejectionData> selectAll();
 

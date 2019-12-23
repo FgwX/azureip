@@ -199,9 +199,10 @@ public class RejectionService {
     public void handleRejectionData() {
         LOG.info("==> 开始处理注册数据，查询驳回...");
         Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
+        // calendar.set(Calendar.HOUR_OF_DAY, 0);
+        // calendar.set(Calendar.MINUTE, 0);
+        // calendar.set(Calendar.SECOND, 0);
+        calendar.add(Calendar.HOUR_OF_DAY, -12);
         // 获取待查询的数据
         List<RejectionData> dataList = rejectionDataMapper.getPendingRejectionDatas(calendar.getTime(), 10000);
 
@@ -285,6 +286,7 @@ public class RejectionService {
             if (resultRetryTimes >= 5) {
                 LOG.info(prefix + "查询超时");
                 data.setTimeout(true);
+                data.setTreated(true);
                 return true;
             }
         }
@@ -332,7 +334,8 @@ public class RejectionService {
         if ("request_tid".equals(regFlowsEle.getAttribute("id"))) {
             // 未受理（返回Input[id=request_tid]，则说明此商标正等待受理，暂无法查询详细信息）
             LOG.error(prefix + "商标未受理");
-            data.setTimeout(true);
+            data.setTimeout(false);
+            data.setTreated(false);
         } else {
             // 判断是否驳回
             List<WebElement> regFlows = regFlowsEle.findElements(By.xpath("/html/body/div[@class='xqboxx']/div/ul/li"));
@@ -371,6 +374,8 @@ public class RejectionService {
             } else {
                 LOG.info(prefix + "无驳回");
             }
+            data.setTimeout(false);
+            data.setTreated(true);
         }
         return true;
     }
