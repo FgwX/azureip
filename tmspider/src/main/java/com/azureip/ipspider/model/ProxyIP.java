@@ -27,6 +27,17 @@ public class ProxyIP {
     public ProxyIP() {
     }
 
+    public ProxyIP(String host) {
+        String[] arr = host.trim().split(":");
+        this.ip = arr[0];
+        this.port = Integer.parseInt(arr[1]);
+        this.type = 0;
+        this.available = false;
+        this.fetchTime = new Date();
+        this.invalidTimes = 0;
+        this.discarded = false;
+    }
+
     public ProxyIP(String ip, Integer port) {
         this.ip = ip;
         this.port = port;

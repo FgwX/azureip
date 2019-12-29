@@ -24,60 +24,87 @@
     </sql>
 
     <delete id="deleteByPrimaryKey" parameterType="map">
-    delete from tms_rejection_data
-    where reg_num = #{regNum,jdbcType=VARCHAR}
-      and type = #{type,jdbcType=INTEGER}
+        delete
+        from tms_rejection_data
+        where reg_num = #{regNum,jdbcType=VARCHAR}
+          and type = #{type,jdbcType=INTEGER}
     </delete>
     <insert id="insert" parameterType="com.azureip.tmspider.model.RejectionData">
-    insert into tms_rejection_data (reg_num, type, tm_name,
-      app_name, app_addr, app_date,
-      reject_date, check_time, approved,
-      reviewed, rejected, timeout, treated,
-      exported, handled)
-    values (#{regNum,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER}, #{tmName,jdbcType=VARCHAR},
-      #{appName,jdbcType=VARCHAR}, #{appAddr,jdbcType=VARCHAR}, #{appDate,jdbcType=TIMESTAMP},
-      #{rejectDate,jdbcType=TIMESTAMP}, #{checkTime,jdbcType=TIMESTAMP}, #{approved,jdbcType=BIT},
-      #{reviewed,jdbcType=BIT}, #{rejected,jdbcType=BIT}, #{timeout,jdbcType=BIT}, #{treated,jdbcType=BIT},
-      #{exported,jdbcType=BIT}, #{handled,jdbcType=BIT})
+        insert into tms_rejection_data (reg_num, type, tm_name,
+                                        app_name, app_addr, app_date,
+                                        reject_date, check_time, approved,
+                                        reviewed, rejected, timeout, treated,
+                                        exported, handled)
+        values (#{regNum,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER}, #{tmName,jdbcType=VARCHAR},
+                #{appName,jdbcType=VARCHAR}, #{appAddr,jdbcType=VARCHAR}, #{appDate,jdbcType=TIMESTAMP},
+                #{rejectDate,jdbcType=TIMESTAMP}, #{checkTime,jdbcType=TIMESTAMP}, #{approved,jdbcType=BIT},
+                #{reviewed,jdbcType=BIT}, #{rejected,jdbcType=BIT}, #{timeout,jdbcType=BIT}, #{treated,jdbcType=BIT},
+                #{exported,jdbcType=BIT}, #{handled,jdbcType=BIT})
     </insert>
     <update id="updateByPrimaryKey" parameterType="com.azureip.tmspider.model.RejectionData">
-    update tms_rejection_data
-    set tm_name = #{tmName,jdbcType=VARCHAR},
-      app_name = #{appName,jdbcType=VARCHAR},
-      app_addr = #{appAddr,jdbcType=VARCHAR},
-      app_date = #{appDate,jdbcType=TIMESTAMP},
-      reject_date = #{rejectDate,jdbcType=TIMESTAMP},
-      check_time = #{checkTime,jdbcType=TIMESTAMP},
-      approved = #{approved,jdbcType=BIT},
-      reviewed = #{reviewed,jdbcType=BIT},
-      rejected = #{rejected,jdbcType=BIT},
-      timeout = #{timeout,jdbcType=BIT},
-      treated = #{treated,jdbcType=BIT},
-      exported = #{exported,jdbcType=BIT},
-      handled = #{handled,jdbcType=BIT}
-    where reg_num = #{regNum,jdbcType=VARCHAR}
-      and type = #{type,jdbcType=INTEGER}
+        update tms_rejection_data
+        set tm_name     = #{tmName,jdbcType=VARCHAR},
+            app_name    = #{appName,jdbcType=VARCHAR},
+            app_addr    = #{appAddr,jdbcType=VARCHAR},
+            app_date    = #{appDate,jdbcType=TIMESTAMP},
+            reject_date = #{rejectDate,jdbcType=TIMESTAMP},
+            check_time  = #{checkTime,jdbcType=TIMESTAMP},
+            approved    = #{approved,jdbcType=BIT},
+            reviewed    = #{reviewed,jdbcType=BIT},
+            rejected    = #{rejected,jdbcType=BIT},
+            timeout     = #{timeout,jdbcType=BIT},
+            treated     = #{treated,jdbcType=BIT},
+            exported    = #{exported,jdbcType=BIT},
+            handled     = #{handled,jdbcType=BIT}
+        where reg_num = #{regNum,jdbcType=VARCHAR}
+          and type = #{type,jdbcType=INTEGER}
     </update>
     <select id="selectByPrimaryKey" parameterType="map" resultMap="BaseResultMap">
-    select reg_num, type, tm_name, app_name, app_addr, app_date, reject_date, check_time, 
-    approved, reviewed, rejected, timeout, treated, exported, handled
-    from tms_rejection_data
-    where reg_num = #{regNum,jdbcType=VARCHAR}
-      and type = #{type,jdbcType=INTEGER}
+        select reg_num,
+               type,
+               tm_name,
+               app_name,
+               app_addr,
+               app_date,
+               reject_date,
+               check_time,
+               approved,
+               reviewed,
+               rejected,
+               timeout,
+               treated,
+               exported,
+               handled
+        from tms_rejection_data
+        where reg_num = #{regNum,jdbcType=VARCHAR}
+          and type = #{type,jdbcType=INTEGER}
     </select>
     <select id="selectAll" resultMap="BaseResultMap">
-    select reg_num, type, tm_name, app_name, app_addr, app_date, reject_date, check_time,
-    approved, reviewed, rejected, timeout, treated, exported, handled
-    from tms_rejection_data
+        select reg_num,
+               type,
+               tm_name,
+               app_name,
+               app_addr,
+               app_date,
+               reject_date,
+               check_time,
+               approved,
+               reviewed,
+               rejected,
+               timeout,
+               treated,
+               exported,
+               handled
+        from tms_rejection_data
     </select>
     <select id="getPendingRejectionDatas" resultMap="BaseResultMap">
         select *
         from tms_rejection_data
         where approved = false
-            and reviewed = false
-            and (check_time is null or check_time &lt; #{deadline})
-            and rejected = false
-            and handled = false
+          and reviewed = false
+          and (check_time is null or check_time &lt; #{deadline})
+          and rejected = false
+          and handled = false
         order by check_time
         limit #{limit}
     </select>

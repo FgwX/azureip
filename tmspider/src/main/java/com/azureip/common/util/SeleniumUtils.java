@@ -1,23 +1,21 @@
 package com.azureip.common.util;
 
 import com.azureip.common.constant.Constant;
-import com.azureip.tmspider.constant.TMSConstant;
+import com.azureip.common.exception.ProxyIPBlockedException;
 import com.azureip.tmspider.service.RegistrationService;
 import org.apache.commons.lang3.StringUtils;
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
-import org.openqa.selenium.*;
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Point;
+import org.openqa.selenium.Proxy;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
-import org.openqa.selenium.firefox.FirefoxProfile;
-import org.openqa.selenium.firefox.internal.ProfilesIni;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
-import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -49,35 +47,43 @@ public class SeleniumUtils {
     /**
      * 初始化浏览器
      */
-    public static WebDriver initBrowser(String type, Integer timeOut) {
+    public static WebDriver initBrowser(String type, String host, Integer timeOut) {
         WebDriver driver;
+        Proxy proxy = null;
+        if (StringUtils.isNotEmpty(host)) {
+            proxy = new Proxy().setHttpProxy(host).setFtpProxy(host).setSslProxy(host);
+        }
         switch (type) {
             case Constant.WEB_DRIVER_CHROME:
-                // ChromeOptions options = new ChromeOptions();
+                ChromeOptions chromeOption = new ChromeOptions();
+                if (proxy != null) {
+                    chromeOption.setProxy(proxy);
+                }
                 // options.addArguments("--user-data-dir=C:/Users/LewisZhang/AppData/Local/Google/Chrome/User Data");
                 // options.addArguments("--no-infobars");
-                // driver = new ChromeDriver(options);
-                driver = new ChromeDriver();
+                driver = new ChromeDriver(chromeOption);
+                // driver = new ChromeDriver();
                 driver.manage().window().setSize(new Dimension(1000, 600));
                 break;
             case Constant.WEB_DRIVER_FIREFOX:
-                // FirefoxOptions options = new FirefoxOptions();
+                FirefoxOptions firefoxOption = new FirefoxOptions();
+                if (proxy != null) {
+                    firefoxOption.setProxy(proxy);
+                }
                 // options.addArguments("-safe-mode");
                 // options.addArguments("-headless");
                 // FirefoxProfile profile = new ProfilesIni().getProfile("default");
                 // options.setProfile(profile);
-                // driver = new FirefoxDriver(options);
-                driver = new FirefoxDriver();
+                driver = new FirefoxDriver(firefoxOption);
+                // driver = new FirefoxDriver();
                 driver.manage().window().setSize(new Dimension(1000, 600));
                 break;
-            case Constant.WEB_DRIVER_HTML:
+            default:
                 driver = new HtmlUnitDriver();
                 break;
-            default:
-                return null;
         }
 
-        Objects.requireNonNull(driver).manage().window().setPosition(new Point(0, 0));
+        driver.manage().window().setPosition(new Point(0, 0));
 
         // driver.manage().timeouts().implicitlyWait(500, TimeUnit.SECONDS);
         if (timeOut != null && timeOut > 0) {
@@ -88,34 +94,8 @@ public class SeleniumUtils {
     }
 
     /**
-     * 初始化无窗口浏览器（HtmlUnitDriver）
-     */
-    public static HtmlUnitDriver initHeadlessBrowser(Long loadTimeOut) {
-        HtmlUnitDriver driver = new HtmlUnitDriver();
-        driver.setJavascriptEnabled(true);
-        Objects.requireNonNull(driver).manage().window().setPosition(new Point(0, 0));
-        if (loadTimeOut != null && loadTimeOut > 0) {
-            driver.manage().timeouts().pageLoadTimeout(loadTimeOut, TimeUnit.MILLISECONDS);
-        }
-        return driver;
-    }
-
-    /**
-     * 初始化状态查询页面
-     */
-    public static WebDriver initStatusQueryPage(WebDriver driver, String type, Integer timeout) {
-        if (driver != null) {
-            quitBrowser(driver);
-            driver = null;
-        }
-        while (driver == null) {
-            driver = initStatusQueryPage(type, timeout);
-        }
-        return driver;
-    }
-
-    /**
      * 关闭所有窗口
+     *
      * @param driver WebDriver
      */
     public static void quitBrowser(WebDriver driver) {
@@ -135,6 +115,7 @@ public class SeleniumUtils {
 
     /**
      * 通过窗口标题切换窗口
+     *
      * @param driver      WebDriver
      * @param targetTitle 目标窗口标题
      */
@@ -154,7 +135,10 @@ public class SeleniumUtils {
             }
             // 切换并检查其Title是否和目标窗口的Title是否相同
             driver.switchTo().window(handle);
-            if (targetTitle.equals(driver.getTitle())) {
+            String title = driver.getTitle();
+            if ("请继续".equals(title)) {
+                throw new ProxyIPBlockedException();
+            } else if (targetTitle.equals(title)) {
                 return;
             }
         }
@@ -162,6 +146,7 @@ public class SeleniumUtils {
 
     /**
      * 通过句柄切换窗口
+     *
      * @param driver       WebDriver
      * @param targetHandle 目标窗口句柄
      */
@@ -204,48 +189,14 @@ public class SeleniumUtils {
         return StringUtils.isNotBlank(title) && "商标状态检索".equals(title);
     }
 
-    // 初始化查询页面
-    private static WebDriver initStatusQueryPage(String type, Integer timeout) {
-        LOG.warn("正在初始化浏览器...");
-        WebDriver driver = initBrowser(type, timeout);
-        int retryTimes = 0;
-        // 打开检索系统主页
-        WebElement statusQueryEle = null;
-        while (statusQueryEle == null) {
-            try {
-                driver.get(TMSConstant.STATUS_DOMAIN);
-                statusQueryEle = new WebDriverWait(driver, 10, 500).until(new ExpectedCondition<WebElement>() {
-                    @NullableDecl
-                    @Override
-                    public WebElement apply(WebDriver driver) {
-                        // 选择商标状态查询
-                        return driver.findElement(By.xpath("//*[@id='txnS03']"));
-                    }
-                });
-            } catch (TimeoutException e) {
-                LOG.error("重新打开状态查询页面...");
-            }
-            if (retryTimes++ >= 5) {
-                LOG.error("打开检索系统主页超时！");
-                quitBrowser(driver);
-                return null;
-            }
-        }
-        statusQueryEle.click();
-        // 等待页面加载完成（通过查询按钮判断页面是否加载完成）
-        try {
-            new WebDriverWait(driver, 12, 500).until(new ExpectedCondition<WebElement>() {
-                @NullableDecl
-                @Override
-                public WebElement apply(WebDriver driver) {
-                    return driver.findElement(By.id("_searchButton"));
-                }
-            });
-        } catch (TimeoutException e) {
-            LOG.error("跳转到“状态查询”超时！");
-            quitBrowser(driver);
-            return null;
-        }
-        return driver;
+    public static boolean blockedByHost(String pageResource) {
+        return pageResource != null && (
+                pageResource.contains("502 Bad Gateway")
+                        || pageResource.contains("该操作已触发系统访问防护规则")
+                        || pageResource.contains("请点击图片中的")
+                        || pageResource.contains("的符号的序号填写在输入框内")
+                        || pageResource.contains("请将图片中汉字读音对应的数字填写在输入框内")
+                        || pageResource.contains("请将图片中显示的字母、数字填写在输入框中")
+        );
     }
 }

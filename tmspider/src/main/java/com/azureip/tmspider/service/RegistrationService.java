@@ -4,6 +4,7 @@ import com.azureip.common.constant.Constant;
 import com.azureip.common.exception.RetriedTooManyTimesException;
 import com.azureip.common.util.ExcelUtils;
 import com.azureip.common.util.SeleniumUtils;
+import com.azureip.tmspider.constant.TMSConstant;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.CellType;
@@ -41,6 +42,7 @@ public class RegistrationService {
         // 操作停止标志
         stopped = true;
     }
+
     private static final String WEB_DRIVER_TYPE = Constant.WEB_DRIVER_HTML;
     private static boolean interruptRequired;
     private static boolean stopped;
@@ -329,13 +331,13 @@ public class RegistrationService {
     // 初始化查询页面
     private WebDriver initQueryPage() {
         LOG.warn("正在初始化浏览器...");
-        WebDriver driver = SeleniumUtils.initBrowser(Constant.WEB_DRIVER_FIREFOX, null);
+        WebDriver driver = SeleniumUtils.initBrowser(Constant.WEB_DRIVER_CHROME, null, null);
         int retryTimes = 0;
         // 打开检索系统主页
         WebElement statusQueryEle = null;
         while (statusQueryEle == null) {
             try {
-                driver.get("http://wcjs.sbj.cnipa.gov.cn");
+                driver.get(TMSConstant.STATUS_DOMAIN);
                 statusQueryEle = new WebDriverWait(driver, 10, 500).until(new ExpectedCondition<WebElement>() {
                     @NullableDecl
                     @Override

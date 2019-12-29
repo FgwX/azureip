@@ -1,9 +1,12 @@
 package com.azureip.tmspider.service;
 
 import com.azureip.common.constant.Constant;
+import com.azureip.common.exception.ProxyIPBlockedException;
 import com.azureip.common.exception.RetriedTooManyTimesException;
+import com.azureip.common.service.SeleniumService;
 import com.azureip.common.util.ExcelUtils;
 import com.azureip.common.util.SeleniumUtils;
+import com.azureip.ipspider.service.ProxyIPProvider;
 import com.azureip.tmspider.constant.TMSConstant;
 import com.azureip.tmspider.mapper.RejectionDataMapper;
 import com.azureip.tmspider.model.RejectionData;
@@ -48,6 +51,10 @@ public class RejectionService {
     // private static final String CHROME_DRIVER_DIR;
     // private static final String FF_DRIVER_DIR;
     private static final SimpleDateFormat dateFormat;
+    @Autowired
+    private ProxyIPProvider proxyIPProvider;
+    @Autowired
+    private SeleniumService seleniumService;
     @Autowired(required = false)
     private RejectionDataMapper rejectionDataMapper;
 
@@ -87,7 +94,7 @@ public class RejectionService {
 
     private void queryRejections(String fileName, XSSFWorkbook workBook) {
         XSSFSheet sheet = workBook.getSheetAt(0);
-        WebDriver driver = SeleniumUtils.initBrowser(WEB_DRIVER_TYPE, 6000);
+        WebDriver driver = SeleniumUtils.initBrowser(WEB_DRIVER_TYPE, null, 6000);
 
         // 循环处理行（跳过标题行）
         for (int i = 1; i <= sheet.getLastRowNum(); i++) {
@@ -199,16 +206,13 @@ public class RejectionService {
     public void handleRejectionData() {
         LOG.info("==> 开始处理注册数据，查询驳回...");
         Calendar calendar = Calendar.getInstance();
-        // calendar.set(Calendar.HOUR_OF_DAY, 0);
-        // calendar.set(Calendar.MINUTE, 0);
-        // calendar.set(Calendar.SECOND, 0);
         calendar.add(Calendar.HOUR_OF_DAY, -12);
         // 获取待查询的数据
         List<RejectionData> dataList = rejectionDataMapper.getPendingRejectionDatas(calendar.getTime(), 10000);
 
         // 查询驳回状态
         int size = dataList.size();
-        WebDriver driver = SeleniumUtils.initStatusQueryPage(null, WEB_DRIVER_TYPE, null);
+        WebDriver driver = seleniumService.initStatusQueryPage(null, WEB_DRIVER_TYPE, null, null);
         for (int i = 0; i < size; i++) {
             RejectionData data = dataList.get(i);
             String prefix = "[(" + (i + 1) + "/" + size + ")" + data.getRegNum() + ":" + data.getType() + "]";
@@ -218,13 +222,16 @@ public class RejectionService {
                     success = queryRejectionData(driver, data, prefix);
                 } catch (RetriedTooManyTimesException e) {
                     LOG.error(prefix + "重试次数过多，重新初始化...");
-                    driver = SeleniumUtils.initStatusQueryPage(driver, WEB_DRIVER_TYPE, null);
+                    driver = seleniumService.initStatusQueryPage(driver, WEB_DRIVER_TYPE, null, null);
                 } catch (NoSuchElementException e) {
                     LOG.error(prefix + "页面切换出错，重新初始化...");
-                    driver = SeleniumUtils.initStatusQueryPage(driver, WEB_DRIVER_TYPE, null);
+                    driver = seleniumService.initStatusQueryPage(driver, WEB_DRIVER_TYPE, null, null);
                 } catch (StaleElementReferenceException e) {
                     LOG.error(prefix + "操作元素过期，重新初始化...");
-                    driver = SeleniumUtils.initStatusQueryPage(driver, WEB_DRIVER_TYPE, null);
+                    driver = seleniumService.initStatusQueryPage(driver, WEB_DRIVER_TYPE, null, null);
+                } catch (ProxyIPBlockedException e) {
+                    LOG.error(prefix + "IP已被拦截，更换IP...");
+                    driver = seleniumService.initStatusQueryPage(driver, WEB_DRIVER_TYPE, proxyIPProvider.nextProxy(), null);
                 } catch (NoSuchSessionException e) {
                     LOG.error(prefix + "页面已被关闭！结束查询...");
                     SeleniumUtils.quitBrowser(driver);
@@ -267,6 +274,8 @@ public class RejectionService {
                         try {
                             if (data.getRegNum().equals(driver.findElement(By.xpath("//*[@id='request_sn']")).getAttribute("value"))) {
                                 return driver.findElement(By.xpath("//*[@id='list_box']/table/tbody/tr[2]/td[2]/a"));
+                            } else if (SeleniumUtils.blockedByHost(driver.getPageSource())) {
+                                throw new ProxyIPBlockedException();
                             } else {
                                 return null;
                             }
@@ -309,6 +318,8 @@ public class RejectionService {
                             WebElement requestID = driver.findElement(By.xpath("//input[@id='request_tid']"));
                             if (data.getRegNum().equals(curRegNumEle.getAttribute("value"))) {
                                 return driver.findElement(By.xpath("/html/body/div[@class='xqboxx']/div/ul"));
+                            } else if (SeleniumUtils.blockedByHost(driver.getPageSource())) {
+                                throw new ProxyIPBlockedException();
                             } else if (retryTimes >= 8 && !StringUtils.isEmpty(requestID.getAttribute("value"))) {
                                 return requestID;
                             }

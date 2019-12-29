@@ -268,7 +268,7 @@ public class ExtensionService {
     // 初始化查询页面
     private WebDriver initQueryPage() {
         LOG.warn("正在初始化浏览器...");
-        WebDriver driver = SeleniumUtils.initBrowser(Constant.WEB_DRIVER_FIREFOX, null);
+        WebDriver driver = SeleniumUtils.initBrowser(Constant.WEB_DRIVER_FIREFOX, null, null);
         int retryTimes = 0;
         // 打开检索系统主页
         WebElement statusQueryEle = null;

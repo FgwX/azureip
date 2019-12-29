@@ -1,6 +1,7 @@
 package com.azureip.common.controller;
 
 import com.azureip.common.constant.Constant;
+import com.azureip.common.tool.CircularLinkedQueue;
 import com.azureip.common.util.ExcelUtils;
 import com.azureip.common.util.JSUtils;
 import com.azureip.common.util.SeleniumUtils;
@@ -46,12 +47,9 @@ import java.util.*;
 public class TestController {
     static {
         String projectBase = TestController.class.getClassLoader().getResource("").getPath();
-        CHROME_DRIVER_DIR = projectBase + "drivers/chromedriver.exe";
-        FF_DRIVER_DIR = projectBase + "drivers/geckodriver.exe";
+        System.setProperty("webdriver.chrome.driver", projectBase + "drivers/chromedriver.exe");
+        System.setProperty("webdriver.gecko.driver", projectBase + "drivers/geckodriver.exe");
     }
-
-    private static final String CHROME_DRIVER_DIR;
-    private static final String FF_DRIVER_DIR;
 
     @GetMapping("test")
     public String test() {
@@ -75,6 +73,10 @@ public class TestController {
         // getAbsoluteFilePath();
         // getFirstDayOfMonth();
         // getRandomNum();
+        // chromeProxyTest();
+        StringBuilder sb = new StringBuilder("ABC");
+        sb.delete(0, sb.length());
+        System.out.println(sb.toString());
     }
 
     private static void commandLineTest() {
@@ -103,41 +105,25 @@ public class TestController {
     // Chrome代理测试
     private static void chromeProxyTest() {
         // 代理服务器
-        // 118.89.234.236:8787
-        // 119.23.21.39:80
-        String[] ip = "117.78.33.45:80".split(":");
-        System.setProperty("webdriver.gecko.driver", FF_DRIVER_DIR);
+        String host = "39.137.69.6:80";
+        Proxy proxy = new Proxy().setHttpProxy(host).setSslProxy(host);
 
-        Proxy proxy = new Proxy();
-
-        ChromeOptions o = new ChromeOptions();
+        /*ChromeOptions o = new ChromeOptions();
         o.setProxy(proxy);
-        FirefoxProfile profile = new FirefoxProfile();
-        // FirefoxProfile profile = new ProfilesIni().getProfile("default");
-        // 使用代理
-        profile.setPreference("network.ip.type", 1);
-        // 代理服务器配置
-        profile.setPreference("network.ip.http", ip[0]);
-        profile.setPreference("network.ip.http_port", ip[1]);
+        o.setExperimentalOption("excludeSwitches", new String[]{"enable-automation"});
+        ChromeDriver driver = new ChromeDriver(o);*/
 
-        profile.setPreference("network.ip.ssl", ip[0]);
-        profile.setPreference("network.ip.ssl_port", ip[1]);
-
-        // profile.setPreference("username", proxyUser);
-        // profile.setPreference("password", proxyPass);
-
-        // 所有协议公用一种代理配置，如果单独配置，这项设置为false
-        profile.setPreference("network.ip.share_proxy_settings", true);
-
-        // 对于localhost的不用代理，这里必须要配置，否则无法和webdriver通讯
-        profile.setPreference("network.ip.no_proxies_on", "localhost");
         FirefoxOptions option = new FirefoxOptions();
-        option.setProfile(profile);
-        // 以代理方式启动firefox
+        option.setProxy(proxy);
         FirefoxDriver driver = new FirefoxDriver(option);
 
-        driver.get("http://ip138.com");
-        // driver.get("http://wsjs.saic.gov.cn");
+        driver.get("http://wcjs.sbj.cnipa.gov.cn/");
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println(driver.getPageSource());
     }
 
     // Firefox代理测试
@@ -145,7 +131,6 @@ public class TestController {
         // 代理服务器
         final String proxyHost = "52.80.58.248";
         final int proxyPort = 3128;
-        System.setProperty("webdriver.gecko.driver", FF_DRIVER_DIR);
 
         FirefoxProfile profile = new FirefoxProfile();
         // FirefoxProfile profile = new ProfilesIni().getProfile("default");
@@ -177,9 +162,7 @@ public class TestController {
 
     private static void jsReadyStateTest() {
         // 初始化Selenium功能参数
-        System.setProperty("webdriver.chrome.driver", CHROME_DRIVER_DIR);
-        System.setProperty("webdriver.gecko.driver", FF_DRIVER_DIR);
-        WebDriver driver = SeleniumUtils.initBrowser(Constant.WEB_DRIVER_FIREFOX, null);
+        WebDriver driver = SeleniumUtils.initBrowser(Constant.WEB_DRIVER_FIREFOX, null, null);
 
         driver.get("http://sbgg.saic.gov.cn:9080/tmann/annInfoView/annSearchDG.html?page=3&rows=100&annNum=1638&annType=TMZCSQ&totalYOrN=true&agentName=");
         String source = driver.getPageSource();
