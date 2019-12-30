@@ -103,12 +103,13 @@ public class TestController {
     // Chrome代理测试
     private static void chromeProxyTest() {
         // 代理服务器
+        // System.setProperty("webdriver.http.factory", "apache");
         String host = "39.137.69.6:80";
         Proxy proxy = new Proxy().setHttpProxy(host).setSslProxy(host);
 
         ChromeOptions o = new ChromeOptions();
         o.setProxy(proxy);
-        o.setExperimentalOption("excludeSwitches", new String[]{"enable-automation"});
+        // o.setExperimentalOption("excludeSwitches", new String[]{"enable-automation"});
         ChromeDriver driver = new ChromeDriver(o);
 
         /*FirefoxOptions option = new FirefoxOptions();

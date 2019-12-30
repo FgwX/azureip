@@ -96,7 +96,6 @@ public class SeleniumUtils {
 
     /**
      * 关闭所有窗口
-     *
      * @param driver WebDriver
      */
     public static void quitBrowser(WebDriver driver) {
@@ -116,7 +115,6 @@ public class SeleniumUtils {
 
     /**
      * 通过窗口标题切换窗口
-     *
      * @param driver      WebDriver
      * @param targetTitle 目标窗口标题
      */
@@ -149,7 +147,6 @@ public class SeleniumUtils {
 
     /**
      * 通过句柄切换窗口
-     *
      * @param driver       WebDriver
      * @param targetHandle 目标窗口句柄
      */
