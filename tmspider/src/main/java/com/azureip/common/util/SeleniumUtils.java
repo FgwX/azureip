@@ -59,6 +59,7 @@ public class SeleniumUtils {
                 if (proxy != null) {
                     chromeOption.setProxy(proxy);
                 }
+                chromeOption.setExperimentalOption("excludeSwitches", new String[]{"enable-automation"});
                 // options.addArguments("--user-data-dir=C:/Users/LewisZhang/AppData/Local/Google/Chrome/User Data");
                 // options.addArguments("--no-infobars");
                 driver = new ChromeDriver(chromeOption);
@@ -119,15 +120,15 @@ public class SeleniumUtils {
      * @param driver      WebDriver
      * @param targetTitle 目标窗口标题
      */
-    public static void switchByTitle(WebDriver driver, String targetTitle) {
+    public static boolean switchByTitle(WebDriver driver, String targetTitle) {
         // 目标窗口如果是当前窗口，直接返回
         if (targetTitle.equals(driver.getTitle())) {
-            return;
+            return true;
         }
-        // 获取所有的窗口句柄
-        Set<String> handles = driver.getWindowHandles();
         // 获取当前窗口的句柄
         String currentHandle = driver.getWindowHandle();
+        // 获取所有的窗口句柄
+        Set<String> handles = driver.getWindowHandles();
         for (String handle : handles) {
             // 略过当前窗口
             if (handle.equals(currentHandle)) {
@@ -139,9 +140,11 @@ public class SeleniumUtils {
             if ("请继续".equals(title)) {
                 throw new ProxyIPBlockedException();
             } else if (targetTitle.equals(title)) {
-                return;
+                return true;
             }
         }
+        LOG.error("窗口切换失败：{}窗口不存在！", targetTitle);
+        return false;
     }
 
     /**
@@ -189,14 +192,22 @@ public class SeleniumUtils {
         return StringUtils.isNotBlank(title) && "商标状态检索".equals(title);
     }
 
-    public static boolean blockedByHost(String pageResource) {
-        return pageResource != null && (
-                pageResource.contains("502 Bad Gateway")
-                        || pageResource.contains("该操作已触发系统访问防护规则")
-                        || pageResource.contains("请点击图片中的")
-                        || pageResource.contains("的符号的序号填写在输入框内")
-                        || pageResource.contains("请将图片中汉字读音对应的数字填写在输入框内")
-                        || pageResource.contains("请将图片中显示的字母、数字填写在输入框中")
-        );
+    public static boolean blockedByHost(WebDriver driver) {
+        Set<String> handles = driver.getWindowHandles();
+        boolean blocked = false;
+        for (String handle : handles) {
+            driver.switchTo().window(handle);
+            String pageSource = driver.getPageSource();
+            if (StringUtils.isNotEmpty(pageSource) && (pageSource.contains("502 Bad Gateway")
+                    || pageSource.contains("该操作已触发系统访问防护规则")
+                    || pageSource.contains("请点击图片中的")
+                    || pageSource.contains("的符号的序号填写在输入框内")
+                    || pageSource.contains("请将图片中汉字读音对应的数字填写在输入框内")
+                    || pageSource.contains("请将图片中显示的字母、数字填写在输入框中"))) {
+                blocked = true;
+                break;
+            }
+        }
+        return blocked;
     }
 }

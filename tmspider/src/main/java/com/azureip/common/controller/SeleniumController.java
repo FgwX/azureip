@@ -1,10 +1,9 @@
 package com.azureip.common.controller;
 
-import com.azureip.tmspider.service.RegistrationService;
 import com.azureip.common.util.SpringUtils;
+import com.azureip.tmspider.service.RegistrationService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.openqa.selenium.*;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.interactions.Actions;
@@ -75,9 +74,9 @@ public class SeleniumController {
                 WebDriverWait wait = new WebDriverWait(driver, 10, 2000);
                 // 每隔200毫秒去调用一下until中的函数，默认是0.5秒，如果等待3秒还没有找到元素，则抛出异常。
                 linkElement = wait.until(new ExpectedCondition<WebElement>() {
-                    @NullableDecl
+                    // @NullableDecl
                     @Override
-                    public WebElement apply(@NullableDecl WebDriver webDriver) {
+                    public WebElement apply(/*@NullableDecl*/ WebDriver webDriver) {
                         System.out.println("====> applying...");
                         WebElement element = webDriver.findElement(By.xpath("//*[@id='list_box']/table/tbody/tr[2]/td[2]"));
                         if (element != null && "31348939".equals(element.findElement(By.tagName("a")).getText())) {
@@ -203,9 +202,9 @@ public class SeleniumController {
             try {
                 WebDriverWait wait = new WebDriverWait(driver, 3, 1000);
                 regFlowsEle = wait.until(new ExpectedCondition<WebElement>() {
-                    @NullableDecl
+                    // @NullableDecl
                     @Override
-                    public WebElement apply(@NullableDecl WebDriver driver) {
+                    public WebElement apply(/*@NullableDecl*/ WebDriver driver) {
                         try {
                             String curRegNum = driver.findElement(By.cssSelector("input[name='info:rn']")).getAttribute("value");
                             // System.out.println("detail page regNum: " + curRegNum);
@@ -250,9 +249,9 @@ public class SeleniumController {
 
     private static WebElement isAppear(WebDriver driver, String xPath, String conString) {
         return new WebDriverWait(driver, 3, 200).until(new ExpectedCondition<WebElement>() {
-            @NullableDecl
+            // @NullableDecl
             @Override
-            public WebElement apply(@NullableDecl WebDriver webDriver) {
+            public WebElement apply(/*@NullableDecl*/ WebDriver webDriver) {
                 if (webDriver.findElement(By.xpath(xPath)).getText().contains(conString)) {
                     return webDriver.findElement(By.xpath(xPath));
                 } else {

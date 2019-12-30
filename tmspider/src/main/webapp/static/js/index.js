@@ -15,8 +15,9 @@ $(function () {
     importAnnLoading = Ladda.create(document.getElementById("importRemoteAnnBtn"));
     delLocalLoading = Ladda.create(document.getElementById("delLocalAnnBtn"));
     optExcelLoading = Ladda.create(document.getElementById("optExcelBtn"));
-    addLinkLoading = Ladda.create(document.getElementById("addLinkBtn"));
-    queryRejectionLoading = Ladda.create(document.getElementById("queryRejectionBtn"));
+    handleRejLoading = Ladda.create(document.getElementById("handleRejBtn"));
+    // queryRejectionLoading = Ladda.create(document.getElementById("queryRejectionBtn"));
+    // addLinkLoading = Ladda.create(document.getElementById("addLinkBtn"));
 
     $("#sqrqStart").daterangepicker({
 
@@ -209,21 +210,21 @@ function notify(title, body) {
     }
 }
 
-function addLink() {
-    if (confirm("即将开始调用【添加链接】接口！\n是否继续？")) {
-        addLinkLoading.start();
+function handleRej() {
+    if (confirm("即将开始调用【查询驳回-handleRej】接口！\n是否继续？")) {
+        handleRejLoading.start();
         $.ajax({
             type: "GET",
-            url: "/reg/addLink",
+            url: "/rej/handleRej",
             success: function (resp) {
                 if (resp.status === "S") {
-                    notify("提示 - TMSpider", "【添加链接】已完成");
+                    notify("提示 - TMSpider", "【查询驳回】已完成");
                 } else {
-                    notify("警告 - TMSpider", "【添加链接】失败！原因如下：\n" + resp.message);
+                    notify("警告 - TMSpider", "【查询驳回】失败！原因如下：\n" + resp.message);
                 }
             },
             complete: function () {
-                addLinkLoading.stop();
+                handleRejLoading.stop();
             }
         });
     }
@@ -247,4 +248,28 @@ function queryRejection() {
             }
         });
     }
+}
+
+function addLink() {
+    if (confirm("即将开始调用【添加链接】接口！\n是否继续？")) {
+        addLinkLoading.start();
+        $.ajax({
+            type: "GET",
+            url: "/reg/addLink",
+            success: function (resp) {
+                if (resp.status === "S") {
+                    notify("提示 - TMSpider", "【添加链接】已完成");
+                } else {
+                    notify("警告 - TMSpider", "【添加链接】失败！原因如下：\n" + resp.message);
+                }
+            },
+            complete: function () {
+                addLinkLoading.stop();
+            }
+        });
+    }
+}
+
+function seleniumTest() {
+    prompt("message", "_default");
 }

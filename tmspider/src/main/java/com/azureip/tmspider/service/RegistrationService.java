@@ -12,7 +12,6 @@ import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.json.JSONObject;
 import org.openqa.selenium.*;
 import org.openqa.selenium.logging.LogEntries;
@@ -213,7 +212,7 @@ public class RegistrationService {
             try {
                 // 每隔500毫秒去调用一下until中的函数，默认是0.5秒，如果等待3秒还没有找到元素，则抛出异常。
                 resultEle = new WebDriverWait(driver, (resultRetryTimes++ > 1 ? 3 : 5), 500).until(new ExpectedCondition<WebElement>() {
-                    @NullableDecl
+                    // @NullableDecl
                     @Override
                     public WebElement apply(WebDriver driver) {
                         try {
@@ -253,7 +252,7 @@ public class RegistrationService {
             final int retryTimes = ++detailRetryTimes;
             try {
                 regFlowsEle = new WebDriverWait(driver, (detailRetryTimes > 1 ? 3 : 5), 500).until(new ExpectedCondition<WebElement>() {
-                    @NullableDecl
+                    // @NullableDecl
                     @Override
                     public WebElement apply(WebDriver driver) {
                         try {
@@ -339,7 +338,7 @@ public class RegistrationService {
             try {
                 driver.get(TMSConstant.STATUS_DOMAIN);
                 statusQueryEle = new WebDriverWait(driver, 10, 500).until(new ExpectedCondition<WebElement>() {
-                    @NullableDecl
+                    // @NullableDecl
                     @Override
                     public WebElement apply(WebDriver driver) {
                         // 选择商标状态查询
@@ -359,7 +358,7 @@ public class RegistrationService {
         // 等待页面加载完成（通过查询按钮判断页面是否加载完成）
         try {
             new WebDriverWait(driver, 12, 500).until(new ExpectedCondition<WebElement>() {
-                @NullableDecl
+                // @NullableDecl
                 @Override
                 public WebElement apply(WebDriver driver) {
                     return driver.findElement(By.id("_searchButton"));

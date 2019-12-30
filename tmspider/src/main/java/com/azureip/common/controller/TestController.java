@@ -20,6 +20,7 @@ import org.json.JSONObject;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Proxy;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
@@ -73,10 +74,7 @@ public class TestController {
         // getAbsoluteFilePath();
         // getFirstDayOfMonth();
         // getRandomNum();
-        // chromeProxyTest();
-        StringBuilder sb = new StringBuilder("ABC");
-        sb.delete(0, sb.length());
-        System.out.println(sb.toString());
+        chromeProxyTest();
     }
 
     private static void commandLineTest() {
@@ -108,22 +106,24 @@ public class TestController {
         String host = "39.137.69.6:80";
         Proxy proxy = new Proxy().setHttpProxy(host).setSslProxy(host);
 
-        /*ChromeOptions o = new ChromeOptions();
+        ChromeOptions o = new ChromeOptions();
         o.setProxy(proxy);
         o.setExperimentalOption("excludeSwitches", new String[]{"enable-automation"});
-        ChromeDriver driver = new ChromeDriver(o);*/
+        ChromeDriver driver = new ChromeDriver(o);
 
-        FirefoxOptions option = new FirefoxOptions();
+        /*FirefoxOptions option = new FirefoxOptions();
         option.setProxy(proxy);
-        FirefoxDriver driver = new FirefoxDriver(option);
+        FirefoxDriver driver = new FirefoxDriver(option);*/
 
-        driver.get("http://wcjs.sbj.cnipa.gov.cn/");
-        try {
+        driver.get("http://ip138.com/");
+
+
+        /*try {
             Thread.sleep(3000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        System.out.println(driver.getPageSource());
+        System.out.println(driver.getPageSource());*/
     }
 
     // Firefox代理测试

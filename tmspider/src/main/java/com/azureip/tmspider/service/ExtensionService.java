@@ -1,6 +1,7 @@
 package com.azureip.tmspider.service;
 
 import com.azureip.common.constant.Constant;
+import com.azureip.common.exception.ProxyIPBlockedException;
 import com.azureip.common.exception.RetriedTooManyTimesException;
 import com.azureip.common.util.ExcelUtils;
 import com.azureip.common.util.SeleniumUtils;
@@ -10,7 +11,6 @@ import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.json.JSONObject;
 import org.openqa.selenium.*;
 import org.openqa.selenium.logging.LogEntries;
@@ -123,7 +123,9 @@ public class ExtensionService {
 
     // 查询续展信息并添加链接
     private boolean queryExtensionData(WebDriver driver, XSSFWorkbook workbook, int rowIndex) {
-        SeleniumUtils.switchByTitle(driver, SEARCH_WIN);
+        if (!SeleniumUtils.switchByTitle(driver, SEARCH_WIN)) {
+            throw new ProxyIPBlockedException();
+        }
         XSSFSheet sheet = workbook.getSheetAt(0);
         int totalRows = sheet.getLastRowNum();
         XSSFRow row = sheet.getRow(rowIndex);
@@ -137,14 +139,17 @@ public class ExtensionService {
         submitBtn.submit();
 
         // 切换到结果页，等待结果加载完成后，点击详情页链接
-        SeleniumUtils.switchByTitle(driver, RESULT_WIN);
+        if (!SeleniumUtils.switchByTitle(driver, RESULT_WIN)) {
+            throw new ProxyIPBlockedException();
+        }
+        ;
         int resultRetryTimes = 0;
         WebElement resultEle = null;
         while (resultEle == null) {
             try {
                 // 每隔500毫秒去调用一下until中的函数，默认是0.5秒，如果等待3秒还没有找到元素，则抛出异常。
                 resultEle = new WebDriverWait(driver, (resultRetryTimes++ > 0 ? 3 : 5), 250).until(new ExpectedCondition<WebElement>() {
-                    @NullableDecl
+                    // @NullableDecl
                     @Override
                     public WebElement apply(WebDriver driver) {
                         try {
@@ -180,7 +185,7 @@ public class ExtensionService {
             final int retryTimes = ++detailRetryTimes;
             try {
                 regFlowsEle = new WebDriverWait(driver, (detailRetryTimes > 1 ? 3 : 5), 250).until(new ExpectedCondition<WebElement>() {
-                    @NullableDecl
+                    // @NullableDecl
                     @Override
                     public WebElement apply(WebDriver driver) {
                         try {
@@ -276,7 +281,7 @@ public class ExtensionService {
             try {
                 driver.get("http://wsjs.saic.gov.cn");
                 statusQueryEle = new WebDriverWait(driver, 6, 500).until(new ExpectedCondition<WebElement>() {
-                    @NullableDecl
+                    // @NullableDecl
                     @Override
                     public WebElement apply(WebDriver driver) {
                         // 选择商标状态查询
@@ -296,7 +301,7 @@ public class ExtensionService {
         // 等待页面加载完成（通过查询按钮判断页面是否加载完成）
         try {
             new WebDriverWait(driver, 12, 500).until(new ExpectedCondition<WebElement>() {
-                @NullableDecl
+                // @NullableDecl
                 @Override
                 public WebElement apply(WebDriver driver) {
                     return driver.findElement(By.id("_searchButton"));

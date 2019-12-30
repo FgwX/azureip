@@ -14,7 +14,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.xssf.usermodel.*;
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedCondition;
@@ -40,7 +39,7 @@ public class RejectionService {
         dateFormat = new SimpleDateFormat("yyyy年MM月dd日");
     }
 
-    private static final String WEB_DRIVER_TYPE = Constant.WEB_DRIVER_FIREFOX;
+    private static final String WEB_DRIVER_TYPE = Constant.WEB_DRIVER_CHROME;
     private static final Logger LOG = LogManager.getLogger(RejectionService.class);
     private static final String SEARCH_WIN = "商标状态检索";
     private static final String RESULT_WIN = "商标检索结果";
@@ -253,7 +252,9 @@ public class RejectionService {
 
     private boolean queryRejectionData(WebDriver driver, RejectionData data, String prefix) {
         // 切换到查询页，输入注册号，进行查询
-        SeleniumUtils.switchByTitle(driver, SEARCH_WIN);
+        if (!SeleniumUtils.switchByTitle(driver, SEARCH_WIN)) {
+            throw new ProxyIPBlockedException();
+        }
         WebElement inputBox = driver.findElement(By.xpath("//*[@id='submitForm']//input[@name='request:sn']"));
         inputBox.clear();
         inputBox.sendKeys(data.getRegNum());
@@ -267,15 +268,13 @@ public class RejectionService {
         while (resultEle == null) {
             try {
                 // 每隔500毫秒去调用一下until中的函数，默认是0.5秒，如果等待3秒还没有找到元素，则抛出异常。
-                resultEle = new WebDriverWait(driver, (resultRetryTimes++ > 1 ? 3 : 5), 500).until(new ExpectedCondition<WebElement>() {
-                    @NullableDecl
+                resultEle = new WebDriverWait(driver, (resultRetryTimes++ > 1 ? 4 : 6), 500).until(new ExpectedCondition<WebElement>() {
+                    // @NullableDecl
                     @Override
                     public WebElement apply(WebDriver driver) {
                         try {
                             if (data.getRegNum().equals(driver.findElement(By.xpath("//*[@id='request_sn']")).getAttribute("value"))) {
                                 return driver.findElement(By.xpath("//*[@id='list_box']/table/tbody/tr[2]/td[2]/a"));
-                            } else if (SeleniumUtils.blockedByHost(driver.getPageSource())) {
-                                throw new ProxyIPBlockedException();
                             } else {
                                 return null;
                             }
@@ -285,11 +284,16 @@ public class RejectionService {
                         }
                     }
                 });
+
             } catch (TimeoutException e) {
-                SeleniumUtils.switchByTitle(driver, SEARCH_WIN);
+                if (!SeleniumUtils.switchByTitle(driver, SEARCH_WIN)) {
+                    throw new ProxyIPBlockedException();
+                }
                 submitBtn.submit();
-            } finally {
-                SeleniumUtils.switchByTitle(driver, RESULT_WIN);
+            }
+            SeleniumUtils.switchByTitle(driver, RESULT_WIN);
+            if (resultRetryTimes > 1 && resultEle == null && SeleniumUtils.blockedByHost(driver)) {
+                throw new ProxyIPBlockedException();
             }
             // 重试5次后，重新打开浏览器
             if (resultRetryTimes >= 5) {
@@ -303,14 +307,16 @@ public class RejectionService {
         resultEle.click();
 
         // 切换到详情页，获取流程列表
-        SeleniumUtils.switchByTitle(driver, DETAIL_WIN);
+        if (!SeleniumUtils.switchByTitle(driver, DETAIL_WIN)) {
+            throw new ProxyIPBlockedException();
+        }
         int detailRetryTimes = 0;
         WebElement regFlowsEle = null;
         while (regFlowsEle == null) {
-            final int retryTimes = ++detailRetryTimes;
+            final int retryTimes = detailRetryTimes++;
             try {
-                regFlowsEle = new WebDriverWait(driver, (detailRetryTimes > 1 ? 3 : 5), 500).until(new ExpectedCondition<WebElement>() {
-                    @NullableDecl
+                regFlowsEle = new WebDriverWait(driver, (detailRetryTimes > 1 ? 4 : 6), 500).until(new ExpectedCondition<WebElement>() {
+                    // @NullableDecl
                     @Override
                     public WebElement apply(WebDriver driver) {
                         try {
@@ -318,9 +324,7 @@ public class RejectionService {
                             WebElement requestID = driver.findElement(By.xpath("//input[@id='request_tid']"));
                             if (data.getRegNum().equals(curRegNumEle.getAttribute("value"))) {
                                 return driver.findElement(By.xpath("/html/body/div[@class='xqboxx']/div/ul"));
-                            } else if (SeleniumUtils.blockedByHost(driver.getPageSource())) {
-                                throw new ProxyIPBlockedException();
-                            } else if (retryTimes >= 8 && !StringUtils.isEmpty(requestID.getAttribute("value"))) {
+                            } else if (retryTimes > 5 && !StringUtils.isEmpty(requestID.getAttribute("value"))) {
                                 return requestID;
                             }
                             return null;
@@ -330,12 +334,16 @@ public class RejectionService {
                         }
                     }
                 });
+
             } catch (TimeoutException | ElementNotInteractableException e) {
-                LOG.debug(prefix + " - TimeoutException | ElementNotInteractableException");
-                SeleniumUtils.switchByTitle(driver, RESULT_WIN);
+                if (!SeleniumUtils.switchByTitle(driver, RESULT_WIN)) {
+                    throw new ProxyIPBlockedException();
+                }
                 resultEle.click();
-            } finally {
-                SeleniumUtils.switchByTitle(driver, DETAIL_WIN);
+            }
+            SeleniumUtils.switchByTitle(driver, DETAIL_WIN);
+            if (detailRetryTimes > 1 && regFlowsEle == null && SeleniumUtils.blockedByHost(driver)) {
+                throw new ProxyIPBlockedException();
             }
             /*if (detailRetryTimes >= 5) {
                 break;

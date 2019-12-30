@@ -5,11 +5,7 @@ import com.azureip.common.util.SeleniumUtils;
 import com.azureip.ipspider.model.ProxyIP;
 import com.azureip.ipspider.service.ProxyIPProvider;
 import com.azureip.tmspider.constant.TMSConstant;
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
-import org.openqa.selenium.By;
-import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
@@ -38,10 +34,10 @@ public class SeleniumService {
             try {
                 driver = initStatusQueryPage(type, host.toString(), timeout);
             } catch (ProxyIPBlockedException e) {
-                LOG.warn("代理IP被屏蔽，更换IP...");
                 ProxyIP nextProxy = proxyIPProvider.nextProxy();
                 host.delete(0, host.length());
                 host.append(nextProxy.getIp()).append(":").append(nextProxy.getPort());
+                LOG.warn("代理IP被屏蔽，更换IP[{}]...",host);
             }
         }
         return driver;
@@ -51,6 +47,7 @@ public class SeleniumService {
     private WebDriver initStatusQueryPage(String type, String host, Integer timeout) {
         LOG.warn("初始化浏览器...");
         WebDriver driver = SeleniumUtils.initBrowser(type, host, timeout);
+        // wipeDriver(driver);
         int retryTimes = 0;
         // 打开检索系统主页
         WebElement statusQueryEle = null;
@@ -58,11 +55,12 @@ public class SeleniumService {
             try {
                 driver.get(TMSConstant.STATUS_DOMAIN);
                 statusQueryEle = new WebDriverWait(driver, 10, 500).until(new ExpectedCondition<WebElement>() {
-                    @NullableDecl
+                    // @NullableDecl
                     @Override
                     public WebElement apply(WebDriver driver) {
                         // 判断IP是否被拦截
-                        if (SeleniumUtils.blockedByHost(driver.getPageSource())) {
+                        if (SeleniumUtils.blockedByHost(driver)) {
+                            SeleniumUtils.quitBrowser(driver);
                             throw new ProxyIPBlockedException();
                         }
                         // 选择商标状态查询
@@ -81,12 +79,13 @@ public class SeleniumService {
         statusQueryEle.click();
         // 等待页面加载完成（通过查询按钮判断页面是否加载完成）
         try {
-            new WebDriverWait(driver, 12, 500).until(new ExpectedCondition<WebElement>() {
-                @NullableDecl
+            new WebDriverWait(driver, 10, 500).until(new ExpectedCondition<WebElement>() {
+                // @NullableDecl
                 @Override
                 public WebElement apply(WebDriver driver) {
                     // 判断IP是否被拦截
-                    if (SeleniumUtils.blockedByHost(driver.getPageSource())) {
+                    if (SeleniumUtils.blockedByHost(driver)) {
+                        SeleniumUtils.quitBrowser(driver);
                         throw new ProxyIPBlockedException();
                     }
                     return driver.findElement(By.id("_searchButton"));
@@ -98,5 +97,11 @@ public class SeleniumService {
             return null;
         }
         return driver;
+    }
+
+    public static void wipeDriver(WebDriver driver) {
+        JavascriptExecutor executor = (JavascriptExecutor) driver;
+
+        executor.executeAsyncScript("");
     }
 }
